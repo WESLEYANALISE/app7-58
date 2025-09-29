@@ -11,6 +11,7 @@ import { normalizeVideoUrl } from '@/utils/videoHelpers';
 import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
 import professoraAvatar from '@/assets/professora-avatar.png';
+import { ProfessoraIAEnhanced } from '@/components/ProfessoraIAEnhanced';
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
 }
@@ -28,6 +29,7 @@ export const CursosPreparatoriosElegant = ({
   const [showControls, setShowControls] = useState(false);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isProfessorOpen, setIsProfessorOpen] = useState(false);
   const {
     areas,
     totalAreas,
@@ -181,10 +183,10 @@ export const CursosPreparatoriosElegant = ({
     }
   };
   if (isLoading) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">
+    return <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-400">Carregando cursos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando cursos...</p>
         </div>
       </div>;
   }
@@ -193,10 +195,10 @@ export const CursosPreparatoriosElegant = ({
   if (currentView === 'player' && selectedLesson) {
     const progress = obterProgresso(selectedLesson.id);
     const progressPercentage = duration > 0 ? currentTime / duration * 100 : 0;
-    return <div className="min-h-screen bg-black text-white">
+    return <div className="min-h-screen bg-background text-foreground">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-foreground hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />
             <span>Voltar</span>
           </Button>
@@ -206,20 +208,20 @@ export const CursosPreparatoriosElegant = ({
 
         {/* Video Container */}
         <div className="relative">
-          <video ref={videoRef} className="w-full h-[300px] object-cover bg-black cursor-pointer" playsInline muted={false} controls={false} preload="auto" onClick={handleVideoClick} onMouseMove={handleMouseMove} />
+          <video ref={videoRef} className="w-full h-auto max-h-[70vh] object-contain bg-black cursor-pointer" playsInline muted={false} controls={false} preload="auto" onClick={handleVideoClick} onMouseMove={handleMouseMove} />
           
           {/* Always visible progress bar at bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-            <div className="h-full bg-yellow-500 transition-all duration-300" style={{
+            <div className="h-full bg-primary transition-all duration-300" style={{
             width: `${progressPercentage}%`
           }} />
           </div>
 
           {/* Video Overlay - Only show when paused or controls are visible */}
-          {(showControls || !playing) && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300">
+          {(showControls || !playing) && <div onClick={togglePlayPause} className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300">
               {/* Central play/pause button */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <button onClick={togglePlayPause} className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110">
+                <button onClick={(e) => { e.stopPropagation(); togglePlayPause(); }} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110">
                   {playing ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
                 </button>
               </div>
@@ -229,19 +231,19 @@ export const CursosPreparatoriosElegant = ({
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-2xl font-bold">{selectedLesson.tema}</h2>
-                    <p className="text-lg text-gray-300">{selectedLesson.nome}</p>
+                    <p className="text-lg text-muted-foreground">{selectedLesson.nome}</p>
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <Badge className="bg-yellow-500 text-black font-medium px-3 py-1">
+                    <Badge className="bg-primary text-primary-foreground font-medium px-3 py-1">
                       Dia {selectedLesson.id} - Aula {selectedModule.aulas.findIndex((a: any) => a.id === selectedLesson.id) + 1}
                     </Badge>
-                    <Badge variant="outline" className="border-white/30 text-white">
+                    <Badge variant="outline" className="border-border text-foreground">
                       {selectedModule.nome}
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center gap-6 text-sm text-gray-400">
+                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       <span>{selectedLesson.duracao}min</span>
@@ -259,12 +261,12 @@ export const CursosPreparatoriosElegant = ({
                   const percentage = x / rect.width * 100;
                   handleSeek(percentage);
                 }}>
-                      <div className="h-full bg-yellow-500 rounded-full transition-all" style={{
+                      <div className="h-full bg-primary rounded-full transition-all" style={{
                     width: `${progressPercentage}%`
                   }} />
                     </div>
                     
-                    <div className="flex items-center justify-between text-sm text-gray-300">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>{Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')}</span>
                       <span>Progresso da aula: {Math.round(progressPercentage)}%</span>
                       <span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}</span>
@@ -291,8 +293,8 @@ export const CursosPreparatoriosElegant = ({
 
         {/* Action Buttons - Logo abaixo do vídeo */}
         <div className="p-6 px-[7px]">
-          <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-            <h3 className="text-base font-semibold mb-3 text-yellow-500">Ferramentas de Estudo</h3>
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <h3 className="text-base font-semibold mb-3 text-primary">Ferramentas de Estudo</h3>
             <LessonActionButtons lesson={{
             id: selectedLesson.id,
             area: selectedLesson.area,
@@ -305,34 +307,18 @@ export const CursosPreparatoriosElegant = ({
 
         {/* Lesson Content */}
         <div className="pb-6 space-y-6 px-[7px]">
-          {selectedLesson.conteudo && <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 text-yellow-500">Conteúdo da Aula</h3>
-              <div className="prose prose-invert prose-sm max-w-none prose-headings:text-yellow-500 prose-strong:text-yellow-400 prose-p:text-gray-300 prose-li:text-gray-300">
+          {selectedLesson.conteudo && <div className="bg-card rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 text-primary">Conteúdo da Aula</h3>
+              <div className="prose prose-invert prose-sm max-w-none prose-headings:text-primary prose-strong:text-primary prose-p:text-muted-foreground prose-li:text-muted-foreground">
                 <ReactMarkdown components={{
-              h1: ({
-                children
-              }) => <h1 className="text-xl font-bold mb-4 text-yellow-500">{children}</h1>,
-              h2: ({
-                children
-              }) => <h2 className="text-lg font-bold mb-3 text-yellow-500">{children}</h2>,
-              h3: ({
-                children
-              }) => <h3 className="text-base font-bold mb-2 text-yellow-500">{children}</h3>,
-              strong: ({
-                children
-              }) => <strong className="text-yellow-400 font-bold">{children}</strong>,
-              p: ({
-                children
-              }) => <p className="mb-4 leading-relaxed text-gray-300">{children}</p>,
-              ul: ({
-                children
-              }) => <ul className="space-y-2 ml-4 text-gray-300">{children}</ul>,
-              ol: ({
-                children
-              }) => <ol className="space-y-2 ml-4 text-gray-300">{children}</ol>,
-              li: ({
-                children
-              }) => <li className="leading-relaxed">{children}</li>
+              h1: ({ children }) => <h1 className="text-xl font-bold mb-4 text-primary">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-lg font-bold mb-3 text-primary">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-base font-bold mb-2 text-primary">{children}</h3>,
+              strong: ({ children }) => <strong className="text-primary font-bold">{children}</strong>,
+              p: ({ children }) => <p className="mb-4 leading-relaxed text-muted-foreground">{children}</p>,
+              ul: ({ children }) => <ul className="space-y-2 ml-4 text-muted-foreground">{children}</ul>,
+              ol: ({ children }) => <ol className="space-y-2 ml-4 text-muted-foreground">{children}</ol>,
+              li: ({ children }) => <li className="leading-relaxed">{children}</li>
             }}>
                   {selectedLesson.conteudo}
                 </ReactMarkdown>
@@ -343,37 +329,53 @@ export const CursosPreparatoriosElegant = ({
         {/* Floating Professor Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <div className="relative">
-            <Button variant="ghost" className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 shadow-lg border-4 border-white" onClick={() => toast.info(`Aula: ${selectedLesson.nome} - ${selectedLesson.tema}`)}>
+            <Button
+              variant="ghost"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 shadow-lg border-4 border-background"
+              onClick={() => setIsProfessorOpen(true)}
+              aria-label="Abrir chat da Professora"
+            >
               <img src={professoraAvatar} alt="Professora" className="w-full h-full rounded-full object-cover" />
             </Button>
             
             {/* Chat indicator */}
-            <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+            <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs">
               <MessageCircle className="h-3 w-3" />
             </div>
           </div>
         </div>
+
+        {/* Professora IA Chat */}
+        <ProfessoraIAEnhanced
+          isOpen={isProfessorOpen}
+          onClose={() => setIsProfessorOpen(false)}
+          bookContext={{
+            titulo: selectedLesson.nome,
+            area: selectedLesson.area,
+            sobre: selectedLesson.conteudo || ''
+          }}
+        />
       </div>;
   }
 
   // Lessons List View
   if (currentView === 'lessons' && selectedModule) {
-    return <div className="min-h-screen bg-black text-white">
+    return <div className="min-h-screen bg-background text-foreground">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-foreground hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />
             <span>Voltar</span>
           </Button>
           <h1 className="text-lg font-medium text-center flex-1">Cursos Preparatórios</h1>
-          <Button variant="ghost" size="sm" className="text-white">
+          <Button variant="ghost" size="sm" className="text-foreground">
             <BarChart3 className="h-5 w-5" />
           </Button>
         </div>
 
         {/* Course Info */}
         <div className="p-6 space-y-4">
-          <div className="flex items-center gap-2 text-yellow-500">
+          <div className="flex items-center gap-2 text-primary">
             <BookOpen className="h-5 w-5" />
             <span className="font-medium">Curso Pro</span>
           </div>
@@ -386,7 +388,7 @@ export const CursosPreparatoriosElegant = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4 text-yellow-500" />
+            <ArrowLeft className="h-4 w-4 text-primary" />
             <div>
               <h2 className="text-xl font-bold">{selectedModule.nome}</h2>
               <p className="text-gray-400">
