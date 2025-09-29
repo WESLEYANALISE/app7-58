@@ -416,7 +416,7 @@ export const CursosPreparatoriosElegant = ({
         </div>
 
         {/* Lessons List */}
-        <div className="px-6 space-y-4">
+        <div className="space-y-4 px-[16px]">
           {selectedModule.aulas.map((lesson: any, index: number) => {
           const progress = obterProgresso(lesson.id);
           return <Card key={lesson.id} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectLesson(lesson)}>
