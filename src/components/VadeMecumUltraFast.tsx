@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { 
   Search, ArrowLeft, Scale, BookOpen, 
   ChevronRight, Copy, X, Home, FileText, Scroll,
-  Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2
+  Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2,
+  Zap, Swords
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -177,81 +178,101 @@ const VadeMecumUltraFast: React.FC = () => {
     }
   }, []);
 
-  // Códigos com layout minimalista 2x2 como na referência
+  // Códigos com layout moderno e gradientes
   const articleCodes = useMemo<VadeMecumLegalCode[]>(() => [
     { 
-      id: 'cc', name: 'CC', fullName: 'Código Civil', 
-      description: 'Relações civis', 
+      id: 'cc', 
+      name: 'CC', 
+      fullName: 'Código Civil', 
+      description: 'Relações civis e direitos privados', 
       icon: '🤝', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-blue-500/20 to-blue-700/30 border border-blue-500/20 backdrop-blur-sm',
+      textColor: 'text-blue-100'
     },
     { 
-      id: 'cf88', name: 'CF/88', fullName: 'Constituição Federal', 
-      description: 'Carta Magna', 
+      id: 'cf88', 
+      name: 'CF/88', 
+      fullName: 'Constituição Federal', 
+      description: 'Carta Magna do Brasil', 
       icon: '🏛️', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-emerald-500/20 to-emerald-700/30 border border-emerald-500/20 backdrop-blur-sm',
+      textColor: 'text-emerald-100'
     },
     { 
-      id: 'cp', name: 'CP', fullName: 'Código Penal', 
-      description: 'Crimes e penas', 
-      icon: '⚖️', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      id: 'cp', 
+      name: 'CP', 
+      fullName: 'Código Penal', 
+      description: 'Crimes e aplicação de penas', 
+      icon: '', 
+      color: 'bg-gradient-to-br from-red-500/20 to-red-700/30 border border-red-500/20 backdrop-blur-sm',
+      textColor: 'text-red-100'
     },
     { 
-      id: 'cpc', name: 'CPC', fullName: 'Código de Processo Civil', 
-      description: 'Procedimentos cíveis', 
+      id: 'cpc', 
+      name: 'CPC', 
+      fullName: 'Código de Processo Civil', 
+      description: 'Procedimentos judiciais cíveis', 
       icon: '📋', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-purple-500/20 to-purple-700/30 border border-purple-500/20 backdrop-blur-sm',
+      textColor: 'text-purple-100'
     },
     { 
-      id: 'cpp', name: 'CPP', fullName: 'Código de Processo Penal', 
-      description: 'Procedimentos penais', 
-      icon: '🔍', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      id: 'cpp', 
+      name: 'CPP', 
+      fullName: 'Código de Processo Penal', 
+      description: 'Procedimentos judiciais penais', 
+      icon: '', 
+      color: 'bg-gradient-to-br from-orange-500/20 to-orange-700/30 border border-orange-500/20 backdrop-blur-sm',
+      textColor: 'text-orange-100'
     },
     { 
-      id: 'clt', name: 'CLT', fullName: 'Consolidação Leis Trabalho', 
-      description: 'Direito trabalhista', 
+      id: 'clt', 
+      name: 'CLT', 
+      fullName: 'Consolidação das Leis do Trabalho', 
+      description: 'Direito trabalhista e sindical', 
       icon: '👷', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
+      textColor: 'text-amber-100'
     },
     { 
-      id: 'cdc', name: 'CDC', fullName: 'Código Defesa Consumidor', 
-      description: 'Proteção consumidor', 
+      id: 'cdc', 
+      name: 'CDC', 
+      fullName: 'Código de Defesa do Consumidor', 
+      description: 'Proteção aos direitos do consumidor', 
       icon: '🛡️', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-cyan-500/20 to-cyan-700/30 border border-cyan-500/20 backdrop-blur-sm',
+      textColor: 'text-cyan-100'
     },
     { 
-      id: 'ctn', name: 'CTN', fullName: 'Código Tributário Nacional', 
-      description: 'Direito tributário', 
+      id: 'ctn', 
+      name: 'CTN', 
+      fullName: 'Código Tributário Nacional', 
+      description: 'Sistema tributário e fiscal', 
       icon: '💰', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-yellow-500/20 to-yellow-700/30 border border-yellow-500/20 backdrop-blur-sm',
+      textColor: 'text-yellow-100'
     }
   ], []);
 
-  // Estatutos minimalistas
+  // Estatutos com gradientes modernos
   const statuteCodes = useMemo<VadeMecumLegalCode[]>(() => [
     { 
-      id: 'eca', name: 'ECA', fullName: 'Estatuto Criança Adolescente', 
-      description: 'Proteção criança', 
+      id: 'eca', 
+      name: 'ECA', 
+      fullName: 'Estatuto da Criança e do Adolescente', 
+      description: 'Proteção de crianças e adolescentes', 
       icon: '👶', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-pink-500/20 to-pink-700/30 border border-pink-500/20 backdrop-blur-sm',
+      textColor: 'text-pink-100'
     },
     { 
-      id: 'estatuto-idoso', name: 'Estatuto Idoso', fullName: 'Estatuto da Pessoa Idosa', 
-      description: 'Direitos idosos', 
+      id: 'estatuto-idoso', 
+      name: 'Estatuto do Idoso', 
+      fullName: 'Estatuto da Pessoa Idosa', 
+      description: 'Direitos e proteção dos idosos', 
       icon: '👴', 
-      color: 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700',
-      textColor: 'text-white'
+      color: 'bg-gradient-to-br from-violet-500/20 to-violet-700/30 border border-violet-500/20 backdrop-blur-sm',
+      textColor: 'text-violet-100'
     }
   ], []);
 
@@ -1026,27 +1047,36 @@ const VadeMecumUltraFast: React.FC = () => {
         </div>
 
         <div className="p-4 bg-background min-h-screen">
-          {/* Grid minimalista 2x2 como na referência */}
-          <div className="max-w-2xl mx-auto">
-            <div className="grid grid-cols-2 gap-4">
+          {/* Grid moderno com cards uniformes */}
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {currentCodes.map((code) => (
-                <div
+                <motion.div
                   key={code.id}
                   onClick={() => loadArticles(code)}
                   className="cursor-pointer group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <div className={`rounded-lg ${code.color} p-6 min-h-[120px] flex flex-col items-center justify-center text-center hover:scale-105 transition-all duration-200`}>
-                    <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">
-                      {code.icon}
+                  <div className={`rounded-xl ${code.color} p-6 h-[160px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
+                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
+                      {code.id === 'cp' ? (
+                        <Zap className="h-10 w-10 text-red-300" />
+                      ) : code.id === 'cpp' ? (
+                        <Swords className="h-10 w-10 text-orange-300" />
+                      ) : (
+                        code.icon
+                      )}
                     </div>
                     <h3 className={`font-bold text-lg mb-1 ${code.textColor}`}>
-                      {code.name}
+                      {code.fullName}
                     </h3>
-                    <p className={`text-xs ${code.textColor} opacity-80`}>
+                    <p className={`text-xs ${code.textColor} opacity-80 leading-relaxed`}>
                       {code.description}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
