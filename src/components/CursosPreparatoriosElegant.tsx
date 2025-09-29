@@ -384,15 +384,10 @@ export const CursosPreparatoriosElegant = ({
             <span className="font-medium">Curso Pro</span>
           </div>
           
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-foreground hover:bg-muted">
-              <Search className="h-4 w-4 mr-2" />
-              Buscar aulas...
-            </Button>
-          </div>
+          
 
           <div className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4 text-primary" />
+            
             <div>
               <h2 className="text-xl font-bold">{selectedModule.nome}</h2>
               <p className="text-muted-foreground">
