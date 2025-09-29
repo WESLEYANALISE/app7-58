@@ -114,7 +114,7 @@ export const FooterMenu = ({
                    {/* Icon container */}
                   <div className={`${getIconStyles(item, isActive)} ${isProfessoraIA ? 'rounded-full' : ''}`}>
                     {isProfessoraIA ? (
-                      <div className="w-8 h-8 overflow-hidden rounded-full">
+                      <div className="w-10 h-10 overflow-hidden rounded-full">
                         <iframe
                           src="https://lottie.host/embed/727109e7-6fe0-44f8-8e93-d168b2f9f0c2/fi5yyQLYCL.lottie"
                           style={{ 
@@ -176,7 +176,7 @@ export const FooterMenu = ({
                 }}>
                       {/* Icon with consistent sizing - smaller for circular button */}
                       {isProfessoraIA ? (
-                        <div className="w-7 h-7 overflow-hidden rounded-full">
+                        <div className="w-9 h-9 overflow-hidden rounded-full">
                           <iframe
                             src="https://lottie.host/embed/727109e7-6fe0-44f8-8e93-d168b2f9f0c2/fi5yyQLYCL.lottie"
                             style={{ 
