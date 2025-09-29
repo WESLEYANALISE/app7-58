@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Search, ArrowLeft, Scale, BookOpen, 
   ChevronRight, Copy, X, Home, FileText, Scroll,
@@ -48,6 +49,10 @@ const VadeMecumUltraFast: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [articles, setArticles] = useState<VadeMecumArticle[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [displayedArticles, setDisplayedArticles] = useState<VadeMecumArticle[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const ARTICLES_PER_PAGE = 20;
   const [fontSize, setFontSize] = useState(16);
   const [showScrollTop, setShowScrollTop] = useState(false);
   
@@ -324,19 +329,18 @@ const VadeMecumUltraFast: React.FC = () => {
     }, 500);
   }, []);
 
-  // Sistema de busca otimizado sem limitação artificial
+  // Sistema de busca otimizado com paginação
   const filteredArticles = useMemo(() => {
     const allValidArticles = articles.filter(article => {
       const articleContent = article["Artigo"] || article.conteudo || '';
       return articleContent.trim() !== '';
     });
 
-    if (!searchTerm.trim()) return allValidArticles; // Remove limitação inicial
+    if (!searchTerm.trim()) return allValidArticles;
 
     const searchLower = searchTerm.toLowerCase().trim();
     const searchNumbers = searchTerm.replace(/[^\d]/g, '');
 
-    // Busca sem limite de resultados
     const results: { article: VadeMecumArticle; score: number }[] = [];
     
     for (let i = 0; i < allValidArticles.length; i++) {
@@ -372,6 +376,45 @@ const VadeMecumUltraFast: React.FC = () => {
       .sort((a, b) => b.score - a.score)
       .map(item => item.article);
   }, [articles, searchTerm]);
+
+  // Infinite scroll setup
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      // When searching, show all results
+      setDisplayedArticles(filteredArticles);
+      setHasMore(false);
+    } else {
+      // When not searching, show paginated results
+      const startIndex = 0;
+      const endIndex = page * ARTICLES_PER_PAGE;
+      const newDisplayed = filteredArticles.slice(startIndex, endIndex);
+      setDisplayedArticles(newDisplayed);
+      setHasMore(endIndex < filteredArticles.length);
+    }
+  }, [filteredArticles, page, searchTerm]);
+
+  // Reset pagination when articles change
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+  }, [articles]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    if (searchTerm.trim()) return; // Don't use infinite scroll during search
+
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop 
+          >= document.documentElement.offsetHeight - 1000) {
+        if (hasMore && !isLoading) {
+          setPage(prev => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, isLoading, searchTerm]);
 
   // Carregar artigos com cache instantâneo e otimização extrema
   const loadArticles = useCallback(async (code: VadeMecumLegalCode) => {
@@ -1055,11 +1098,34 @@ const VadeMecumUltraFast: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
-            {filteredArticles.map((article, index) => (
-              <VadeMecumArticleCard key={`${article.id}-${index}`} article={article} index={index} />
+          <motion.div
+            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {displayedArticles.map((article, index) => (
+              <motion.div
+                key={`${article.id}-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.4,
+                  delay: index * 0.05,
+                  ease: "easeOut"
+                }}
+              >
+                <VadeMecumArticleCard article={article} index={index} />
+              </motion.div>
             ))}
-          </div>
+            
+            {hasMore && !searchTerm && (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span className="ml-3 text-muted-foreground">Carregando mais artigos...</span>
+              </div>
+            )}
+          </motion.div>
         )}
       </div>
 
