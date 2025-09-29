@@ -810,25 +810,25 @@ ${fullContent}`;
               />
 
               <div className="flex gap-2 pt-4 border-t">
-                <Button 
-                  onClick={() => handleAiAction('resumir')}
-                  disabled={loadingAi}
-                  className="gap-2"
-                  variant="outline"
-                >
-                  <Brain className="h-4 w-4" />
-                  {loadingAi ? 'Analisando...' : 'Resumir'}
-                </Button>
-                
-                <Button 
-                  onClick={() => handleAiAction('explicar')}
-                  disabled={loadingAi}
-                  className="gap-2"
-                  variant="outline"
-                >
-                  <FileText className="h-4 w-4" />
-                  {loadingAi ? 'Analisando...' : 'Explicar'}
-                </Button>
+                  <Button 
+                    onClick={() => handleAiAction('resumir')}
+                    disabled={loadingAi}
+                    className="gap-2 bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
+                    variant="outline"
+                  >
+                    <Brain className="h-4 w-4" />
+                    {loadingAi ? 'Analisando...' : 'Resumir'}
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleAiAction('explicar')}
+                    disabled={loadingAi}
+                    className="gap-2 bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
+                    variant="outline"
+                  >
+                    <FileText className="h-4 w-4" />
+                    {loadingAi ? 'Analisando...' : 'Explicar'}
+                  </Button>
               </div>
 
               {aiResponse && showAiAnalysis && (
@@ -842,7 +842,7 @@ ${fullContent}`;
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowAiAnalysis(false)}
-                      className="h-8 w-8 p-0 hover:bg-destructive/20 hover:text-destructive bg-destructive/10 text-destructive border border-destructive/30 rounded-full"
+                      className="h-8 w-8 p-0 hover:bg-yellow-500/20 hover:text-yellow-300 bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 rounded-full"
                       title="Fechar análise"
                     >
                       <X className="h-5 w-5 font-bold" />
@@ -851,13 +851,13 @@ ${fullContent}`;
                   <div className="prose prose-sm max-w-none dark:prose-invert">
                     <ReactMarkdown 
                       components={{
-                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-3 text-primary" {...props} />,
+                        h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-3 text-yellow-400" {...props} />,
                         h2: ({node, ...props}) => <h2 className="text-base font-semibold mb-2 text-foreground" {...props} />,
                         h3: ({node, ...props}) => <h3 className="text-sm font-medium mb-2 text-foreground" {...props} />,
                         p: ({node, ...props}) => <p className="mb-2 text-sm text-foreground leading-relaxed" {...props} />,
                         ul: ({node, ...props}) => <ul className="mb-2 space-y-1" {...props} />,
                         li: ({node, ...props}) => <li className="text-sm text-foreground" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-semibold text-primary" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-semibold text-yellow-400" {...props} />,
                         code: ({node, ...props}) => <code className="bg-muted px-1 py-0.5 rounded text-xs" {...props} />,
                         hr: ({node, ...props}) => <hr className="my-4 border-border" {...props} />
                       }}
