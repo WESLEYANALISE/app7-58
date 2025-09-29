@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { 
   Search, ArrowLeft, Scale, BookOpen, 
   ChevronRight, Copy, X, Home, FileText, Scroll,
-  Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp
+  Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,6 +59,11 @@ const VadeMecumUltraFast: React.FC = () => {
   // Estado para loading com blur overlay
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingType, setGeneratingType] = useState<'explicar' | 'exemplo' | null>(null);
+  
+  // Estados para narração
+  const [isNarrating, setIsNarrating] = useState(false);
+  const [narrateLoading, setNarrateLoading] = useState(false);
+  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
   
   // Estado para Professora IA
   const [showProfessora, setShowProfessora] = useState(false);
@@ -482,6 +487,79 @@ const VadeMecumUltraFast: React.FC = () => {
     }
   }, [toast]);
 
+  const narrateArticle = useCallback(async (articleContent: string, articleNumber: string, codeName: string) => {
+    if (isNarrating && audioInstance) {
+      // Parar narração
+      audioInstance.pause();
+      setIsNarrating(false);
+      setAudioInstance(null);
+      return;
+    }
+
+    setNarrateLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('gemini-article-tts', {
+        body: {
+          text: `${codeName}, Artigo ${articleNumber}. ${articleContent}`,
+          voice: 'Zephyr'
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success && data.audioData) {
+        // Converter base64 para blob e reproduzir
+        const binaryString = atob(data.audioData);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const audioBlob = new Blob([bytes], { type: data.mimeType || 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          setIsNarrating(false);
+          setAudioInstance(null);
+          URL.revokeObjectURL(audioUrl);
+        };
+        
+        audio.onerror = () => {
+          setIsNarrating(false);
+          setAudioInstance(null);
+          URL.revokeObjectURL(audioUrl);
+          toast({
+            title: "❌ Erro",
+            description: "Erro ao reproduzir áudio.",
+            variant: "destructive",
+          });
+        };
+
+        setAudioInstance(audio);
+        setIsNarrating(true);
+        audio.play();
+        
+        toast({
+          title: "🔊 Narração iniciada",
+          description: "O artigo está sendo narrado.",
+        });
+      } else {
+        throw new Error('Falha ao gerar áudio');
+      }
+    } catch (error: any) {
+      console.error('Erro ao narrar artigo:', error);
+      toast({
+        title: "❌ Erro ao narrar",
+        description: "Erro ao narrar artigo. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setNarrateLoading(false);
+    }
+  }, [isNarrating, audioInstance, toast]);
+
   // Função para sintetizar voz (Web Speech API)
   const speakText = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
@@ -770,6 +848,23 @@ const VadeMecumUltraFast: React.FC = () => {
                 >
                   <Copy className="h-3 w-3 mr-1" />
                   Copiar
+                </Button>
+
+                <Button
+                  onClick={() => narrateArticle(articleContent, articleNumber, selectedCode?.name || '')}
+                  disabled={narrateLoading}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  {narrateLoading ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : isNarrating ? (
+                    <Square className="h-3 w-3 mr-1" />
+                  ) : (
+                    <Volume2 className="h-3 w-3 mr-1" />
+                  )}
+                  {narrateLoading ? 'Carregando...' : isNarrating ? 'Parar' : 'Narrar'}
                 </Button>
                 
                 <Button
