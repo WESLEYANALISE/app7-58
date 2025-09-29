@@ -35,8 +35,10 @@ export const AIAnalysisDetailPage = () => {
     return null;
   }
 
+  const cleanedContent = (state.analysisContent || "").replace(/ANALYSIS_COMPLETE:SHOW_OPTIONS/g, '').trim();
+
   const handleCopy = async () => {
-    const success = await copyToClipboard(state.analysisContent);
+    const success = await copyToClipboard(cleanedContent);
     if (success) {
       setCopySuccess(true);
       toast({
@@ -60,7 +62,7 @@ export const AIAnalysisDetailPage = () => {
       try {
         await navigator.share({
           title: `${state.analysisLabel} - ${state.newsTitle}`,
-          text: state.analysisContent,
+          text: cleanedContent,
         });
       } catch (error) {
         console.error('Error sharing:', error);
@@ -135,7 +137,7 @@ export const AIAnalysisDetailPage = () => {
       <div className="container max-w-4xl mx-auto px-4 py-6">
         <ScrollArea className="h-[calc(100vh-120px)]">
           <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
-            <ReactMarkdown>{state.analysisContent}</ReactMarkdown>
+            <ReactMarkdown>{cleanedContent}</ReactMarkdown>
           </div>
         </ScrollArea>
       </div>

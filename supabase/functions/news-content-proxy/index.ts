@@ -77,10 +77,19 @@ serve(async (req) => {
     let content = '';
     
     if (url.includes('conjur.com.br')) {
-      // Para o Conjur, tentar extrair o conteúdo principal
-      const articleMatch = html.match(/<div[^>]*class="[^"]*texto[^"]*"[^>]*>(.*?)<\/div>/s);
-      if (articleMatch) {
-        content = extractTextFromHTML(articleMatch[1]);
+      // Conjur (WordPress): conteúdo fica dentro de .the_content
+      const candidates: string[] = [];
+      const patterns = [
+        /<div[^>]*class=\"[^\"]*(?:the_content|entry-content|post-content|single-content|texto)[^\"]*\"[^>]*>([\s\S]*?)<\/div>/s,
+        /<section[^>]*class=\"[^\"]*inner-content[^\"]*\"[^>]*>([\s\S]*?)<\/section>/s,
+      ];
+      for (const p of patterns) {
+        const m = html.match(p);
+        if (m && m[1]) candidates.push(extractTextFromHTML(m[1]));
+      }
+      if (candidates.length) {
+        // Escolhe o texto mais longo
+        content = candidates.reduce((a, b) => (b.length > a.length ? b : a));
       }
     } else if (url.includes('migalhas.com.br')) {
       // Para Migalhas
