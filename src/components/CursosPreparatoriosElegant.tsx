@@ -236,7 +236,7 @@ export const CursosPreparatoriosElegant = ({
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-2xl font-bold">{selectedLesson.tema}</h2>
+                    
                     <p className="text-lg text-muted-foreground">{selectedLesson.nome}</p>
                   </div>
                   
