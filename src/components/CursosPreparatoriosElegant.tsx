@@ -582,7 +582,7 @@ export const CursosPreparatoriosElegant = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-primary">
             <BookOpen className="h-5 w-5" />
-            <span className="font-medium text-lg">Curso Pro</span>
+            
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
