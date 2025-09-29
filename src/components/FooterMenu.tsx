@@ -1,8 +1,9 @@
 import { Scale, Bot, Film, ClipboardList, BookOpen, Headphones } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@/context/NavigationContext';
 import { useAppFunctions } from '@/hooks/useAppFunctions';
 import { useDeviceDetection } from '@/hooks/useDeviceDetection';
+import Lottie from 'lottie-react';
 interface FooterMenuProps {
   isVisible?: boolean;
 }
@@ -12,6 +13,7 @@ export const FooterMenu = ({
   // Hide when search modal is open
   const isSearchModalOpen = document.body.classList.contains('search-modal-open');
   const [activeItem, setActiveItem] = useState('audioaulas');
+  const [professoraAnimation, setProfessoraAnimation] = useState(null);
   const {
     setCurrentFunction
   } = useNavigation();
@@ -21,6 +23,20 @@ export const FooterMenu = ({
   const {
     isDesktop
   } = useDeviceDetection();
+
+  // Load Lottie animation
+  useEffect(() => {
+    const loadAnimation = async () => {
+      try {
+        const response = await fetch('/src/assets/professora-animation.lottie');
+        const animationData = await response.json();
+        setProfessoraAnimation(animationData);
+      } catch (error) {
+        console.error('Failed to load professora animation:', error);
+      }
+    };
+    loadAnimation();
+  }, []);
   const findFunction = (searchTerm: string) => {
     return functions.find(func => func.funcao.toLowerCase().includes(searchTerm.toLowerCase()));
   };
@@ -113,7 +129,18 @@ export const FooterMenu = ({
                   
                    {/* Icon container */}
                   <div className={`${getIconStyles(item, isActive)} ${isProfessoraIA ? 'rounded-full' : ''}`}>
-                    <Icon className={`${isProfessoraIA ? 'h-6 w-6' : 'h-5 w-5'} transition-all duration-300`} />
+                    {isProfessoraIA && professoraAnimation ? (
+                      <div className="w-6 h-6 overflow-hidden">
+                        <Lottie 
+                          animationData={professoraAnimation} 
+                          loop={true}
+                          autoplay={true}
+                          style={{ width: '120%', height: '120%', transform: 'translate(-10%, -10%)' }}
+                        />
+                      </div>
+                    ) : (
+                      <Icon className={`${isProfessoraIA ? 'h-6 w-6' : 'h-5 w-5'} transition-all duration-300`} />
+                    )}
                   </div>
                   
                   {/* Label - hide for circular Professora IA */}
@@ -160,10 +187,21 @@ export const FooterMenu = ({
                   animationDelay: `${index * 100}ms`
                 }}>
                       {/* Icon with consistent sizing - smaller for circular button */}
-                      <Icon className={`
-                        ${isProfessoraIA ? 'h-5 w-5' : 'h-6 w-6'} ${!isProfessoraIA && 'mb-1'} transition-all duration-300
-                        ${isProfessoraIA ? 'text-white drop-shadow-lg' : 'text-white'}
-                      `} />
+                      {isProfessoraIA && professoraAnimation ? (
+                        <div className="w-5 h-5 overflow-hidden">
+                          <Lottie 
+                            animationData={professoraAnimation} 
+                            loop={true}
+                            autoplay={true}
+                            style={{ width: '120%', height: '120%', transform: 'translate(-10%, -10%)' }}
+                          />
+                        </div>
+                      ) : (
+                        <Icon className={`
+                          ${isProfessoraIA ? 'h-5 w-5' : 'h-6 w-6'} ${!isProfessoraIA && 'mb-1'} transition-all duration-300
+                          ${isProfessoraIA ? 'text-white drop-shadow-lg' : 'text-white'}
+                        `} />
+                      )}
                       
                       {/* Label with consistent styling - hide for circular button */}
                       {!isProfessoraIA && (
