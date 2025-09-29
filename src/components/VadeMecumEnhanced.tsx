@@ -293,7 +293,7 @@ export const VadeMecumEnhanced: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.1 }}
       >
-        <Card className="glass-effect-modern shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50">
+        <Card className="glass-effect-modern shadow-lg border border-border/50">{/* Removida animação que causava piscar */}
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="bg-primary/20 text-primary border-primary/40 text-sm font-medium">
@@ -571,7 +571,7 @@ export const VadeMecumEnhanced: React.FC = () => {
                 onClick={() => handleCodeClick(code)}
                 className="cursor-pointer group"
               >
-                <div className={`relative overflow-hidden rounded-xl ${code.color} shadow-md hover:shadow-lg transition-all duration-300 p-4 h-18`}>
+                <div className={`relative overflow-hidden rounded-xl ${code.color} shadow-md p-4 h-18`}>{/* Removida animação hover */}
                   {/* Background gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
                   
@@ -600,13 +600,13 @@ export const VadeMecumEnhanced: React.FC = () => {
                           </span>
                         </div>
                       ) : (
-                        <ChevronRight className={`h-5 w-5 ${code.textColor || 'text-white'} group-hover:translate-x-1 transition-transform`} />
+                        <ChevronRight className={`h-5 w-5 ${code.textColor || 'text-white'}`} />
                       )}
                     </div>
                   </div>
                   
                   {/* Hover effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                  {/* Shimmer effect removido para evitar piscar */}
                 </div>
               </motion.div>
             ))}

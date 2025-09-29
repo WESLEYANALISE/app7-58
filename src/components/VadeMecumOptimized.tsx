@@ -261,13 +261,11 @@ const VadeMecumOptimized: React.FC = () => {
       
       if (score > 0) {
         results.push({ article, score });
-        if (results.length >= 30) break;
       }
     }
 
     return results
       .sort((a, b) => b.score - a.score)
-      .slice(0, 30)
       .map(item => item.article);
   }, [articles, searchTerm]);
 
@@ -580,7 +578,7 @@ const VadeMecumOptimized: React.FC = () => {
     const exampleKey = `example-${articleNumber}`;
 
     return (
-      <Card className="mb-4 hover:shadow-md transition-shadow">
+      <Card className="mb-4">{/* Removida animação hover que causava piscar */}
         <CardContent className="p-4">
           <div className="space-y-3">
             <div>
@@ -689,7 +687,7 @@ const VadeMecumOptimized: React.FC = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 max-w-md w-full">
-            <Card className="cursor-pointer group hover:shadow-lg transition-all" 
+            <Card className="cursor-pointer group" 
                   onClick={() => selectCategory('articles')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 mx-auto bg-primary/20 rounded-xl flex items-center justify-center mb-4">
@@ -702,7 +700,7 @@ const VadeMecumOptimized: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer group hover:shadow-lg transition-all" 
+            <Card className="cursor-pointer group" 
                   onClick={() => selectCategory('statutes')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 mx-auto bg-primary/20 rounded-xl flex items-center justify-center mb-4">
@@ -739,7 +737,7 @@ const VadeMecumOptimized: React.FC = () => {
             {currentCodes.map((code) => (
               <Card 
                 key={code.id}
-                className={`cursor-pointer hover:shadow-lg transition-all ${code.color}`}
+                className={`cursor-pointer ${code.color}`}
                 onClick={() => loadArticles(code)}
               >
                 <CardContent className="p-4 text-center">

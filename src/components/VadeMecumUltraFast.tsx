@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { useNavigation } from '@/context/NavigationContext';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
 import { ProfessoraIAFloatingButton } from '@/components/ProfessoraIAFloatingButton';
 import { ProfessoraIA } from '@/components/ProfessoraIA';
 import ReactMarkdown from 'react-markdown';
@@ -325,22 +324,22 @@ const VadeMecumUltraFast: React.FC = () => {
     }, 500);
   }, []);
 
-  // Sistema de busca otimizado com debounce para performance
+  // Sistema de busca otimizado sem limitação artificial
   const filteredArticles = useMemo(() => {
     const allValidArticles = articles.filter(article => {
       const articleContent = article["Artigo"] || article.conteudo || '';
       return articleContent.trim() !== '';
     });
 
-    if (!searchTerm.trim()) return allValidArticles.slice(0, 30); // Limita inicial para performance
+    if (!searchTerm.trim()) return allValidArticles; // Remove limitação inicial
 
     const searchLower = searchTerm.toLowerCase().trim();
     const searchNumbers = searchTerm.replace(/[^\d]/g, '');
 
-    // Busca otimizada com limite de resultados
+    // Busca sem limite de resultados
     const results: { article: VadeMecumArticle; score: number }[] = [];
     
-    for (let i = 0; i < allValidArticles.length && results.length < 20; i++) {
+    for (let i = 0; i < allValidArticles.length; i++) {
       const article = allValidArticles[i];
       const articleNumber = article["Número do Artigo"] || article.numero || '';
       const articleContent = article["Artigo"] || article.conteudo || '';
@@ -359,7 +358,7 @@ const VadeMecumUltraFast: React.FC = () => {
       else if (articleNumber.toLowerCase().includes(searchLower)) {
         score = 800;
       }
-      // Conteúdo contém (limitado)
+      // Conteúdo contém
       else if (articleContent.toLowerCase().includes(searchLower)) {
         score = 100;
       }
@@ -371,7 +370,6 @@ const VadeMecumUltraFast: React.FC = () => {
 
     return results
       .sort((a, b) => b.score - a.score)
-      .slice(0, 20) // Máximo 20 resultados para performance
       .map(item => item.article);
   }, [articles, searchTerm]);
 
@@ -632,13 +630,10 @@ const VadeMecumUltraFast: React.FC = () => {
     // Layout compacto para cards sem número válido (seções, capítulos, etc.)
     if (!hasValidNumber) {
       return (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.02 }}
+        <div
           className="mb-2"
         >
-          <Card className="bg-muted/20 border-muted/40 hover:bg-muted/30 transition-colors">
+          <Card className="bg-muted/20 border-muted/40">
             <CardContent className="p-2">
               <div className="text-center">
                 <div className="text-xs text-muted-foreground font-medium tracking-wide">
@@ -647,7 +642,7 @@ const VadeMecumUltraFast: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       );
     }
 
@@ -756,14 +751,11 @@ const VadeMecumUltraFast: React.FC = () => {
     // Layout diferente para cards sem número válido
     if (!hasValidNumber) {
       return (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
+        <div
           className="mb-3"
         >
           <Card className="bg-card/50 border-muted">
-            <CardContent className="p-3">
+            <CardContent className="p-3">{/* Removida animação motion */}
                 <div className="text-center">
                   <div 
                     className="vademecum-text text-foreground/80 text-sm leading-relaxed"
@@ -807,20 +799,18 @@ const VadeMecumUltraFast: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       );
     }
 
     // Layout para cards com número válido
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.05 }}
+      <div
+        key={`${article.id}-${index}`}
         className="mb-4"
       >
-        <Card className="hover:shadow-md transition-all duration-200 bg-card border">
-          <CardContent className="p-4">
+        <Card className="bg-card border">
+          <CardContent className="p-4">{/* Removidas animações de hover que causavam piscar */}
             <div className="space-y-3">
               {/* Cabeçalho do Artigo */}
               <div className="flex items-start justify-between gap-3">
@@ -909,7 +899,7 @@ const VadeMecumUltraFast: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     );
   };
 
@@ -938,10 +928,10 @@ const VadeMecumUltraFast: React.FC = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 max-w-2xl w-full">
-            <Card className="cursor-pointer group bg-gradient-to-br from-primary/20 to-primary/10 border-primary/30 hover:border-primary/50 hover:shadow-lg transition-all duration-300" 
+            <Card className="cursor-pointer group bg-gradient-to-br from-primary/20 to-primary/10 border-primary/30 hover:border-primary/50" 
                   onClick={() => selectCategory('articles')}>
               <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 mx-auto bg-primary/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 mx-auto bg-primary/20 rounded-xl flex items-center justify-center mb-4">
                   <BookOpen className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-bold text-primary mb-3">Códigos & Leis</h3>
@@ -1198,12 +1188,7 @@ const VadeMecumUltraFast: React.FC = () => {
 
           {/* Botão Scroll to Top - Canto Inferior Direito */}
           {showScrollTop && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="fixed bottom-6 right-6 z-50"
-            >
+            <div className="fixed bottom-6 right-6 z-50">
               <Button
                 onClick={scrollToTop}
                 size="sm"
@@ -1211,7 +1196,7 @@ const VadeMecumUltraFast: React.FC = () => {
               >
                 <ArrowUp className="h-5 w-5" />
               </Button>
-            </motion.div>
+            </div>
           )}
         </>
       )}
