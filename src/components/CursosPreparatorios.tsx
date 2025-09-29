@@ -1,5 +1,5 @@
 import { useNavigation } from '@/context/NavigationContext';
-import { CursosPreparatoriosModern } from './courses/CursosPreparatoriosModern';
+import { CursosPreparatoriosElegant } from './CursosPreparatoriosElegant';
 
 export const CursosPreparatorios = () => {
   const { setCurrentFunction } = useNavigation();
@@ -8,5 +8,5 @@ export const CursosPreparatorios = () => {
     setCurrentFunction(null);
   };
   
-  return <CursosPreparatoriosModern onBack={handleBack} />;
+  return <CursosPreparatoriosElegant onBack={handleBack} />;
 };
