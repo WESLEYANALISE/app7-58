@@ -9,12 +9,14 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Search, Volume2, Share2, Heart, 
   Lightbulb, BookOpen, Presentation,
-  Play, Pause, Loader2, X
+  Play, Pause, Loader2, X, Square
 } from 'lucide-react';
 import { VadeMecumSlideShow } from './VadeMecumSlideShow';
 import { useGeminiAI } from '@/hooks/useGeminiAI';
 import { useDebounce } from 'use-debounce';
 import { ErrorBoundary } from 'react-error-boundary';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface VadeMecumArticleProps {
   article: {
@@ -50,8 +52,12 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [isNarrating, setIsNarrating] = useState(false);
+  const [narrateLoading, setNarrateLoading] = useState(false);
+  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
   
   const { loading, responses, callGeminiAPI, clearResponse } = useGeminiAI();
+  const { toast } = useToast();
 
   // Animation springs
   const fadeSpring = useSpring({
@@ -118,6 +124,79 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
       setIsAudioPlaying(true);
     }
   }, [isAudioPlaying, article.conteudo]);
+
+  const narrateArticle = useCallback(async () => {
+    if (isNarrating && audioInstance) {
+      // Parar narração
+      audioInstance.pause();
+      setIsNarrating(false);
+      setAudioInstance(null);
+      return;
+    }
+
+    setNarrateLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('gemini-article-tts', {
+        body: {
+          text: `${codeInfo.fullName}, Artigo ${article.numero}. ${article.conteudo}`,
+          voice: 'Zephyr'
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success && data.audioData) {
+        // Converter base64 para blob e reproduzir
+        const binaryString = atob(data.audioData);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const audioBlob = new Blob([bytes], { type: data.mimeType || 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          setIsNarrating(false);
+          setAudioInstance(null);
+          URL.revokeObjectURL(audioUrl);
+        };
+        
+        audio.onerror = () => {
+          setIsNarrating(false);
+          setAudioInstance(null);
+          URL.revokeObjectURL(audioUrl);
+          toast({
+            title: "Erro",
+            description: "Erro ao reproduzir áudio.",
+            variant: "destructive",
+          });
+        };
+
+        setAudioInstance(audio);
+        setIsNarrating(true);
+        audio.play();
+        
+        toast({
+          title: "Narração iniciada",
+          description: "O artigo está sendo narrado.",
+        });
+      } else {
+        throw new Error('Falha ao gerar áudio');
+      }
+    } catch (error: any) {
+      console.error('Erro ao narrar artigo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao narrar artigo. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setNarrateLoading(false);
+    }
+  }, [isNarrating, audioInstance, article, codeInfo, toast]);
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -272,7 +351,7 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
               </div>
 
               {/* Basic Functions - Third Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Button
                   variant="outline"
                   onClick={handleAudio}
@@ -284,6 +363,22 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
                     <Volume2 className="h-4 w-4" />
                   )}
                   Ouvir
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={narrateArticle}
+                  disabled={narrateLoading}
+                  className="h-10 justify-center gap-3 bg-background/50 hover:bg-background/80 border-border/50"
+                >
+                  {narrateLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isNarrating ? (
+                    <Square className="h-4 w-4" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
+                  {narrateLoading ? 'Carregando...' : isNarrating ? 'Parar' : 'Narrar'}
                 </Button>
                 
                 <Button

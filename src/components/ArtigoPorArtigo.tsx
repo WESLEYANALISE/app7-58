@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, FileText } from 'lucide-react';
+import { ArrowLeft, Loader2, FileText, Volume2, Square, Play } from 'lucide-react';
 import { useNavigation } from '@/context/NavigationContext';
 import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 interface ArtigoData {
   id: number;
@@ -28,6 +29,10 @@ export const ArtigoPorArtigo = () => {
   const [selectedArtigo, setSelectedArtigo] = useState<ArtigoData | null>(null);
   const [showAnalise, setShowAnalise] = useState(false);
   const { exporting, exportarArtigo } = useArtigoPDFExport();
+  const [isNarrating, setIsNarrating] = useState(false);
+  const [narrateLoading, setNarrateLoading] = useState(false);
+  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   const { data: rawData, isLoading } = useOptimizedQuery<any[]>({
     queryKey: ['curso-artigos-leis'],
@@ -78,6 +83,85 @@ export const ArtigoPorArtigo = () => {
     if (selectedArtigo) return `Art. ${selectedArtigo.artigo} - ${selectedArtigo.area}`;
     if (selectedArea) return selectedArea;
     return 'Artigo por Artigo';
+  };
+
+  const narrateArticle = async () => {
+    if (!selectedArtigo) return;
+
+    if (isNarrating && audioInstance) {
+      // Parar narração
+      audioInstance.pause();
+      setIsNarrating(false);
+      setAudioInstance(null);
+      return;
+    }
+
+    setNarrateLoading(true);
+    
+    try {
+      const textToNarrate = showAnalise 
+        ? `${selectedArtigo.area}, Artigo ${selectedArtigo.artigo}. Análise: ${selectedArtigo.analise}`
+        : `${selectedArtigo.area}, Artigo ${selectedArtigo.artigo}. ${selectedArtigo['texto artigo']}`;
+
+      const { data, error } = await supabase.functions.invoke('gemini-article-tts', {
+        body: {
+          text: textToNarrate,
+          voice: 'Zephyr'
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success && data.audioData) {
+        // Converter base64 para blob e reproduzir
+        const binaryString = atob(data.audioData);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const audioBlob = new Blob([bytes], { type: data.mimeType || 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          setIsNarrating(false);
+          setAudioInstance(null);
+          URL.revokeObjectURL(audioUrl);
+        };
+        
+        audio.onerror = () => {
+          setIsNarrating(false);
+          setAudioInstance(null);
+          URL.revokeObjectURL(audioUrl);
+          toast({
+            title: "Erro",
+            description: "Erro ao reproduzir áudio.",
+            variant: "destructive",
+          });
+        };
+
+        setAudioInstance(audio);
+        setIsNarrating(true);
+        audio.play();
+        
+        toast({
+          title: "Narração iniciada",
+          description: `${showAnalise ? 'Análise' : 'Artigo'} está sendo narrado.`,
+        });
+      } else {
+        throw new Error('Falha ao gerar áudio');
+      }
+    } catch (error: any) {
+      console.error('Erro ao narrar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao narrar. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setNarrateLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -232,31 +316,53 @@ export const ArtigoPorArtigo = () => {
             <Card className="max-w-4xl mx-auto">
               <CardContent className="p-6">
                  {showAnalise ? (
-                   <div>
-                     <div className="flex items-center justify-between mb-4">
-                       <h3 className="text-lg font-semibold">Análise do Artigo</h3>
-                       <Button
-                         onClick={() => exportarArtigo({
-                           tipo: 'explicar',
-                           conteudo: selectedArtigo.analise || '',
-                           numeroArtigo: selectedArtigo.artigo,
-                           nomecodigo: selectedArtigo.area,
-                           textoOriginal: selectedArtigo['texto artigo']
-                         })}
-                         disabled={exporting}
-                         size="sm"
-                         className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0"
-                       >
-                         {exporting ? (
-                           <Loader2 className="h-4 w-4 animate-spin" />
-                         ) : (
-                           <>
-                             <FileText className="h-4 w-4 mr-2" />
-                             Exportar PDF
-                           </>
-                         )}
-                       </Button>
-                     </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold">Análise do Artigo</h3>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={narrateArticle}
+                            disabled={narrateLoading}
+                            variant="outline"
+                            size="sm"
+                          >
+                            {narrateLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : isNarrating ? (
+                              <>
+                                <Square className="h-4 w-4 mr-2" />
+                                Parar
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="h-4 w-4 mr-2" />
+                                Narrar
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => exportarArtigo({
+                              tipo: 'explicar',
+                              conteudo: selectedArtigo.analise || '',
+                              numeroArtigo: selectedArtigo.artigo,
+                              nomecodigo: selectedArtigo.area,
+                              textoOriginal: selectedArtigo['texto artigo']
+                            })}
+                            disabled={exporting}
+                            size="sm"
+                            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0"
+                          >
+                            {exporting ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <FileText className="h-4 w-4 mr-2" />
+                                PDF
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
                      <div className="prose prose-sm max-w-none">
                        {selectedArtigo.analise?.split('\n').map((paragraph, index) => (
                          <p key={index} className="mb-4 text-sm leading-relaxed">
@@ -265,16 +371,38 @@ export const ArtigoPorArtigo = () => {
                        ))}
                      </div>
                    </div>
-                ) : (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Texto do Artigo</h3>
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <p className="text-base font-medium leading-relaxed">
-                        {selectedArtigo['texto artigo']}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                 ) : (
+                   <div>
+                     <div className="flex items-center justify-between mb-4">
+                       <h3 className="text-lg font-semibold">Texto do Artigo</h3>
+                       <Button
+                         onClick={narrateArticle}
+                         disabled={narrateLoading}
+                         variant="outline"
+                         size="sm"
+                       >
+                         {narrateLoading ? (
+                           <Loader2 className="h-4 w-4 animate-spin" />
+                         ) : isNarrating ? (
+                           <>
+                             <Square className="h-4 w-4 mr-2" />
+                             Parar Narração
+                           </>
+                         ) : (
+                           <>
+                             <Volume2 className="h-4 w-4 mr-2" />
+                             Narrar Artigo
+                           </>
+                         )}
+                       </Button>
+                     </div>
+                     <div className="bg-muted/50 p-4 rounded-lg">
+                       <p className="text-base font-medium leading-relaxed">
+                         {selectedArtigo['texto artigo']}
+                       </p>
+                     </div>
+                   </div>
+                 )}
               </CardContent>
             </Card>
           </div>
