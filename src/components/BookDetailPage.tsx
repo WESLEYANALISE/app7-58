@@ -7,6 +7,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
+import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 
 interface BookData {
   id: number;
@@ -29,6 +31,7 @@ export const BookDetailPage = () => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [showProfessora, setShowProfessora] = useState(false);
   
   const book = location.state?.book as BookData;
 
@@ -49,7 +52,13 @@ export const BookDetailPage = () => {
 
   const handleLinkClick = () => {
     if (book.link) {
-      setShowLinkModal(true);
+      // Navigate to reading page instead of modal
+      navigate('/book/read', { 
+        state: { 
+          book: book,
+          url: book.link 
+        } 
+      });
     }
   };
 
@@ -318,43 +327,20 @@ export const BookDetailPage = () => {
         </div>
       </ScrollArea>
 
-      {/* Reading Modal */}
-      <AnimatePresence>
-        {showLinkModal && book.link && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowLinkModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-background rounded-lg w-full h-[90vh] max-w-6xl shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center p-4 border-b border-border">
-                <h3 className="text-lg font-semibold">{book.livro}</h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowLinkModal(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <iframe 
-                src={book.link} 
-                className="w-full flex-1 h-[calc(90vh-80px)]" 
-                title={book.livro}
-                loading="lazy"
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Floating Professor Button */}
+      <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      
+      {/* Professor AI Chat */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        bookContext={{
+          titulo: book.livro,
+          autor: book.autor,
+          area: book.area,
+          sobre: book.sobre
+        }}
+      />
     </div>
   );
 };

@@ -17,6 +17,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AIAnalysisDetailPage } from "@/components/AIAnalysisDetailPage";
 import { BookDetailPage } from "@/components/BookDetailPage";
+import { BookReaderPage } from "@/components/BookReaderPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,11 @@ const App = () => (
                     <Route path="/book/:id" element={
                       <ProtectedRoute>
                         <BookDetailPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/book/read" element={
+                      <ProtectedRoute>
+                        <BookReaderPage />
                       </ProtectedRoute>
                     } />
                     <Route path="/" element={

@@ -37,7 +37,15 @@ export const ProfessoraIAFloatingButton = ({
         stiffness: 400,
         damping: 25
       }}>
-          
+          <Button
+            onClick={onOpen}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-400/50"
+            size="lg"
+          >
+            <Brain className="h-8 w-8 text-white" />
+          </Button>
         </motion.div>
         
         {/* Tooltip */}
