@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Download, ExternalLink, BookOpen, Share2, X } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, BookOpen, Share2, X, Bot } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BookData {
   id: number;
@@ -26,6 +27,8 @@ export const BookDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showLinkModal, setShowLinkModal] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   
   const book = location.state?.book as BookData;
 
@@ -47,6 +50,40 @@ export const BookDetailPage = () => {
   const handleLinkClick = () => {
     if (book.link) {
       setShowLinkModal(true);
+    }
+  };
+
+  const handleExplainClick = async () => {
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-book', {
+        body: {
+          bookTitle: book.livro,
+          author: book.autor,
+          area: book.area,
+          description: book.sobre,
+          benefits: book.beneficios
+        }
+      });
+
+      if (error) throw error;
+
+      setAnalysisResult(data.analysis);
+      toast({
+        title: "Análise concluída!",
+        description: "A inteligência artificial analisou o livro detalhadamente.",
+      });
+    } catch (error) {
+      console.error('Error analyzing book:', error);
+      toast({
+        title: "Erro na análise",
+        description: "Não foi possível analisar o livro. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -154,44 +191,71 @@ export const BookDetailPage = () => {
               </Badge>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-              {book.link && (
-                <Button
-                  onClick={handleLinkClick}
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <BookOpen className="h-5 w-5 mr-2" />
-                  Ler agora
-                </Button>
-              )}
-              {book.download && (
-                <Button
-                  onClick={handleDownloadClick}
-                  variant="outline"
-                  size="lg"
-                  className="border-2 border-border hover:bg-muted/50 py-3 px-6 rounded-full font-semibold transition-all duration-300"
-                >
-                  <Download className="h-5 w-5 mr-2" />
-                  Download
-                </Button>
-              )}
-              {!book.link && !book.download && (
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  disabled 
-                  className="opacity-50 py-3 px-6 rounded-full"
-                >
-                  Em breve
-                </Button>
-              )}
-            </div>
+          </div>
+
+          {/* Action Buttons - Moved before content sections */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto mb-12">
+            {book.link && (
+              <Button
+                onClick={handleLinkClick}
+                size="lg"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <BookOpen className="h-5 w-5 mr-2" />
+                Ler agora
+              </Button>
+            )}
+            {book.download && (
+              <Button
+                onClick={handleDownloadClick}
+                variant="outline"
+                size="lg"
+                className="border-2 border-border hover:bg-muted/50 py-3 px-6 rounded-full font-semibold transition-all duration-300"
+              >
+                <Download className="h-5 w-5 mr-2" />
+                Download
+              </Button>
+            )}
+            <Button
+              onClick={handleExplainClick}
+              variant="secondary"
+              size="lg"
+              className="border-2 border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary py-3 px-6 rounded-full font-semibold transition-all duration-300"
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? "🔄 Analisando..." : "🤖 Explicar"}
+            </Button>
+            {!book.link && !book.download && (
+              <Button 
+                variant="outline" 
+                size="lg" 
+                disabled 
+                className="opacity-50 py-3 px-6 rounded-full"
+              >
+                Em breve
+              </Button>
+            )}
           </div>
 
           {/* Content Sections */}
           <div className="space-y-12">
+            {/* AI Analysis Result */}
+            {analysisResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="border-t border-border/30 pt-8"
+              >
+                <h2 className="text-2xl font-bold text-foreground mb-6">
+                  🤖 Análise Detalhada pela IA
+                </h2>
+                <div className="prose prose-lg max-w-none text-muted-foreground bg-muted/30 p-6 rounded-lg">
+                  <div dangerouslySetInnerHTML={{ __html: analysisResult }} />
+                </div>
+              </motion.div>
+            )}
+
             {/* About the Book */}
             {book.sobre && (
               <motion.div

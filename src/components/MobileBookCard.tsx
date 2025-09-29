@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, Heart, Bookmark, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAccessHistory } from '@/hooks/useAccessHistory';
+import { useNavigate } from 'react-router-dom';
 
 interface LivroJuridico {
   id: number;
@@ -22,6 +23,7 @@ interface MobileBookCardProps {
 
 export const MobileBookCard = ({ livro, onClick }: MobileBookCardProps) => {
   const { addToHistory } = useAccessHistory();
+  const navigate = useNavigate();
 
   const handleCardClick = () => {
     // Registrar no histórico
@@ -30,6 +32,9 @@ export const MobileBookCard = ({ livro, onClick }: MobileBookCardProps) => {
       title: `📚 ${livro.livro}`,
       icon: '📚'
     });
+
+    // Navigate to book detail page
+    navigate(`/book/${livro.id}`, { state: { book: livro } });
 
     if (onClick) {
       onClick();
