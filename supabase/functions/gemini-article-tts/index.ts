@@ -32,7 +32,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-goog-api-key': geminiApiKey,
+        'x-goog-api-key': geminiApiKey,
       },
       body: JSON.stringify({
         contents: [
@@ -47,14 +47,7 @@ serve(async (req) => {
         ],
         generationConfig: {
           temperature: 1,
-          responseModalities: ['audio']
-        },
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: {
-              voiceName: voice
-            }
-          }
+          responseModalities: ['AUDIO']
         }
       }),
     })
