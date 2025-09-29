@@ -58,7 +58,7 @@ export const FlashcardsViewer = ({
   if (showAll) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent data-lesson-modal="flashcards" className="max-w-[min(100vw,1100px)] max-h-[90vh] flex flex-col">
+        <DialogContent data-lesson-modal="flashcards" className="max-w-[95vw] sm:max-w-[min(100vw,1100px)] max-h-[90vh] flex flex-col">{/* Mais responsivo */}
           <DialogHeader className="flex flex-row items-center justify-between pb-4 border-b">
             <div className="flex-1">
               <DialogTitle className="text-xl font-bold">{content.titulo}</DialogTitle>
@@ -116,7 +116,7 @@ export const FlashcardsViewer = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent data-lesson-modal="flashcards" className="max-w-[min(100vw,700px)] sm:max-w-2xl max-h-[90vh] overflow-hidden">
+      <DialogContent data-lesson-modal="flashcards" className="max-w-[95vw] sm:max-w-[min(100vw,700px)] lg:max-w-2xl max-h-[90vh] overflow-hidden">{/* Mais responsivo */}
         <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b flex-shrink-0">
           <div className="flex-1 min-w-0">
             <DialogTitle className="text-lg sm:text-xl font-bold truncate">{content.titulo}</DialogTitle>
@@ -164,7 +164,7 @@ export const FlashcardsViewer = ({
           </div>
 
           {/* Flashcard */}
-          <div className="relative h-48 sm:h-64 md:h-72 mb-4 sm:mb-6 mx-2">{/* Altura responsiva ajustada */}
+          <div className="relative h-40 sm:h-48 md:h-64 lg:h-72 mb-4 sm:mb-6 mx-1 sm:mx-2">{/* Altura mais responsiva para mobile */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${currentIndex}-${isFlipped}`}
@@ -176,18 +176,18 @@ export const FlashcardsViewer = ({
                 onClick={() => setIsFlipped(!isFlipped)}
                 style={{ backfaceVisibility: 'hidden' }}
               >
-                <div className="w-full h-full border-2 border-dashed border-primary/30 rounded-xl p-3 sm:p-4 md:p-6 flex flex-col justify-center items-center text-center bg-gradient-to-br from-background to-muted/30 hover:border-primary/50 transition-colors">
+                <div className="w-full h-full border-2 border-dashed border-primary/30 rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 flex flex-col justify-center items-center text-center bg-gradient-to-br from-background to-muted/30 hover:border-primary/50 transition-colors">{/* Padding mais responsivo */}
                   {!isFlipped ? (
                     <div className="w-full h-full flex flex-col justify-center">
                       <h3 className="text-sm sm:text-base md:text-lg font-medium mb-2 sm:mb-3">Pergunta</h3>
-                      <p className="text-xs sm:text-sm md:text-base leading-relaxed px-1 sm:px-2 flex-1 flex items-center justify-center">{currentCard.pergunta}</p>
+                      <p className="text-xs sm:text-sm md:text-base leading-relaxed px-1 sm:px-2 flex-1 flex items-center justify-center text-center">{currentCard.pergunta}</p>{/* Garantir centralização */}
                       <p className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground mt-2 sm:mt-3">Clique para ver a resposta</p>
                     </div>
                   ) : (
                     <div className="w-full h-full flex flex-col justify-center">
                       <h3 className="text-sm sm:text-base md:text-lg font-medium mb-2 sm:mb-3">Resposta</h3>
                       <div className="flex-1 flex flex-col justify-center">
-                        <p className="text-xs sm:text-sm md:text-base leading-relaxed mb-2 sm:mb-3 px-1 sm:px-2">{currentCard.resposta}</p>
+                        <p className="text-xs sm:text-sm md:text-base leading-relaxed mb-2 sm:mb-3 px-1 sm:px-2 text-center">{currentCard.resposta}</p>{/* Garantir centralização */}
                          {currentCard.dica && (
                            <div className="bg-muted/50 border border-border rounded-lg p-2 sm:p-3 mt-2 sm:mt-3 mx-2">
                              <p className="text-[10px] sm:text-xs md:text-sm text-foreground">💡 <strong>Dica:</strong> {currentCard.dica}</p>
@@ -216,7 +216,7 @@ export const FlashcardsViewer = ({
               <span className="sm:hidden">Ant</span>
             </Button>
 
-            <div className="flex gap-1 sm:gap-2 px-2 overflow-x-auto max-w-[120px] sm:max-w-none">
+            <div className="flex gap-1 sm:gap-2 px-2 overflow-x-auto max-w-[100px] sm:max-w-[150px] lg:max-w-none">
               {content.flashcards.map((_, index) => (
                 <button
                   key={index}

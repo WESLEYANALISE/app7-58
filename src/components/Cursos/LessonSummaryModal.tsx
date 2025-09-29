@@ -2,7 +2,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { X, Download, FileText } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
+import { LessonSummaryPDFExport } from './LessonSummaryPDFExport';
 import type { LessonSummary, LessonData } from '@/hooks/useLessonContent';
 
 interface LessonSummaryModalProps {
@@ -10,7 +11,7 @@ interface LessonSummaryModalProps {
   onClose: () => void;
   content: LessonSummary | null;
   lesson: LessonData;
-  onExportPDF: () => void;
+  onExportPDF?: () => void; // Agora opcional
 }
 
 export const LessonSummaryModal = ({ 
@@ -33,10 +34,9 @@ export const LessonSummaryModal = ({
             </p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={onExportPDF} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar PDF
-            </Button>
+            {content && (
+              <LessonSummaryPDFExport content={content} lesson={lesson} />
+            )}
             <Button onClick={onClose} variant="ghost" size="sm">
               <X className="h-4 w-4" />
             </Button>
