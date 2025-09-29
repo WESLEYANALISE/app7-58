@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen, User, Search, Filter, X } from 'lucide-react';
 import { useSearchHighlight } from '@/hooks/useSearchHighlight';
+import { useNavigate } from 'react-router-dom';
 
 interface StandardLivro {
   id: number;
@@ -40,6 +41,7 @@ export const StandardBibliotecaLista = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'estudos' | 'alfabetica'>('estudos');
   const [previewBook, setPreviewBook] = useState<StandardLivro | null>(null);
+  const navigate = useNavigate();
   
   // Sistema de highlight para itens vindos da busca global
   const { shouldHighlightItem, highlightAndScrollToItem } = useSearchHighlight();
@@ -183,7 +185,19 @@ export const StandardBibliotecaLista = ({
                 >
                   <Card 
                     className={`group cursor-pointer hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary/50 hover:border-l-primary overflow-hidden shadow-md ${shouldHighlight ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
-                    onClick={() => setPreviewBook(livro)}
+                    onClick={() => {
+                      const adapted = {
+                        id: livro.id,
+                        imagem: getCapaLivro(livro) || '',
+                        livro: getTitulo(livro),
+                        autor: livro.autor,
+                        area,
+                        sobre: livro.sobre,
+                        link: livro.link,
+                        download: livro.download,
+                      };
+                      navigate(`/book/${livro.id}`, { state: { book: adapted } });
+                    }}
                   >
                   <CardContent className="p-4 sm:p-5">
                     <div className="flex gap-4 sm:gap-5">

@@ -8,6 +8,7 @@ import { ArrowLeft, Search, BookOpen, User, Download, ExternalLink, Filter, X } 
 import { MobileBookCard } from './MobileBookCard';
 import { JuridicalBookCard } from './JuridicalBookCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 interface LivroJuridico {
   id: number;
   imagem: string;
@@ -35,6 +36,7 @@ export const BibliotecaLista = ({
   const [sortBy, setSortBy] = useState<'titulo' | 'autor'>('titulo');
   const [previewBook, setPreviewBook] = useState<LivroJuridico | null>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Filtrar e ordenar livros
   const filteredAndSortedBooks = useMemo(() => {
@@ -131,7 +133,7 @@ export const BibliotecaLista = ({
           duration: 0.3,
           delay: index * 0.05
         }}>
-              <Card className="group cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 border-l-primary/50 hover:border-l-primary overflow-hidden" onClick={() => setPreviewBook(livro)}>
+              <Card className="group cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 border-l-primary/50 hover:border-l-primary overflow-hidden" onClick={() => navigate(`/book/${livro.id}`, { state: { book: livro } })}>
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex gap-3 sm:gap-4">
                     {/* Imagem do livro - responsiva */}
