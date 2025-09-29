@@ -15,6 +15,7 @@ import { ProfessoraIAGlobal } from "@/components/ProfessoraIAGlobal";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { AIAnalysisDetailPage } from "@/components/AIAnalysisDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,11 @@ const App = () => (
                 <Sonner />
                   <Routes>
                     <Route path="/reset-password" element={<ResetPasswordScreen />} />
+                    <Route path="/ai-analysis" element={
+                      <ProtectedRoute>
+                        <AIAnalysisDetailPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/" element={
                       <ProtectedRoute>
                         <Index />

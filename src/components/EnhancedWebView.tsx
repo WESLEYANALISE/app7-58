@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ExternalLink, Brain, FileText, Lightbulb, Scale, BookOpen, Copy, Check, Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +19,7 @@ interface EnhancedWebViewProps {
 type AIActionType = 'resumo' | 'explicar' | 'exemplo' | 'analise' | 'precedentes';
 
 export const EnhancedWebView = ({ url, title, onClose }: EnhancedWebViewProps) => {
+  const navigate = useNavigate();
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<Record<AIActionType, string>>({
     resumo: '',
@@ -222,11 +224,22 @@ ${newsContent}`
       if (error) throw error;
 
       if (data.success) {
-        setAiAnalysis(prev => ({ ...prev, [actionType]: data.response }));
-        toast({
-          title: "Análise gerada",
-          description: `${aiActions.find(a => a.type === actionType)?.label} criada com sucesso`,
-        });
+        const action = aiActions.find(a => a.type === actionType);
+        if (action) {
+          // Navigate to detailed analysis page
+          navigate('/ai-analysis', {
+            state: {
+              analysisType: actionType,
+              analysisLabel: action.label,
+              analysisContent: data.response,
+              newsTitle: title,
+              newsUrl: url,
+              analysisColor: action.color,
+              analysisIcon: action.icon
+            }
+          });
+        }
+        setShowAiModal(false);
       } else {
         throw new Error(data.error || 'Erro na IA');
       }
