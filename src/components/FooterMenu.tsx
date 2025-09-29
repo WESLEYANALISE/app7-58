@@ -1,9 +1,8 @@
 import { Scale, Bot, Film, ClipboardList, BookOpen, Headphones } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigation } from '@/context/NavigationContext';
 import { useAppFunctions } from '@/hooks/useAppFunctions';
 import { useDeviceDetection } from '@/hooks/useDeviceDetection';
-import Lottie from 'lottie-react';
 interface FooterMenuProps {
   isVisible?: boolean;
 }
@@ -13,7 +12,6 @@ export const FooterMenu = ({
   // Hide when search modal is open
   const isSearchModalOpen = document.body.classList.contains('search-modal-open');
   const [activeItem, setActiveItem] = useState('audioaulas');
-  const [professoraAnimation, setProfessoraAnimation] = useState(null);
   const {
     setCurrentFunction
   } = useNavigation();
@@ -23,21 +21,6 @@ export const FooterMenu = ({
   const {
     isDesktop
   } = useDeviceDetection();
-
-  // Load Lottie animation
-  useEffect(() => {
-    const loadAnimation = async () => {
-      try {
-        // Fetch the JSON animation data directly from Lottie host
-        const response = await fetch('https://lottie.host/8cd9f993-8f79-4400-bc3b-8b6323ee8164/u08MMvLcmY.json');
-        const animationData = await response.json();
-        setProfessoraAnimation(animationData);
-      } catch (error) {
-        console.error('Failed to load professora animation:', error);
-      }
-    };
-    loadAnimation();
-  }, []);
   const findFunction = (searchTerm: string) => {
     return functions.find(func => func.funcao.toLowerCase().includes(searchTerm.toLowerCase()));
   };
@@ -130,13 +113,17 @@ export const FooterMenu = ({
                   
                    {/* Icon container */}
                   <div className={`${getIconStyles(item, isActive)} ${isProfessoraIA ? 'rounded-full' : ''}`}>
-                    {isProfessoraIA && professoraAnimation ? (
-                      <div className="w-6 h-6 overflow-hidden">
-                        <Lottie 
-                          animationData={professoraAnimation} 
-                          loop={true}
-                          autoplay={true}
-                          style={{ width: '120%', height: '120%', transform: 'translate(-10%, -10%)' }}
+                    {isProfessoraIA ? (
+                      <div className="w-6 h-6 overflow-hidden rounded-full">
+                        <iframe 
+                          src="https://lottie.host/embed/462be1de-7e6c-4d35-bd11-bf0c61cd91c8/u08MMvLcmY.lottie"
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            border: 'none',
+                            transform: 'scale(1.2)'
+                          }}
+                          title="Professora IA Animation"
                         />
                       </div>
                     ) : (
@@ -188,13 +175,17 @@ export const FooterMenu = ({
                   animationDelay: `${index * 100}ms`
                 }}>
                       {/* Icon with consistent sizing - smaller for circular button */}
-                      {isProfessoraIA && professoraAnimation ? (
-                        <div className="w-5 h-5 overflow-hidden">
-                          <Lottie 
-                            animationData={professoraAnimation} 
-                            loop={true}
-                            autoplay={true}
-                            style={{ width: '120%', height: '120%', transform: 'translate(-10%, -10%)' }}
+                      {isProfessoraIA ? (
+                        <div className="w-5 h-5 overflow-hidden rounded-full">
+                          <iframe 
+                            src="https://lottie.host/embed/462be1de-7e6c-4d35-bd11-bf0c61cd91c8/u08MMvLcmY.lottie"
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              border: 'none',
+                              transform: 'scale(1.2)'
+                            }}
+                            title="Professora IA Animation"
                           />
                         </div>
                       ) : (
