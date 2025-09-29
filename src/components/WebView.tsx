@@ -5,30 +5,37 @@ import { ArrowLeft, Brain, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import ReactMarkdown from 'react-markdown';
-
 interface WebViewProps {
   url: string;
   title: string;
   onClose: () => void;
   showAIOptions?: boolean;
 }
-
-export const WebView = ({ url, title, onClose, showAIOptions = true }: WebViewProps) => {
+export const WebView = ({
+  url,
+  title,
+  onClose,
+  showAIOptions = true
+}: WebViewProps) => {
   const [aiResponse, setAiResponse] = useState('');
   const [loadingAi, setLoadingAi] = useState(false);
   const [contentText, setContentText] = useState('');
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     // Carregar o conteúdo da página para análise da IA
     const loadContent = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('news-content-proxy', {
-          body: { url }
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('news-content-proxy', {
+          body: {
+            url
+          }
         });
-
         if (error) throw error;
-
         if (data.success && data.content_text) {
           setContentText(data.content_text);
         }
@@ -36,28 +43,27 @@ export const WebView = ({ url, title, onClose, showAIOptions = true }: WebViewPr
         console.error('Error loading content for AI analysis:', error);
       }
     };
-
     if (showAIOptions) {
       loadContent();
     }
   }, [url, showAIOptions]);
-
   const handleAiAction = async (action: 'resumir' | 'explicar') => {
     setLoadingAi(true);
     setAiResponse('');
-
     try {
       // Primeiro, garantir que temos o conteúdo completo da notícia
       let fullContent = contentText;
-      
       if (!fullContent) {
         // Carregar o conteúdo se ainda não temos
-        const { data, error } = await supabase.functions.invoke('news-content-proxy', {
-          body: { url }
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('news-content-proxy', {
+          body: {
+            url
+          }
         });
-
         if (error) throw error;
-
         if (data.success && data.content_text) {
           fullContent = data.content_text;
           setContentText(data.content_text);
@@ -65,13 +71,10 @@ export const WebView = ({ url, title, onClose, showAIOptions = true }: WebViewPr
           throw new Error('Não foi possível carregar o conteúdo da notícia');
         }
       }
-
       if (!fullContent) {
         throw new Error('Conteúdo da notícia não está disponível');
       }
-
-      const prompt = action === 'resumir' 
-        ? `Você é um assistente especializado em direito. Analise COMPLETAMENTE o artigo jurídico a seguir e crie um RESUMO ESTRUTURADO em markdown. 
+      const prompt = action === 'resumir' ? `Você é um assistente especializado em direito. Analise COMPLETAMENTE o artigo jurídico a seguir e crie um RESUMO ESTRUTURADO em markdown. 
 
 Siga exatamente esta estrutura:
 
@@ -95,8 +98,7 @@ Siga exatamente esta estrutura:
 ---
 
 ARTIGO COMPLETO A ANALISAR:
-${fullContent}`
-        : `Você é um professor de direito experiente. Leia COMPLETAMENTE o artigo jurídico a seguir e crie uma EXPLICAÇÃO DIDÁTICA em markdown.
+${fullContent}` : `Você é um professor de direito experiente. Leia COMPLETAMENTE o artigo jurídico a seguir e crie uma EXPLICAÇÃO DIDÁTICA em markdown.
 
 Siga exatamente esta estrutura:
 
@@ -133,16 +135,16 @@ Siga exatamente esta estrutura:
 
 ARTIGO COMPLETO A ANALISAR:
 ${fullContent}`;
-
-      const { data, error } = await supabase.functions.invoke('gemini-ai-chat', {
-        body: { 
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('gemini-ai-chat', {
+        body: {
           message: prompt,
           conversationHistory: []
         }
       });
-
       if (error) throw error;
-
       if (data.success) {
         setAiResponse(data.response);
       } else {
@@ -153,15 +155,13 @@ ${fullContent}`;
       toast({
         title: `Erro ao ${action}`,
         description: error.message || "Não foi possível processar com a IA. Tente novamente.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoadingAi(false);
     }
   };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-background">
+  return <div className="fixed inset-0 z-50 bg-background">
       {/* Header com botão voltar */}
       <div className="fixed top-0 left-0 right-0 z-60 bg-background/95 backdrop-blur-sm border-b border-border/30 h-14">
         <div className="flex items-center h-full px-4">
@@ -175,44 +175,21 @@ ${fullContent}`;
 
       {/* WebView iframe - tela completa */}
       <div className="pt-14 h-full">
-        <iframe 
-          src={url} 
-          className="w-full h-full border-0" 
-          title={title}
-          loading="lazy"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-links"
-        />
+        <iframe src={url} className="w-full h-full border-0" title={title} loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-links" />
       </div>
 
       {/* Botões flutuantes de IA */}
-      {showAIOptions && (
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-60">
-          <Button 
-            onClick={() => handleAiAction('resumir')}
-            disabled={loadingAi}
-            className="gap-2 shadow-lg bg-primary hover:bg-primary/90"
-            size="default"
-          >
-            <Brain className="h-4 w-4" />
-            {loadingAi ? 'Lendo...' : 'Resumir'}
-          </Button>
+      {showAIOptions && <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-60">
           
-          <Button 
-            onClick={() => handleAiAction('explicar')}
-            disabled={loadingAi}
-            className="gap-2 shadow-lg bg-secondary hover:bg-secondary/90"
-            variant="secondary"
-            size="default"
-          >
+          
+          <Button onClick={() => handleAiAction('explicar')} disabled={loadingAi} className="gap-2 shadow-lg bg-secondary hover:bg-secondary/90" variant="secondary" size="default">
             <FileText className="h-4 w-4" />
             {loadingAi ? 'Lendo...' : 'Explicar'}
           </Button>
-        </div>
-      )}
+        </div>}
 
       {/* Loading indicator para IA */}
-      {loadingAi && (
-        <div className="fixed bottom-6 left-6 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg z-60 border">
+      {loadingAi && <div className="fixed bottom-6 left-6 bg-background/95 backdrop-blur-sm rounded-lg p-4 shadow-lg z-60 border">
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
             <div>
@@ -220,12 +197,10 @@ ${fullContent}`;
               <p className="text-xs text-muted-foreground">Lendo todo o conteúdo</p>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Modal para resposta da IA */}
-      {aiResponse && (
-        <Dialog open={true} onOpenChange={() => setAiResponse('')}>
+      {aiResponse && <Dialog open={true} onOpenChange={() => setAiResponse('')}>
           <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -234,25 +209,48 @@ ${fullContent}`;
               </DialogTitle>
             </DialogHeader>
             <div className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown 
-                components={{
-                  h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-4 text-primary" {...props} />,
-                  h2: ({node, ...props}) => <h2 className="text-xl font-semibold mb-3 text-foreground" {...props} />,
-                  h3: ({node, ...props}) => <h3 className="text-lg font-medium mb-2 text-foreground" {...props} />,
-                  p: ({node, ...props}) => <p className="mb-3 text-foreground leading-relaxed" {...props} />,
-                  ul: ({node, ...props}) => <ul className="mb-3 space-y-1" {...props} />,
-                  li: ({node, ...props}) => <li className="text-foreground" {...props} />,
-                  strong: ({node, ...props}) => <strong className="font-semibold text-primary" {...props} />,
-                  code: ({node, ...props}) => <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props} />,
-                  hr: ({node, ...props}) => <hr className="my-6 border-border" {...props} />
-                }}
-              >
+              <ReactMarkdown components={{
+            h1: ({
+              node,
+              ...props
+            }) => <h1 className="text-2xl font-bold mb-4 text-primary" {...props} />,
+            h2: ({
+              node,
+              ...props
+            }) => <h2 className="text-xl font-semibold mb-3 text-foreground" {...props} />,
+            h3: ({
+              node,
+              ...props
+            }) => <h3 className="text-lg font-medium mb-2 text-foreground" {...props} />,
+            p: ({
+              node,
+              ...props
+            }) => <p className="mb-3 text-foreground leading-relaxed" {...props} />,
+            ul: ({
+              node,
+              ...props
+            }) => <ul className="mb-3 space-y-1" {...props} />,
+            li: ({
+              node,
+              ...props
+            }) => <li className="text-foreground" {...props} />,
+            strong: ({
+              node,
+              ...props
+            }) => <strong className="font-semibold text-primary" {...props} />,
+            code: ({
+              node,
+              ...props
+            }) => <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props} />,
+            hr: ({
+              node,
+              ...props
+            }) => <hr className="my-6 border-border" {...props} />
+          }}>
                 {aiResponse}
               </ReactMarkdown>
             </div>
           </DialogContent>
-        </Dialog>
-      )}
-    </div>
-  );
+        </Dialog>}
+    </div>;
 };
