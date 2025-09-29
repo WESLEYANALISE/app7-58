@@ -4,7 +4,7 @@ import {
   Search, ArrowLeft, Scale, BookOpen, 
   ChevronRight, Copy, X, Home, FileText, Scroll,
   Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2,
-  Zap, Swords
+  Zap, Swords, Handshake, Building, Briefcase, Shield, DollarSign, Baby, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -185,7 +185,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CC', 
       fullName: 'Código Civil', 
       description: 'Relações civis e direitos privados', 
-      icon: '🤝', 
+      icon: 'Handshake', 
       color: 'bg-gradient-to-br from-blue-500/20 to-blue-700/30 border border-blue-500/20 backdrop-blur-sm',
       textColor: 'text-blue-100'
     },
@@ -194,7 +194,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CF/88', 
       fullName: 'Constituição Federal', 
       description: 'Carta Magna do Brasil', 
-      icon: '🏛️', 
+      icon: 'Building', 
       color: 'bg-gradient-to-br from-emerald-500/20 to-emerald-700/30 border border-emerald-500/20 backdrop-blur-sm',
       textColor: 'text-emerald-100'
     },
@@ -203,7 +203,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CP', 
       fullName: 'Código Penal', 
       description: 'Crimes e aplicação de penas', 
-      icon: '', 
+      icon: 'Zap', 
       color: 'bg-gradient-to-br from-red-500/20 to-red-700/30 border border-red-500/20 backdrop-blur-sm',
       textColor: 'text-red-100'
     },
@@ -212,7 +212,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CPC', 
       fullName: 'Código de Processo Civil', 
       description: 'Procedimentos judiciais cíveis', 
-      icon: '📋', 
+      icon: 'FileText', 
       color: 'bg-gradient-to-br from-purple-500/20 to-purple-700/30 border border-purple-500/20 backdrop-blur-sm',
       textColor: 'text-purple-100'
     },
@@ -221,7 +221,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CPP', 
       fullName: 'Código de Processo Penal', 
       description: 'Procedimentos judiciais penais', 
-      icon: '', 
+      icon: 'Swords', 
       color: 'bg-gradient-to-br from-orange-500/20 to-orange-700/30 border border-orange-500/20 backdrop-blur-sm',
       textColor: 'text-orange-100'
     },
@@ -230,7 +230,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CLT', 
       fullName: 'Consolidação das Leis do Trabalho', 
       description: 'Direito trabalhista e sindical', 
-      icon: '👷', 
+      icon: 'Briefcase', 
       color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
       textColor: 'text-amber-100'
     },
@@ -239,7 +239,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CDC', 
       fullName: 'Código de Defesa do Consumidor', 
       description: 'Proteção aos direitos do consumidor', 
-      icon: '🛡️', 
+      icon: 'Shield', 
       color: 'bg-gradient-to-br from-cyan-500/20 to-cyan-700/30 border border-cyan-500/20 backdrop-blur-sm',
       textColor: 'text-cyan-100'
     },
@@ -248,7 +248,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CTN', 
       fullName: 'Código Tributário Nacional', 
       description: 'Sistema tributário e fiscal', 
-      icon: '💰', 
+      icon: 'DollarSign', 
       color: 'bg-gradient-to-br from-yellow-500/20 to-yellow-700/30 border border-yellow-500/20 backdrop-blur-sm',
       textColor: 'text-yellow-100'
     }
@@ -261,7 +261,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'ECA', 
       fullName: 'Estatuto da Criança e do Adolescente', 
       description: 'Proteção de crianças e adolescentes', 
-      icon: '👶', 
+      icon: 'Baby', 
       color: 'bg-gradient-to-br from-pink-500/20 to-pink-700/30 border border-pink-500/20 backdrop-blur-sm',
       textColor: 'text-pink-100'
     },
@@ -270,7 +270,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'Estatuto do Idoso', 
       fullName: 'Estatuto da Pessoa Idosa', 
       description: 'Direitos e proteção dos idosos', 
-      icon: '👴', 
+      icon: 'Users', 
       color: 'bg-gradient-to-br from-violet-500/20 to-violet-700/30 border border-violet-500/20 backdrop-blur-sm',
       textColor: 'text-violet-100'
     }
@@ -1047,9 +1047,9 @@ const VadeMecumUltraFast: React.FC = () => {
         </div>
 
         <div className="p-4 bg-background min-h-screen">
-          {/* Grid moderno com cards uniformes */}
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Grid moderno com 2 cards por linha */}
+          <div className="max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 gap-4">
               {currentCodes.map((code) => (
                 <motion.div
                   key={code.id}
@@ -1061,13 +1061,22 @@ const VadeMecumUltraFast: React.FC = () => {
                 >
                   <div className={`rounded-xl ${code.color} p-6 h-[160px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
                     <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                      {code.id === 'cp' ? (
-                        <Zap className="h-10 w-10 text-red-300" />
-                      ) : code.id === 'cpp' ? (
-                        <Swords className="h-10 w-10 text-orange-300" />
-                      ) : (
-                        code.icon
-                      )}
+                      {(() => {
+                        const iconMap: Record<string, React.ComponentType<any>> = {
+                          'Handshake': Handshake,
+                          'Building': Building,
+                          'Zap': Zap,
+                          'FileText': FileText,
+                          'Swords': Swords,
+                          'Briefcase': Briefcase,
+                          'Shield': Shield,
+                          'DollarSign': DollarSign,
+                          'Baby': Baby,
+                          'Users': Users
+                        };
+                        const IconComponent = iconMap[code.icon];
+                        return IconComponent ? <IconComponent className="h-10 w-10" /> : null;
+                      })()}
                     </div>
                     <h3 className={`font-bold text-lg mb-1 ${code.textColor}`}>
                       {code.fullName}
