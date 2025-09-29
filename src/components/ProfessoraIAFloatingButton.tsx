@@ -27,7 +27,7 @@ export const ProfessoraIAFloatingButton = ({
   return (
     <AnimatePresence>
       <motion.div 
-        className="fixed bottom-6 right-6 z-40" 
+        className="fixed bottom-6 right-6 z-[9999]" 
         initial={{
           y: 100,
           opacity: 0,
@@ -67,19 +67,21 @@ export const ProfessoraIAFloatingButton = ({
             onClick={onOpen}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-white/20 p-2"
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-2xl hover:shadow-red-500/50 transition-all duration-300 border-2 border-white/20 p-2 relative"
             size="lg"
           >
             {animationData ? (
-              <Lottie 
-                animationData={animationData}
-                loop={true}
-                autoplay={true}
-                style={{ width: '100%', height: '100%' }}
-                className="text-white"
-              />
+              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                <Lottie 
+                  animationData={animationData}
+                  loop={true}
+                  autoplay={true}
+                  style={{ width: '120%', height: '120%' }}
+                  className="text-white"
+                />
+              </div>
             ) : (
-              <Brain className="h-8 w-8 text-white" />
+              <Brain className="h-8 w-8 text-white animate-pulse" />
             )}
           </Button>
         </motion.div>
