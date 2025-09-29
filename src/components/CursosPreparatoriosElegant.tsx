@@ -1,14 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Play, Pause, Search, BarChart3, Download, BookOpen, Clock, CheckCircle, PlayCircle } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Search, BarChart3, Download, BookOpen, Clock, CheckCircle, PlayCircle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import ReactMarkdown from 'react-markdown';
 import { useCursosOrganizados, useProgressoUsuario } from '@/hooks/useCursosPreparatorios';
 import { useOptimizedVideoPlayer } from '@/hooks/useOptimizedVideoPlayer';
 import { normalizeVideoUrl } from '@/utils/videoHelpers';
+import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
+import professoraAvatar from '@/assets/professora-avatar.png';
 
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
@@ -62,10 +65,22 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
     autoPlay: true
   });
 
-  // Video player effects
+  // Auto-play video when lesson is selected
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !selectedLesson) return;
+
+    console.log('🎬 Initializing video for lesson:', selectedLesson.nome);
+    
+    const handleLoadedData = () => {
+      console.log('📊 Video loaded, attempting autoplay...');
+      video.play().then(() => {
+        console.log('✅ Autoplay successful');
+      }).catch((error) => {
+        console.warn('⚠️ AutoPlay blocked:', error);
+        toast.info('Clique no play para iniciar o vídeo');
+      });
+    };
 
     const handleLoadedMetadata = () => handleDuration(video.duration);
     const handleTimeUpdate = () => onVideoProgress({
@@ -74,11 +89,17 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       loaded: video.buffered.length > 0 ? video.buffered.end(0) / video.duration : 0
     });
 
+    video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('ended', handleEnded);
 
+    // Load the video
+    video.src = normalizeVideoUrl(selectedLesson.video);
+    video.load();
+
     return () => {
+      video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('ended', handleEnded);
@@ -169,11 +190,11 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
         <div className="relative">
           <video
             ref={videoRef}
-            src={normalizeVideoUrl(selectedLesson.video)}
             className="w-full h-[300px] object-cover bg-black"
             playsInline
-            onPlay={() => {}}
-            onPause={() => {}}
+            autoPlay
+            muted={false}
+            controls={false}
           />
           
           {/* Video Overlay */}
@@ -253,18 +274,65 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
           </div>
         </div>
 
+        {/* Action Buttons - Logo abaixo do vídeo */}
+        <div className="p-6">
+          <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+            <h3 className="text-base font-semibold mb-3 text-yellow-500">Ferramentas de Estudo</h3>
+            <LessonActionButtons lesson={{
+              id: selectedLesson.id,
+              area: selectedLesson.area,
+              tema: selectedLesson.tema,
+              assunto: selectedLesson.nome,
+              conteudo: selectedLesson.conteudo || ''
+            }} />
+          </div>
+        </div>
+
         {/* Lesson Content */}
-        <div className="p-6 space-y-6">
+        <div className="px-6 pb-6 space-y-6">
           {selectedLesson.conteudo && (
             <div className="bg-gray-900 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4 text-yellow-500">Conteúdo da Aula</h3>
-              <div className="prose prose-invert prose-sm max-w-none">
-                <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+              <div className="prose prose-invert prose-sm max-w-none prose-headings:text-yellow-500 prose-strong:text-yellow-400 prose-p:text-gray-300 prose-li:text-gray-300">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-xl font-bold mb-4 text-yellow-500">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-lg font-bold mb-3 text-yellow-500">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-base font-bold mb-2 text-yellow-500">{children}</h3>,
+                    strong: ({ children }) => <strong className="text-yellow-400 font-bold">{children}</strong>,
+                    p: ({ children }) => <p className="mb-4 leading-relaxed text-gray-300">{children}</p>,
+                    ul: ({ children }) => <ul className="space-y-2 ml-4 text-gray-300">{children}</ul>,
+                    ol: ({ children }) => <ol className="space-y-2 ml-4 text-gray-300">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                  }}
+                >
                   {selectedLesson.conteudo}
-                </div>
+                </ReactMarkdown>
               </div>
             </div>
           )}
+        </div>
+
+        {/* Floating Professor Button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="relative">
+            <Button
+              variant="ghost"
+              className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 shadow-lg border-4 border-white"
+              onClick={() => toast.info(`Aula: ${selectedLesson.nome} - ${selectedLesson.tema}`)}
+            >
+              <img 
+                src={professoraAvatar} 
+                alt="Professora"
+                className="w-full h-full rounded-full object-cover"
+              />
+            </Button>
+            
+            {/* Chat indicator */}
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+              <MessageCircle className="h-3 w-3" />
+            </div>
+          </div>
         </div>
       </div>
     );
