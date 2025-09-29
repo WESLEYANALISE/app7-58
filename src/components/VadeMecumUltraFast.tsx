@@ -35,8 +35,10 @@ interface VadeMecumArticle {
   numero: string;
   conteudo: string;
   codigo_id: string;
+  naracao_url?: string | null;
   "Número do Artigo"?: string;
   "Artigo"?: string;
+  "Narração"?: string | null;
 }
 
 // Cache em memória global para máxima performance
@@ -141,7 +143,7 @@ const VadeMecumUltraFast: React.FC = () => {
               try {
                 const { data } = await supabase
                   .from(table as any)
-                  .select('id, "Número do Artigo", Artigo')
+                  .select('id, "Número do Artigo", Artigo, Narração')
                   .order('id', { ascending: true });
                 
                 if (data) {
@@ -150,7 +152,9 @@ const VadeMecumUltraFast: React.FC = () => {
                     numero: item["Número do Artigo"] || String(item.id),
                     conteudo: item.Artigo || '',
                     codigo_id: id,
+                    naracao_url: item["Narração"] || null,
                     "Número do Artigo": item["Número do Artigo"],
+                    "Narração": item["Narração"],
                     "Artigo": item.Artigo
                   }));
                   articlesCache.set(cacheKey, transformed);
@@ -483,7 +487,7 @@ const VadeMecumUltraFast: React.FC = () => {
       // Query otimizada para máxima velocidade
       const { data, error } = await supabase
         .from(tableName as any)
-        .select('id, "Número do Artigo", Artigo')
+        .select('id, "Número do Artigo", Artigo, Narração')
         .order('id', { ascending: true });
 
       if (error) throw error;
@@ -493,6 +497,8 @@ const VadeMecumUltraFast: React.FC = () => {
         id: String(item.id),
         numero: item["Número do Artigo"] || String(item.id),
         conteudo: item.Artigo || '',
+        naracao_url: item["Narração"] || null,
+        "Narração": item["Narração"],
         codigo_id: code.id,
         "Número do Artigo": item["Número do Artigo"],
         "Artigo": item.Artigo
@@ -549,7 +555,16 @@ const VadeMecumUltraFast: React.FC = () => {
     }
   }, [toast]);
 
-  const narrateArticle = useCallback(async (articleContent: string, articleNumber: string, codeName: string) => {
+  const narrateArticle = useCallback(async (article: VadeMecumArticle, codeName: string) => {
+    // Check if audio URL is not available
+    if (!article.naracao_url) {
+      toast({
+        title: "Em breve",
+        description: "A narração deste artigo estará disponível em breve.",
+      });
+      return;
+    }
+
     if (isNarrating && audioInstance) {
       // Parar narração
       audioInstance.pause();
@@ -561,60 +576,37 @@ const VadeMecumUltraFast: React.FC = () => {
     setNarrateLoading(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('gemini-article-tts', {
-        body: {
-          text: `${codeName}, Artigo ${articleNumber}. ${articleContent}`,
-          voice: 'Zephyr'
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.success && data.audioData) {
-        // Converter base64 para blob e reproduzir
-        const binaryString = atob(data.audioData);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        
-        const audioBlob = new Blob([bytes], { type: data.mimeType || 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        
-        audio.onended = () => {
-          setIsNarrating(false);
-          setAudioInstance(null);
-          URL.revokeObjectURL(audioUrl);
-        };
-        
-        audio.onerror = () => {
-          setIsNarrating(false);
-          setAudioInstance(null);
-          URL.revokeObjectURL(audioUrl);
-          toast({
-            title: "❌ Erro",
-            description: "Erro ao reproduzir áudio.",
-            variant: "destructive",
-          });
-        };
-
-        setAudioInstance(audio);
-        setIsNarrating(true);
-        audio.play();
-        
+      // Use the audio URL directly from the database
+      const audio = new Audio(article.naracao_url);
+      
+      audio.onended = () => {
+        setIsNarrating(false);
+        setAudioInstance(null);
+      };
+      
+      audio.onerror = () => {
+        setIsNarrating(false);
+        setAudioInstance(null);
         toast({
-          title: "🔊 Narração iniciada",
-          description: "O artigo está sendo narrado.",
+          title: "❌ Erro",
+          description: "Erro ao reproduzir áudio.",
+          variant: "destructive",
         });
-      } else {
-        throw new Error('Falha ao gerar áudio');
-      }
+      };
+
+      setAudioInstance(audio);
+      setIsNarrating(true);
+      audio.play();
+      
+      toast({
+        title: "🔊 Narração iniciada",
+        description: "O artigo está sendo narrado.",
+      });
     } catch (error: any) {
       console.error('Erro ao narrar artigo:', error);
       toast({
         title: "❌ Erro ao narrar",
-        description: "Erro ao narrar artigo. Tente novamente.",
+        description: "Erro ao reproduzir áudio. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -905,11 +897,15 @@ const VadeMecumUltraFast: React.FC = () => {
                 </Button>
 
                 <Button
-                  onClick={() => narrateArticle(articleContent, articleNumber, selectedCode?.name || '')}
-                  disabled={narrateLoading}
+                  onClick={() => narrateArticle(article, selectedCode?.name || '')}
+                  disabled={narrateLoading || !article.naracao_url}
                   variant="outline"
                   size="sm"
-                  className="text-xs"
+                  className={`text-xs ${
+                    !article.naracao_url 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : ''
+                  }`}
                 >
                   {narrateLoading ? (
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />

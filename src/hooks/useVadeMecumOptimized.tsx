@@ -17,8 +17,10 @@ export interface VadeMecumArticle {
   numero: string;
   conteudo: string;
   codigo_id: string;
+  naracao_url?: string | null;
   "Número do Artigo"?: string;
   "Artigo"?: string;
+  "Narração"?: string | null;
 }
 
 export const useVadeMecumOptimized = () => {
@@ -122,7 +124,7 @@ export const useVadeMecumOptimized = () => {
       
       const { data, error: fetchError } = await supabase
         .from(tableName as any)
-        .select('id, "Número do Artigo", Artigo')
+        .select('id, "Número do Artigo", Artigo, Narração')
         .order('id', { ascending: true });
 
       if (fetchError) throw fetchError;
@@ -133,8 +135,10 @@ export const useVadeMecumOptimized = () => {
         numero: item["Número do Artigo"] || item.id.toString(),
         conteudo: item.Artigo || '',
         codigo_id: codeId,
+        naracao_url: item["Narração"] || null,
         "Número do Artigo": item["Número do Artigo"],
-        "Artigo": item.Artigo
+        "Artigo": item.Artigo,
+        "Narração": item["Narração"]
       }));
       
       setArticles(transformedArticles);

@@ -17,8 +17,10 @@ export interface VadeMecumArticle {
   numero: string;
   conteudo: string;
   codigo_id: string;
+  naracao_url?: string | null;
   "Número do Artigo"?: string;
   "Artigo"?: string;
+  "Narração"?: string | null;
 }
 
 // Cache ultra-rápido em memória
@@ -289,7 +291,7 @@ export const useVadeMecumInstant = () => {
 
       const { data } = await supabase
         .from(tableName as any)
-        .select('id, "Número do Artigo", Artigo')
+        .select('id, "Número do Artigo", Artigo, Narração')
         .order('id', { ascending: true });
 
       const transformedArticles = (data || []).map((item: any) => ({
@@ -297,7 +299,9 @@ export const useVadeMecumInstant = () => {
         numero: item["Número do Artigo"] || item.id.toString(),
         conteudo: item.Artigo || '',
         codigo_id: codeId,
+        naracao_url: item["Narração"] || null,
         "Número do Artigo": item["Número do Artigo"],
+        "Narração": item["Narração"],
         "Artigo": item.Artigo
       }));
       

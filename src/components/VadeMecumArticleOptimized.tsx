@@ -24,6 +24,7 @@ interface VadeMecumArticleProps {
     numero: string;
     conteudo: string;
     codigo_id: string;
+    naracao_url?: string | null;
   };
   codeInfo: {
     name: string;
@@ -126,6 +127,15 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
   }, [isAudioPlaying, article.conteudo]);
 
   const narrateArticle = useCallback(async () => {
+    // Check if audio URL is not available
+    if (!article.naracao_url) {
+      toast({
+        title: "Em breve",
+        description: "A narração deste artigo estará disponível em breve.",
+      });
+      return;
+    }
+
     if (isNarrating && audioInstance) {
       // Parar narração
       audioInstance.pause();
@@ -137,66 +147,43 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
     setNarrateLoading(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('gemini-article-tts', {
-        body: {
-          text: `${codeInfo.fullName}, Artigo ${article.numero}. ${article.conteudo}`,
-          voice: 'Zephyr'
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.success && data.audioData) {
-        // Converter base64 para blob e reproduzir
-        const binaryString = atob(data.audioData);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        
-        const audioBlob = new Blob([bytes], { type: data.mimeType || 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        
-        audio.onended = () => {
-          setIsNarrating(false);
-          setAudioInstance(null);
-          URL.revokeObjectURL(audioUrl);
-        };
-        
-        audio.onerror = () => {
-          setIsNarrating(false);
-          setAudioInstance(null);
-          URL.revokeObjectURL(audioUrl);
-          toast({
-            title: "Erro",
-            description: "Erro ao reproduzir áudio.",
-            variant: "destructive",
-          });
-        };
-
-        setAudioInstance(audio);
-        setIsNarrating(true);
-        audio.play();
-        
+      // Use the audio URL directly from the database
+      const audio = new Audio(article.naracao_url);
+      
+      audio.onended = () => {
+        setIsNarrating(false);
+        setAudioInstance(null);
+      };
+      
+      audio.onerror = () => {
+        setIsNarrating(false);
+        setAudioInstance(null);
         toast({
-          title: "Narração iniciada",
-          description: "O artigo está sendo narrado.",
+          title: "Erro",
+          description: "Erro ao reproduzir áudio.",
+          variant: "destructive",
         });
-      } else {
-        throw new Error('Falha ao gerar áudio');
-      }
+      };
+
+      setAudioInstance(audio);
+      setIsNarrating(true);
+      audio.play();
+      
+      toast({
+        title: "Narração iniciada",
+        description: "O artigo está sendo narrado.",
+      });
     } catch (error: any) {
       console.error('Erro ao narrar artigo:', error);
       toast({
         title: "Erro",
-        description: "Erro ao narrar artigo. Tente novamente.",
+        description: "Erro ao reproduzir áudio. Tente novamente.",
         variant: "destructive",
       });
     } finally {
       setNarrateLoading(false);
     }
-  }, [isNarrating, audioInstance, article, codeInfo, toast]);
+  }, [isNarrating, audioInstance, article, toast]);
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -368,8 +355,12 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
                 <Button
                   variant="outline"
                   onClick={narrateArticle}
-                  disabled={narrateLoading}
-                  className="h-10 justify-center gap-3 bg-background/50 hover:bg-background/80 border-border/50"
+                  disabled={narrateLoading || !article.naracao_url}
+                  className={`h-10 justify-center gap-3 ${
+                    !article.naracao_url 
+                      ? 'bg-muted/30 cursor-not-allowed opacity-50' 
+                      : 'bg-background/50 hover:bg-background/80'
+                  } border-border/50`}
                 >
                   {narrateLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
