@@ -135,25 +135,8 @@ export const NewsCard = ({ news, isRead, isFavorite, onRead, onToggleFavorite }:
             
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
                 size="sm"
-                className="text-xs text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
-                asChild
-                onClick={(e) => e.stopPropagation()}
-              >
-                <a 
-                  href={news.news_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Original
-                </a>
-              </Button>
-              
-              <Button
-                size="sm"
+                onClick={() => onRead(news)}
                 className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30 text-xs"
                 variant="outline"
               >

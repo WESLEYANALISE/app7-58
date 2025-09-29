@@ -7,6 +7,7 @@ import { ArrowLeft, RefreshCw, Settings, TrendingUp, BarChart3 } from 'lucide-re
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { WebView } from '@/components/WebView';
+import { EnhancedWebView } from '@/components/EnhancedWebView';
 import { useLegalNewsRead } from '@/hooks/useLegalNewsRead';
 import { EnhancedNewsReader } from '@/components/RadarJuridico/EnhancedNewsReader';
 import { NewsCard } from '@/components/RadarJuridico/NewsCard';
@@ -109,33 +110,8 @@ export const RadarJuridico = () => {
   const openNewsReader = async (newsItem: LegalNews) => {
     markAsRead(newsItem.id);
     
-    setSelectedNews(newsItem);
-    setLoadingContent(true);
-    setNewsContent(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('news-content-proxy', {
-        body: { url: newsItem.news_url }
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        setNewsContent(data);
-      } else {
-        throw new Error(data.error || 'Erro ao carregar conteúdo');
-      }
-    } catch (error) {
-      console.error('Error loading news content:', error);
-      toast({
-        title: "Erro ao carregar conteúdo",
-        description: "Não foi possível carregar o artigo. Tente novamente.",
-        variant: "destructive",
-      });
-      setNewsContent({ success: false, error: 'Erro ao carregar conteúdo' });
-    } finally {
-      setLoadingContent(false);
-    }
+    // Abrir diretamente na WebView com botões flutuantes
+    openWebView(newsItem.news_url, newsItem.title);
   };
 
   const toggleFavorite = (newsId: string) => {
@@ -216,7 +192,7 @@ export const RadarJuridico = () => {
 
   if (webViewUrl) {
     return (
-      <WebView
+      <EnhancedWebView
         url={webViewUrl}
         title={webViewTitle}
         onClose={() => setWebViewUrl(null)}
@@ -350,14 +326,6 @@ export const RadarJuridico = () => {
         )}
       </div>
 
-      <EnhancedNewsReader
-        newsItem={selectedNews}
-        newsContent={newsContent}
-        isOpen={!!selectedNews}
-        onClose={() => setSelectedNews(null)}
-        onToggleFavorite={toggleFavorite}
-        isFavorite={selectedNews ? favorites.has(selectedNews.id) : false}
-      />
     </div>
   );
 };
