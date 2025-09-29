@@ -194,7 +194,7 @@ const VadeMecumUltraFast: React.FC = () => {
       name: 'CF/88', 
       fullName: 'Constituição Federal', 
       description: 'Carta Magna do Brasil', 
-      icon: 'Building', 
+      icon: 'Scale', 
       color: 'bg-gradient-to-br from-emerald-500/20 to-emerald-700/30 border border-emerald-500/20 backdrop-blur-sm',
       textColor: 'text-emerald-100'
     },
@@ -1047,9 +1047,9 @@ const VadeMecumUltraFast: React.FC = () => {
         </div>
 
         <div className="p-4 bg-background min-h-screen">
-          {/* Grid moderno com 2 cards por linha */}
-          <div className="max-w-2xl mx-auto">
-            <div className="grid grid-cols-2 gap-4">
+          {/* Grid responsivo */}
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
               {currentCodes.map((code) => (
                 <motion.div
                   key={code.id}
@@ -1059,8 +1059,8 @@ const VadeMecumUltraFast: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className={`rounded-xl ${code.color} p-6 h-[160px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[140px] sm:h-[160px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
+                    <div className="mb-3 group-hover:scale-110 transition-transform duration-300">
                       {(() => {
                         const iconMap: Record<string, React.ComponentType<any>> = {
                           'Handshake': Handshake,
@@ -1072,17 +1072,18 @@ const VadeMecumUltraFast: React.FC = () => {
                           'Shield': Shield,
                           'DollarSign': DollarSign,
                           'Baby': Baby,
-                          'Users': Users
+                          'Users': Users,
+                          'Scale': Scale
                         };
                         const IconComponent = iconMap[code.icon];
-                        return IconComponent ? <IconComponent className="h-10 w-10" /> : null;
+                        return IconComponent ? <IconComponent className="h-8 w-8 sm:h-10 sm:w-10" /> : null;
                       })()}
                     </div>
-                    <h3 className={`font-bold text-lg mb-1 ${code.textColor}`}>
-                      {code.fullName}
+                    <h3 className={`font-bold text-lg sm:text-xl mb-1 ${code.textColor}`}>
+                      {code.name}
                     </h3>
-                    <p className={`text-xs ${code.textColor} opacity-80 leading-relaxed`}>
-                      {code.description}
+                    <p className={`text-xs sm:text-sm ${code.textColor} opacity-80 leading-tight`}>
+                      {code.fullName}
                     </p>
                   </div>
                 </motion.div>
