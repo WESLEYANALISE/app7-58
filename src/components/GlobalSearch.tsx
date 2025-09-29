@@ -152,11 +152,11 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
     return filtered.slice(0, 100);
   }, [searchResults, activeFilter]);
 
-  // Navigate to function when clicking on result with intelligent deep linking
+  // Navigate to function when clicking on result with intelligent deep linking and highlighting
   const handleResultClick = (result: SearchResult) => {
     const { tableSource, originalData } = result.metadata;
     
-    // Create enhanced navigation context with specific item data
+    // Create enhanced navigation context with specific item data for highlighting
     const navigationContext = {
       itemId: originalData?.id?.toString(),
       itemTitle: result.title,
@@ -164,7 +164,10 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
       searchTerm: result.title,
       targetSection: result.category,
       autoOpen: true,
-      highlightTerm: searchTerm // Para destacar o termo buscado
+      highlightTerm: searchTerm, // Para destacar o termo buscado
+      highlightItem: true, // Flag para indicar que deve destacar o item específico
+      pulseAnimation: true, // Flag para animação de pulso no item encontrado
+      scrollToItem: true // Flag para rolar até o item específico
     };
 
     // Store context in sessionStorage for cross-component access
@@ -352,13 +355,14 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
   const ResultCard = ({ result }: { result: SearchResult }) => {
     const Icon = typeIcons[result.type];
     
-    // Get image/capa from metadata with priority for different content types
-    const imageUrl = result.metadata.capa || 
+    // Priorizar capa específica do item (livro, curso, etc.) sobre capa da área
+    const imageUrl = result.metadata.imagem || 
+                     result.metadata.capa || 
                      result.metadata['Capa-livro'] || 
+                     result.metadata['capa-livro'] || 
                      result.metadata['Capa-area'] || 
                      result.metadata['capa-area'] || 
-                     result.metadata['capa-modulo'] || 
-                     result.metadata.imagem;
+                     result.metadata['capa-modulo'];
     
     return (
       <div 

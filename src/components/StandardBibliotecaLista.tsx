@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen, User, Search, Filter, X } from 'lucide-react';
+import { useSearchHighlight } from '@/hooks/useSearchHighlight';
 
 interface StandardLivro {
   id: number;
@@ -39,6 +40,9 @@ export const StandardBibliotecaLista = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'estudos' | 'alfabetica'>('estudos');
   const [previewBook, setPreviewBook] = useState<StandardLivro | null>(null);
+  
+  // Sistema de highlight para itens vindos da busca global
+  const { shouldHighlightItem, highlightAndScrollToItem } = useSearchHighlight();
 
   // Filtrar e ordenar livros
   const filteredAndSortedBooks = useMemo(() => {
@@ -158,17 +162,29 @@ export const StandardBibliotecaLista = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredAndSortedBooks.map((livro, index) => (
-              <motion.div
-                key={livro.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <Card 
-                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary/50 hover:border-l-primary overflow-hidden shadow-md"
-                  onClick={() => setPreviewBook(livro)}
+            {filteredAndSortedBooks.map((livro, index) => {
+              const cardRef = useRef<HTMLDivElement>(null);
+              const shouldHighlight = shouldHighlightItem(livro.id, getTitulo(livro));
+              
+              // Adicionar highlight se necessário
+              useEffect(() => {
+                if (shouldHighlight && cardRef.current) {
+                  highlightAndScrollToItem(cardRef.current, 1500 + (index * 100));
+                }
+              }, [shouldHighlight]);
+              
+              return (
+                <motion.div
+                  key={livro.id}
+                  ref={cardRef}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
+                  <Card 
+                    className={`group cursor-pointer hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary/50 hover:border-l-primary overflow-hidden shadow-md ${shouldHighlight ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
+                    onClick={() => setPreviewBook(livro)}
+                  >
                   <CardContent className="p-4 sm:p-5">
                     <div className="flex gap-4 sm:gap-5">
                       {/* Imagem do livro - responsiva e maior */}
@@ -225,7 +241,8 @@ export const StandardBibliotecaLista = ({
                   </CardContent>
                 </Card>
               </motion.div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

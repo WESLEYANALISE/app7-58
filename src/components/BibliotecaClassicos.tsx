@@ -1,5 +1,5 @@
 
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookOpen, Search, Loader2 } from 'lucide-react';
 import { useNavigation } from '@/context/NavigationContext';
@@ -36,6 +36,38 @@ export const BibliotecaClassicos = () => {
   const [selectedBook, setSelectedBook] = useState<LivroClassico | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
+
+  // Verificar se há navegação específica vinda da busca global
+  useEffect(() => {
+    const checkNavigationContext = () => {
+      const contextData = sessionStorage.getItem('navigationContext');
+      if (contextData) {
+        try {
+          const context = JSON.parse(contextData);
+          if (context.itemTitle && context.highlightItem && livros) {
+            // Buscar o livro específico pelo título
+            const foundBook = livros.find((livro: any) => 
+              livro.livro?.toLowerCase().includes(context.itemTitle.toLowerCase()) ||
+              livro.tema?.toLowerCase().includes(context.itemTitle.toLowerCase())
+            );
+            
+            if (foundBook) {
+              // Navegar diretamente para o livro específico
+              setSelectedBook(foundBook as LivroClassico);
+              setViewMode('leitor');
+              setSelectedArea(foundBook.area);
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing navigation context:', error);
+        }
+      }
+    };
+
+    if (livros && livros.length > 0) {
+      checkNavigationContext();
+    }
+  }, [livros]);
 
   // Organizar livros por área
   const livrosPorArea = livros?.reduce((acc, livro) => {
