@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ArrowLeft, Clock, Newspaper, ExternalLink, Brain, FileText, Loader2, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Clock, Newspaper, ExternalLink, Brain, FileText, Loader2, CheckCircle2, X, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { WebView } from '@/components/WebView';
@@ -68,6 +68,7 @@ export const RadarJuridico = () => {
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState<string>('');
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
   const { toast } = useToast();
   const { markAsRead, isRead } = useLegalNewsRead();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -613,6 +614,25 @@ ${fullContent}`;
     return 'Agora';
   };
 
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(aiResponse);
+      setCopySuccess(true);
+      toast({
+        title: "✅ Copiado!",
+        description: "Análise copiada para a área de transferência",
+      });
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o texto. Tente selecionar e copiar manualmente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -810,43 +830,58 @@ ${fullContent}`;
               />
 
               <div className="flex gap-2 pt-4 border-t">
-                  <Button 
-                    onClick={() => handleAiAction('resumir')}
-                    disabled={loadingAi}
-                    className="gap-2 bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
-                    variant="outline"
-                  >
-                    <Brain className="h-4 w-4" />
-                    {loadingAi ? 'Analisando...' : 'Resumir'}
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => handleAiAction('explicar')}
-                    disabled={loadingAi}
-                    className="gap-2 bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
-                    variant="outline"
-                  >
-                    <FileText className="h-4 w-4" />
-                    {loadingAi ? 'Analisando...' : 'Explicar'}
-                  </Button>
+                <Button 
+                  onClick={() => handleAiAction('resumir')}
+                  disabled={loadingAi}
+                  className="gap-2 bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
+                  variant="outline"
+                >
+                  <Brain className="h-4 w-4" />
+                  {loadingAi ? 'Analisando...' : 'Resumo'}
+                </Button>
+                
+                <Button 
+                  onClick={() => handleAiAction('explicar')}
+                  disabled={loadingAi}
+                  className="gap-2 bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
+                  variant="outline"
+                >
+                  <FileText className="h-4 w-4" />
+                  {loadingAi ? 'Analisando...' : 'Explicar'}
+                </Button>
               </div>
 
               {aiResponse && showAiAnalysis && (
                 <div className="mt-4 p-6 bg-muted/50 rounded-lg relative border border-border/30">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="font-semibold flex items-center gap-2 text-lg">
-                      <Brain className="h-5 w-5 text-primary" />
+                      <Brain className="h-5 w-5 text-yellow-400" />
                       Análise da IA
                     </h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowAiAnalysis(false)}
-                      className="h-8 w-8 p-0 hover:bg-yellow-500/20 hover:text-yellow-300 bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 rounded-full"
-                      title="Fechar análise"
-                    >
-                      <X className="h-5 w-5 font-bold" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={copyToClipboard}
+                        className="h-8 w-8 p-0 hover:bg-yellow-500/20 hover:text-yellow-300 bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 rounded-full"
+                        title="Copiar análise"
+                      >
+                        {copySuccess ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAiAnalysis(false)}
+                        className="h-8 w-8 p-0 hover:bg-yellow-500/20 hover:text-yellow-300 bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 rounded-full"
+                        title="Fechar análise"
+                      >
+                        <X className="h-5 w-5 font-bold" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="prose prose-sm max-w-none dark:prose-invert">
                     <ReactMarkdown 
