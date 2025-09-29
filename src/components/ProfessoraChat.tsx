@@ -116,17 +116,25 @@ export const ProfessoraChat = ({ isOpen, onClose, context }: ProfessoraChatProps
         {/* Input */}
         <div className="p-6 pb-8 bg-muted/30 backdrop-blur-sm border-t border-border">
           <div className="flex space-x-2">
-            <Input
+            <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Digite sua dúvida sobre a aula..."
-              className="flex-1 bg-background/50 border-border text-foreground placeholder:text-muted-foreground"
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              className="flex-1 bg-background/50 border-border text-foreground placeholder:text-muted-foreground min-h-12 resize-none"
+              rows={2}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
             />
             <Button
               onClick={handleSendMessage}
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
               size="sm"
+              disabled={isLoading}
+              aria-label="Enviar mensagem"
             >
               <Send className="w-4 h-4" />
             </Button>
