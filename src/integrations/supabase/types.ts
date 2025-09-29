@@ -1092,6 +1092,42 @@ export type Database = {
         }
         Relationships: []
       }
+      "BIBILIOTECA-OAB": {
+        Row: {
+          Área: string | null
+          "Capa-area": string | null
+          "Capa-livro": string | null
+          Download: string | null
+          id: number
+          Link: string | null
+          Ordem: string | null
+          Sobre: string | null
+          Tema: string | null
+        }
+        Insert: {
+          Área?: string | null
+          "Capa-area"?: string | null
+          "Capa-livro"?: string | null
+          Download?: string | null
+          id?: number
+          Link?: string | null
+          Ordem?: string | null
+          Sobre?: string | null
+          Tema?: string | null
+        }
+        Update: {
+          Área?: string | null
+          "Capa-area"?: string | null
+          "Capa-livro"?: string | null
+          Download?: string | null
+          id?: number
+          Link?: string | null
+          Ordem?: string | null
+          Sobre?: string | null
+          Tema?: string | null
+        }
+        Relationships: []
+      }
       biblioteca: {
         Row: {
           autor: string | null
