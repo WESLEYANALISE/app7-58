@@ -25,6 +25,8 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [showControls, setShowControls] = useState(false);
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -71,8 +73,14 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       }
     };
 
-    const handlePlay = () => setPlaying(true);
-    const handlePause = () => setPlaying(false);
+    const handlePlay = () => {
+      setPlaying(true);
+      setShowControls(false); // Hide controls when playing
+    };
+    const handlePause = () => {
+      setPlaying(false);
+      setShowControls(true); // Show controls when paused
+    };
     
     const handleEnded = () => {
       setPlaying(false);
@@ -155,6 +163,30 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
     }
   };
 
+  // Handle user interaction with video
+  const handleVideoClick = () => {
+    togglePlayPause();
+    if (playing) {
+      setShowControls(true);
+      // Hide controls after 3 seconds of no interaction
+      setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
+  };
+
+  const handleMouseMove = () => {
+    if (playing) {
+      setShowControls(true);
+      setIsUserInteracting(true);
+      // Hide controls after 3 seconds of no mouse movement
+      setTimeout(() => {
+        setShowControls(false);
+        setIsUserInteracting(false);
+      }, 3000);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -191,72 +223,87 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
         <div className="relative">
           <video
             ref={videoRef}
-            className="w-full h-[300px] object-cover bg-black"
+            className="w-full h-[300px] object-cover bg-black cursor-pointer"
             playsInline
             muted={false}
             controls={false}
             preload="auto"
+            onClick={handleVideoClick}
+            onMouseMove={handleMouseMove}
           />
           
-          {/* Video Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Button
-                variant="ghost"
-                size="lg"
-                onClick={togglePlayPause}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16"
-              >
-                {playing ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
-              </Button>
-            </div>
-            
-            {/* Bottom overlay with lesson info */}
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <div className="space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold">{selectedLesson.tema}</h2>
-                  <p className="text-lg text-gray-300">{selectedLesson.nome}</p>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <Badge className="bg-yellow-500 text-black font-medium px-3 py-1">
-                    Dia {selectedLesson.id} - Aula {selectedModule.aulas.findIndex((a: any) => a.id === selectedLesson.id) + 1}
-                  </Badge>
-                  <Badge variant="outline" className="border-white/30 text-white">
-                    {selectedModule.nome}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-6 text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>{selectedLesson.duracao}min</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{progress?.percentualAssistido || 0}% assistido</span>
-                  </div>
-                </div>
+          {/* Always visible progress bar at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
+            <div 
+              className="h-full bg-yellow-500 transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
 
-                {/* Progress Controls */}
-                <div className="space-y-2">
-                  <div 
-                    className="w-full h-2 bg-gray-600 rounded-full cursor-pointer"
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const percentage = (x / rect.width) * 100;
-                      handleSeek(percentage);
-                    }}
-                  >
-                    <div 
-                      className="h-full bg-yellow-500 rounded-full transition-all"
-                      style={{ width: `${progressPercentage}%` }}
-                    />
+          {/* Video Overlay - Only show when paused or controls are visible */}
+          {(showControls || !playing) && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300">
+              {/* Central play/pause button */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button
+                  onClick={togglePlayPause}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110"
+                >
+                  {playing ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
+                </button>
+              </div>
+              
+              {/* Bottom overlay with lesson info */}
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">{selectedLesson.tema}</h2>
+                    <p className="text-lg text-gray-300">{selectedLesson.nome}</p>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <Badge className="bg-yellow-500 text-black font-medium px-3 py-1">
+                      Dia {selectedLesson.id} - Aula {selectedModule.aulas.findIndex((a: any) => a.id === selectedLesson.id) + 1}
+                    </Badge>
+                    <Badge variant="outline" className="border-white/30 text-white">
+                      {selectedModule.nome}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-6 text-sm text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>{selectedLesson.duracao}min</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>{progress?.percentualAssistido || 0}% assistido</span>
+                    </div>
+                  </div>
+
+                  {/* Interactive Progress Controls */}
+                  <div className="space-y-2">
+                    <div 
+                      className="w-full h-3 bg-gray-600 rounded-full cursor-pointer hover:h-4 transition-all"
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const percentage = (x / rect.width) * 100;
+                        handleSeek(percentage);
+                      }}
+                    >
+                      <div 
+                        className="h-full bg-yellow-500 rounded-full transition-all"
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-300">
+                      <span>{Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')}</span>
+                      <span>Progresso da aula: {Math.round(progressPercentage)}%</span>
+                      <span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}</span>
+                    </div>
+
+                    <div className="flex items-center justify-center">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -265,14 +312,21 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
                         <span>1x</span>
                       </Button>
                     </div>
-                    <div className="text-sm text-gray-400">
-                      Progresso da aula: {progress?.percentualAssistido || 0}%
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Loading indicator */}
+          {!playing && currentTime === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="text-center text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-yellow-500 border-t-transparent mx-auto mb-2"></div>
+                <p className="text-sm">Carregando vídeo...</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons - Logo abaixo do vídeo */}
