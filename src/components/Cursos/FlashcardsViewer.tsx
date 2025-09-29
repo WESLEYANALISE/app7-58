@@ -116,7 +116,7 @@ export const FlashcardsViewer = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent data-lesson-modal="flashcards" className="max-w-[95vw] sm:max-w-[min(100vw,700px)] lg:max-w-2xl max-h-[90vh] overflow-hidden">{/* Mais responsivo */}
+      <DialogContent data-lesson-modal="flashcards" className="w-[95vw] sm:w-auto max-w-[95vw] sm:max-w-[min(100vw,700px)] lg:max-w-2xl max-h-[90vh] overflow-hidden px-3 sm:px-6">{/* Mais responsivo */}
         <DialogHeader className="flex flex-row items-center justify-between pb-3 border-b flex-shrink-0">
           <div className="flex-1 min-w-0">
             <DialogTitle className="text-lg sm:text-xl font-bold truncate">{content.titulo}</DialogTitle>
@@ -139,7 +139,7 @@ export const FlashcardsViewer = ({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto py-4 sm:py-6 px-1">{/* Conteúdo principal com scroll */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 sm:py-6 px-3 sm:px-4">{/* Conteúdo principal com scroll */}
           {/* Progress */}
           <div className="flex items-center justify-between mb-4 sm:mb-6 px-2">
             <div className="flex items-center gap-2 min-w-0">
@@ -164,7 +164,7 @@ export const FlashcardsViewer = ({
           </div>
 
           {/* Flashcard */}
-          <div className="relative h-40 sm:h-48 md:h-64 lg:h-72 mb-4 sm:mb-6 mx-1 sm:mx-2">{/* Altura mais responsiva para mobile */}
+          <div className="relative h-40 sm:h-48 md:h-64 lg:h-72 mb-4 sm:mb-6 mx-0 sm:mx-2 px-1 overflow-hidden">{/* Altura mais responsiva para mobile e sem corte */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${currentIndex}-${isFlipped}`}
@@ -172,15 +172,15 @@ export const FlashcardsViewer = ({
                 animate={{ rotateY: 0, opacity: 1 }}
                 exit={{ rotateY: 90, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 cursor-pointer"
+                className="absolute inset-0 cursor-pointer max-w-full overflow-x-hidden"
                 onClick={() => setIsFlipped(!isFlipped)}
                 style={{ backfaceVisibility: 'hidden' }}
               >
-                <div className="w-full h-full border-2 border-dashed border-primary/30 rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 flex flex-col justify-center items-center text-center bg-gradient-to-br from-background to-muted/30 hover:border-primary/50 transition-colors">{/* Padding mais responsivo */}
+                <div className="w-full max-w-full h-full border-2 border-dashed border-primary/30 rounded-xl p-2 sm:p-3 md:p-4 lg:p-6 flex flex-col justify-center items-center text-center bg-gradient-to-br from-background to-muted/30 hover:border-primary/50 transition-colors">{/* Padding mais responsivo */}
                   {!isFlipped ? (
                     <div className="w-full h-full flex flex-col justify-center">
                       <h3 className="text-sm sm:text-base md:text-lg font-medium mb-2 sm:mb-3">Pergunta</h3>
-                      <p className="text-xs sm:text-sm md:text-base leading-relaxed px-1 sm:px-2 flex-1 flex items-center justify-center text-center">{currentCard.pergunta}</p>{/* Garantir centralização */}
+                      <p className="text-xs sm:text-sm md:text-base leading-relaxed px-1 sm:px-2 flex-1 flex items-center justify-center text-center break-words">{currentCard.pergunta}</p>{/* Garantir centralização e quebra */}
                       <p className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground mt-2 sm:mt-3">Clique para ver a resposta</p>
                     </div>
                   ) : (
