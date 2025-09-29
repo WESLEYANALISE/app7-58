@@ -15,7 +15,6 @@ interface AIAnalysisState {
   newsTitle: string;
   newsUrl: string;
   analysisColor: string;
-  analysisIcon: string;
 }
 
 export const AIAnalysisDetailPage = () => {

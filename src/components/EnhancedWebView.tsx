@@ -226,7 +226,7 @@ ${newsContent}`
       if (data.success) {
         const action = aiActions.find(a => a.type === actionType);
         if (action) {
-          // Navigate to detailed analysis page
+          // Navigate to detailed analysis page (without passing icon)
           navigate('/ai-analysis', {
             state: {
               analysisType: actionType,
@@ -234,8 +234,7 @@ ${newsContent}`
               analysisContent: data.response,
               newsTitle: title,
               newsUrl: url,
-              analysisColor: action.color,
-              analysisIcon: action.icon
+              analysisColor: action.color
             }
           });
         }
