@@ -212,10 +212,9 @@ export const CursosPreparatoriosElegant = ({
           
           {/* Progress bar at bottom with percentage */}
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/50">
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
+            <div className="h-full bg-primary transition-all duration-300" style={{
+            width: `${progressPercentage}%`
+          }} />
             <div className="absolute -top-6 right-2 text-xs px-2 py-1 rounded-md bg-background/80 text-foreground border border-border">
               {Math.round(progressPercentage)}%
             </div>
@@ -225,7 +224,10 @@ export const CursosPreparatoriosElegant = ({
           {(showControls || !playing) && <div onClick={togglePlayPause} className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300">
               {/* Central play/pause button */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <button onClick={(e) => { e.stopPropagation(); togglePlayPause(); }} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110">
+                <button onClick={e => {
+              e.stopPropagation();
+              togglePlayPause();
+            }} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110">
                   {playing ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
                 </button>
               </div>
@@ -315,14 +317,30 @@ export const CursosPreparatoriosElegant = ({
               <h3 className="text-lg font-semibold mb-4 text-primary">Conteúdo da Aula</h3>
               <div className="prose prose-invert prose-sm max-w-none prose-headings:text-primary prose-strong:text-primary prose-p:text-muted-foreground prose-li:text-muted-foreground">
                 <ReactMarkdown components={{
-              h1: ({ children }) => <h1 className="text-xl font-bold mb-4 text-primary">{children}</h1>,
-              h2: ({ children }) => <h2 className="text-lg font-bold mb-3 text-primary">{children}</h2>,
-              h3: ({ children }) => <h3 className="text-base font-bold mb-2 text-primary">{children}</h3>,
-              strong: ({ children }) => <strong className="text-primary font-bold">{children}</strong>,
-              p: ({ children }) => <p className="mb-4 leading-relaxed text-muted-foreground">{children}</p>,
-              ul: ({ children }) => <ul className="space-y-2 ml-4 text-muted-foreground">{children}</ul>,
-              ol: ({ children }) => <ol className="space-y-2 ml-4 text-muted-foreground">{children}</ol>,
-              li: ({ children }) => <li className="leading-relaxed">{children}</li>
+              h1: ({
+                children
+              }) => <h1 className="text-xl font-bold mb-4 text-primary">{children}</h1>,
+              h2: ({
+                children
+              }) => <h2 className="text-lg font-bold mb-3 text-primary">{children}</h2>,
+              h3: ({
+                children
+              }) => <h3 className="text-base font-bold mb-2 text-primary">{children}</h3>,
+              strong: ({
+                children
+              }) => <strong className="text-primary font-bold">{children}</strong>,
+              p: ({
+                children
+              }) => <p className="mb-4 leading-relaxed text-muted-foreground">{children}</p>,
+              ul: ({
+                children
+              }) => <ul className="space-y-2 ml-4 text-muted-foreground">{children}</ul>,
+              ol: ({
+                children
+              }) => <ol className="space-y-2 ml-4 text-muted-foreground">{children}</ol>,
+              li: ({
+                children
+              }) => <li className="leading-relaxed">{children}</li>
             }}>
                   {selectedLesson.conteudo}
                 </ReactMarkdown>
@@ -333,12 +351,7 @@ export const CursosPreparatoriosElegant = ({
         {/* Floating Professor Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <div className="relative">
-            <Button
-              variant="ghost"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 shadow-lg border-4 border-background"
-              onClick={() => setIsProfessorOpen(true)}
-              aria-label="Abrir chat da Professora"
-            >
+            <Button variant="ghost" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 shadow-lg border-4 border-background" onClick={() => setIsProfessorOpen(true)} aria-label="Abrir chat da Professora">
               <img src={professoraAvatar} alt="Professora" className="w-full h-full rounded-full object-cover" />
             </Button>
             
@@ -350,15 +363,11 @@ export const CursosPreparatoriosElegant = ({
         </div>
 
         {/* Professora Chat */}
-        <ProfessoraChat
-          isOpen={isProfessorOpen}
-          onClose={() => setIsProfessorOpen(false)}
-          context={{
-            titulo: selectedLesson.nome,
-            area: selectedLesson.area,
-            sobre: selectedLesson.conteudo || ''
-          }}
-        />
+        <ProfessoraChat isOpen={isProfessorOpen} onClose={() => setIsProfessorOpen(false)} context={{
+        titulo: selectedLesson.nome,
+        area: selectedLesson.area,
+        sobre: selectedLesson.conteudo || ''
+      }} />
       </div>;
   }
 
@@ -441,9 +450,7 @@ export const CursosPreparatoriosElegant = ({
                         <Badge variant="outline" className="border-primary text-primary">
                           {selectedModule.nome}
                         </Badge>
-                        <Badge variant="outline" className="border-border text-muted-foreground">
-                          Em andamento
-                        </Badge>
+                        
                       </div>
 
                       <h3 className="text-lg font-bold">{lesson.nome}</h3>
