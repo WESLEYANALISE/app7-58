@@ -11,7 +11,7 @@ import { normalizeVideoUrl } from '@/utils/videoHelpers';
 import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
 import professoraAvatar from '@/assets/professora-avatar.png';
-import { ProfessoraIAEnhanced } from '@/components/ProfessoraIAEnhanced';
+import { ProfessoraChat } from '@/components/ProfessoraChat';
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
 }
@@ -210,9 +210,9 @@ export const CursosPreparatoriosElegant = ({
         <div className="relative">
           <video ref={videoRef} className="w-full h-auto max-h-[70vh] object-contain bg-black cursor-pointer" playsInline muted={false} controls={false} preload="auto" onClick={handleVideoClick} onMouseMove={handleMouseMove} />
           
-          {/* Always visible progress bar at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-            <div className="h-full bg-primary transition-all duration-300" style={{
+          {/* Minimalist progress bar at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black/20">
+            <div className="h-full bg-primary/80 transition-all duration-300" style={{
             width: `${progressPercentage}%`
           }} />
           </div>
@@ -255,7 +255,7 @@ export const CursosPreparatoriosElegant = ({
 
                   {/* Interactive Progress Controls */}
                   <div className="space-y-2">
-                    <div className="w-full h-3 bg-gray-600 rounded-full cursor-pointer hover:h-4 transition-all" onClick={e => {
+                    <div className="w-full h-1 bg-muted/50 rounded-full cursor-pointer hover:h-1.5 transition-all" onClick={e => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const x = e.clientX - rect.left;
                   const percentage = x / rect.width * 100;
@@ -272,8 +272,8 @@ export const CursosPreparatoriosElegant = ({
                       <span>{Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}</span>
                     </div>
 
-                    <div className="flex items-center justify-center">
-                      <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                    <div className="flex items-center justify-center gap-2">
+                      <Button variant="ghost" size="sm" className="text-foreground hover:bg-muted/20 px-2 py-1 text-xs">
                         <span>1x</span>
                       </Button>
                     </div>
@@ -345,11 +345,11 @@ export const CursosPreparatoriosElegant = ({
           </div>
         </div>
 
-        {/* Professora IA Chat */}
-        <ProfessoraIAEnhanced
+        {/* Professora Chat */}
+        <ProfessoraChat
           isOpen={isProfessorOpen}
           onClose={() => setIsProfessorOpen(false)}
-          bookContext={{
+          context={{
             titulo: selectedLesson.nome,
             area: selectedLesson.area,
             sobre: selectedLesson.conteudo || ''
@@ -381,7 +381,7 @@ export const CursosPreparatoriosElegant = ({
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-white">
+            <Button variant="ghost" size="sm" className="text-foreground hover:bg-muted">
               <Search className="h-4 w-4 mr-2" />
               Buscar aulas...
             </Button>
@@ -391,7 +391,7 @@ export const CursosPreparatoriosElegant = ({
             <ArrowLeft className="h-4 w-4 text-primary" />
             <div>
               <h2 className="text-xl font-bold">{selectedModule.nome}</h2>
-              <p className="text-gray-400">
+              <p className="text-muted-foreground">
                 {selectedModule.aulas.length} de {selectedModule.aulas.length} aulas concluídas
               </p>
             </div>
@@ -406,7 +406,7 @@ export const CursosPreparatoriosElegant = ({
         <div className="px-6 space-y-4">
           {selectedModule.aulas.map((lesson: any, index: number) => {
           const progress = obterProgresso(lesson.id);
-          return <Card key={lesson.id} className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors" onClick={() => handleSelectLesson(lesson)}>
+          return <Card key={lesson.id} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectLesson(lesson)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Lesson Image */}
