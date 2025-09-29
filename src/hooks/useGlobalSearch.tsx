@@ -82,16 +82,16 @@ export const useGlobalSearch = () => {
       setIsSearching(true);
       
       try {
-        // Busca APENAS nas tabelas das bibliotecas - foco total nos LIVROS
+        // Busca ampla e inteligente em TODAS as funcionalidades solicitadas
         const searchPromises = [
-          // APENAS BIBLIOTECAS DE LIVROS - Busca precisa nos títulos
+          // 1. BIBLIOTECAS DE LIVROS - Busca precisa nos títulos
           searchInTable('BIBLIOTECA-CLASSICOS', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('BIBLIOTECA-JURIDICA', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('BIBILIOTECA-NOVA-490', searchTerm, 'livro', 'Tema', 'Sobre'),
           searchInTable('BIBILIOTECA-CONCURSO', searchTerm, 'livro', 'Tema', 'Sobre'),
           searchInTable('BILBIOTECA-FORA DA TOGA', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('LIVROS-INDICACAO', searchTerm, 'livro', 'Titulo', 'Sobre'),
-          // Bibliotecas temáticas - apenas livros específicos
+          // Bibliotecas temáticas específicas
           searchInTable('01. AUTO CONHECIMENTO', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('02. Empreendedorismo e Negócios', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('03. Finanças pessoas e Investimento', searchTerm, 'livro', 'livro', 'sobre'),
@@ -100,67 +100,85 @@ export const useGlobalSearch = () => {
           searchInTable('05. Sociedade e Comportamento', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('06. Romance', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('01. LIVROS-APP-NOVO', searchTerm, 'livro', 'livro', 'sobre'),
+
+          // 2. CURSOS PREPARATÓRIOS - Busca em todos os cursos
+          searchInTable('CURSOS-APP-VIDEO', searchTerm, 'cursos', 'Aula', 'conteudo'),
+          searchInTable('CURSO-FACULDADE', searchTerm, 'cursos', 'Assunto', 'conteudo'),
+          searchInTable('CURSOS-NOVOS', searchTerm, 'cursos', 'Aula', 'conteudo'),
           
-          // OUTRAS FUNCIONALIDADES - apenas se não for busca específica de livro
-          ...(searchTerm.toLowerCase().includes('curso') || 
-              searchTerm.toLowerCase().includes('aula') || 
-              searchTerm.toLowerCase().includes('video') ? [
-            // Cursos e videoaulas apenas se buscar especificamente
-            searchInTable('CURSOS-APP-VIDEO', searchTerm, 'cursos', 'Aula', 'conteudo'),
-            searchInTable('CURSO-FACULDADE', searchTerm, 'cursos', 'Assunto', 'conteudo'),
-            searchInTable('VIDEO-AULAS-DIAS', searchTerm, 'videoaulas', 'Aula', 'conteudo'),
-            searchInTable('VIDEOS', searchTerm, 'videoaulas', 'area', 'link'),
-          ] : []),
+          // 3. VIDEOAULAS - Busca em todas as videoaulas com capas
+          searchInTable('VIDEO-AULAS-DIAS', searchTerm, 'videoaulas', 'Aula', 'conteudo'),
+          searchInTable('VIDEOS', searchTerm, 'videoaulas', 'area', 'link'),
+          searchInTable('VIDEOAULAS-REDACAO', searchTerm, 'videoaulas', 'Aula', 'conteudo'),
           
-          ...(searchTerm.toLowerCase().includes('lei') || 
-              searchTerm.toLowerCase().includes('artigo') || 
-              searchTerm.toLowerCase().includes('código') ? [
-            // Leis apenas se buscar especificamente
-            searchInTable('CF88', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
-            searchInTable('CC', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
-            searchInTable('CDC', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
-            searchInTable('CLT', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
-          ] : []),
+          // 4. RESUMOS JURÍDICOS - Busca em resumos e mapas mentais
+          searchInTable('RESUMOS-NOVOS', searchTerm, 'resumo', 'Subtema', 'Resumo detalhado'),
+          searchInTable('MAPAS MENTAIS', searchTerm, 'resumo', 'Subtema', 'Conteúdo'),
+          searchInTable('RESUMOS-PERSONALIZADOS', searchTerm, 'resumo', 'titulo', 'conteudo'),
           
-          ...(searchTerm.toLowerCase().includes('resumo') || 
-              searchTerm.toLowerCase().includes('mapa') ? [
-            // Resumos apenas se buscar especificamente
-            searchInTable('RESUMOS-NOVOS', searchTerm, 'resumo', 'Subtema', 'Resumo detalhado'),
-            searchInTable('MAPAS MENTAIS', searchTerm, 'resumo', 'Subtema', 'Conteúdo'),
-          ] : [])
+          // 5. AUDIOAULAS - Busca em audioaulas
+          searchInTable('AUDIO-AULAS', searchTerm, 'audio', 'Aula', 'conteudo'),
+          searchInTable('AUDIOS-RELAXANTES', searchTerm, 'audio', 'nome', 'descricao'),
+          
+          // 6. NOTÍCIAS DO RADAR JURÍDICO - Busca em notícias
+          searchInTable('NOTICIAS-JURIDICAS', searchTerm, 'noticia', 'titulo', 'conteudo'),
+          searchInTable('NOTICIAS-COMENTADAS', searchTerm, 'noticia', 'titulo', 'resumo'),
+          searchInTable('RADAR-JURIDICO', searchTerm, 'noticia', 'titulo', 'conteudo'),
+          
+          // 7. VADE MECUM - Busca em leis e códigos
+          searchInTable('CF88', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CC', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CDC', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CLT', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CP', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CPC', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CPP', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          searchInTable('CTN', searchTerm, 'lei', 'Número do Artigo', 'Artigo'),
+          
+          // 8. ARTIGOS E PETIÇÕES
+          searchInTable('ARITIGOS-COMENTADOS', searchTerm, 'artigo', 'titulo', 'conteudo'),
+          searchInTable('CURSO-ARTIGOS-LEIS', searchTerm, 'artigo', 'titulo', 'conteudo'),
+          searchInTable('PETICOES', searchTerm, 'artigo', 'titulo', 'conteudo'),
+          
+          // 9. OUTRAS FUNCIONALIDADES
+          searchInTable('BLOGER', searchTerm, 'jusblog', 'titulo', 'conteudo'),
+          searchInTable('QUESTÕES-CURSO', searchTerm, 'artigo', 'pergunta', 'resposta'),
+          searchInTable('OAB -EXAME', searchTerm, 'artigo', 'pergunta', 'resposta'),
+          
+          // EXCLUÍDO: Flashcards conforme solicitado
         ];
 
         const results = await Promise.all(searchPromises);
         const flattened = results.flat();
         
-        // Filtrar resultados para MÁXIMA precisão - apenas conteúdo relevante
+        // Filtro inteligente - permite busca mais ampla mas relevante
         const filtered = flattened.filter(result => {
           const searchLower = searchTerm.toLowerCase();
           const titleLower = result.title.toLowerCase();
+          const contentLower = result.content.toLowerCase();
           
-          // FILTRO RIGOROSO: só mostrar se o título contém o termo buscado
-          // Evita mostrar apenas categorias/áreas
+          // Busca inteligente: título OU conteúdo contém o termo
           const titleMatch = titleLower.includes(searchLower);
+          const contentMatch = contentLower.includes(searchLower);
           
           // Para livros, verificar se não é apenas uma categoria vazia
           if (result.type === 'livro') {
-            // Não mostrar se o título for muito genérico ou igual à categoria
             const isGeneric = titleLower === result.category.toLowerCase() ||
-                            titleLower.length < 3 ||
-                            !titleMatch;
-            return !isGeneric && titleMatch;
+                            titleLower.length < 3;
+            return !isGeneric && (titleMatch || contentMatch);
           }
           
-          return titleMatch;
+          // Para outros tipos, aceitar tanto título quanto conteúdo
+          return titleMatch || contentMatch;
         });
         
-        // Ordenação SUPER otimizada - prioridade absoluta para matches exatos
+        // Ordenação inteligente - prioriza relevância
         const sorted = filtered.sort((a, b) => {
           const searchLower = searchTerm.toLowerCase();
           const aTitle = a.title.toLowerCase();
           const bTitle = b.title.toLowerCase();
           
-          // Prioridade 1: Match exato no título (case insensitive)
+          // Prioridade 1: Match exato no título
           const aExact = aTitle === searchLower;
           const bExact = bTitle === searchLower;
           if (aExact && !bExact) return -1;
@@ -172,21 +190,25 @@ export const useGlobalSearch = () => {
           if (aStarts && !bStarts) return -1;
           if (!aStarts && bStarts) return 1;
           
-          // Prioridade 3: LIVROS sempre primeiro
-          if (a.type === 'livro' && b.type !== 'livro') return -1;
-          if (a.type !== 'livro' && b.type === 'livro') return 1;
+          // Prioridade 3: Tipos mais relevantes primeiro (livros, cursos, videoaulas)
+          const priorityOrder = ['livro', 'cursos', 'videoaulas', 'audio', 'noticia', 'resumo', 'lei', 'artigo', 'jusblog'];
+          const aPriority = priorityOrder.indexOf(a.type);
+          const bPriority = priorityOrder.indexOf(b.type);
+          if (aPriority !== bPriority) {
+            return aPriority - bPriority;
+          }
           
-          // Prioridade 4: Por similaridade do título
-          const aIncludes = aTitle.includes(searchLower);
-          const bIncludes = bTitle.includes(searchLower);
-          if (aIncludes && !bIncludes) return -1;
-          if (!aIncludes && bIncludes) return 1;
+          // Prioridade 4: Match no título vs conteúdo
+          const aTitleMatch = aTitle.includes(searchLower);
+          const bTitleMatch = bTitle.includes(searchLower);
+          if (aTitleMatch && !bTitleMatch) return -1;
+          if (!aTitleMatch && bTitleMatch) return 1;
           
           return 0;
         });
 
-          // Limitar resultados - máximo 15 para manter foco
-          return sorted.slice(0, 15);
+        // Limitar resultados - máximo 50 para performance mas amplo o suficiente
+        return sorted.slice(0, 50);
       } finally {
         setIsSearching(false);
       }

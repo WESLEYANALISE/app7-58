@@ -74,7 +74,7 @@ interface GlobalSearchProps {
 
 export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
   const [inputValue, setInputValue] = useState('');
-  const [activeFilter, setActiveFilter] = useState<SearchResult['type'] | 'all' | 'videos' | 'resumos' | 'leis'>('all');
+  const [activeFilter, setActiveFilter] = useState<SearchResult['type'] | 'all' | 'videos' | 'resumos' | 'leis' | 'noticias' | 'audios'>('all');
   const { setCurrentFunction } = useNavigation();
   const { 
     searchTerm, 
@@ -140,52 +140,146 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
       filtered = searchResults.filter(result => result.type === 'resumo');
     } else if (activeFilter === 'leis') {
       filtered = searchResults.filter(result => result.type === 'lei' || result.type === 'artigo');
+    } else if (activeFilter === 'noticias') {
+      filtered = searchResults.filter(result => result.type === 'noticia');
+    } else if (activeFilter === 'audios') {
+      filtered = searchResults.filter(result => result.type === 'audio');
     } else if (activeFilter !== 'all') {
       filtered = searchResults.filter(result => result.type === activeFilter);
     }
     
-    // Limit to 50 results to prevent UI freezing
-    return filtered.slice(0, 50);
+    // Limit to 100 results to prevent UI freezing but show more comprehensive results
+    return filtered.slice(0, 100);
   }, [searchResults, activeFilter]);
 
-  // Navigate to function when clicking on result with deep linking
+  // Navigate to function when clicking on result with intelligent deep linking
   const handleResultClick = (result: SearchResult) => {
     const { tableSource, originalData } = result.metadata;
     
-    // Create navigation context with specific item data
+    // Create enhanced navigation context with specific item data
     const navigationContext = {
       itemId: originalData?.id?.toString(),
       itemTitle: result.title,
       itemData: originalData,
       searchTerm: result.title,
       targetSection: result.category,
-      autoOpen: true
+      autoOpen: true,
+      highlightTerm: searchTerm // Para destacar o termo buscado
     };
 
     // Store context in sessionStorage for cross-component access
     sessionStorage.setItem('navigationContext', JSON.stringify(navigationContext));
     
-    // Enhanced navigation mapping with context
+    // Enhanced intelligent navigation mapping
     let targetFunction: string;
     
+    // LIVROS - Navegação específica para cada biblioteca
     if (result.type === 'livro') {
-      // Biblioteca específica baseada na tabela
-      if (tableSource?.includes('CLASSICOS')) {
+      if (tableSource?.includes('BIBLIOTECA-CLASSICOS')) {
         targetFunction = 'Biblioteca Clássicos';
-      } else if (tableSource?.includes('JURIDICA')) {
+      } else if (tableSource?.includes('BIBLIOTECA-JURIDICA')) {
         targetFunction = 'Biblioteca de Estudos';
-      } else if (tableSource?.includes('CONCURSO')) {
+      } else if (tableSource?.includes('BIBILIOTECA-NOVA-490')) {
+        targetFunction = 'Biblioteca de Estudos';
+      } else if (tableSource?.includes('BIBILIOTECA-CONCURSO')) {
         targetFunction = 'Biblioteca Concurso Público';
-      } else if (tableSource?.includes('FORA DA TOGA')) {
+      } else if (tableSource?.includes('BILBIOTECA-FORA DA TOGA')) {
         targetFunction = 'Biblioteca Fora da Toga';
-      } else if (tableSource?.includes('INDICACAO')) {
+      } else if (tableSource?.includes('LIVROS-INDICACAO')) {
         targetFunction = 'Indicações de Livros';
+      } else if (tableSource?.includes('01. AUTO CONHECIMENTO')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('02. Empreendedorismo e Negócios')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('03. Finanças pessoas e Investimento')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('04. Inteligência Emocional e Relacionamentos')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('05. Espiritualidade e Propósitos')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('05. Sociedade e Comportamento')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('06. Romance')) {
+        targetFunction = 'Biblioteca Fora da Toga';
+      } else if (tableSource?.includes('01. LIVROS-APP-NOVO')) {
+        targetFunction = 'Biblioteca de Estudos';
       } else {
         targetFunction = 'Biblioteca de Estudos';
       }
-      // Remove essa verificação de 'video' pois agora temos videoaulas e cursos
-    } else if (result.type === 'lei') {
-      // Vade Mecum com artigo específico
+    }
+    
+    // CURSOS PREPARATÓRIOS
+    else if (result.type === 'cursos') {
+      targetFunction = 'Cursos Preparatórios';
+      
+      // Adicionar informações específicas do curso
+      navigationContext.itemData = {
+        ...navigationContext.itemData,
+        courseArea: originalData?.area || originalData?.Area,
+        courseModule: originalData?.Modulo,
+        courseAssunto: originalData?.Assunto
+      };
+    }
+    
+    // VIDEOAULAS
+    else if (result.type === 'videoaulas') {
+      targetFunction = 'Videoaulas';
+      
+      // Adicionar informações específicas da videoaula
+      navigationContext.itemData = {
+        ...navigationContext.itemData,
+        videoArea: originalData?.area || originalData?.Area,
+        videoTema: originalData?.Tema,
+        videoLink: originalData?.video || originalData?.link
+      };
+    }
+    
+    // AUDIOAULAS
+    else if (result.type === 'audio') {
+      targetFunction = 'Áudio-aulas';
+      
+      navigationContext.itemData = {
+        ...navigationContext.itemData,
+        audioArea: originalData?.area,
+        audioTema: originalData?.Tema
+      };
+    }
+    
+    // RESUMOS
+    else if (result.type === 'resumo') {
+      if (tableSource === 'MAPAS MENTAIS') {
+        targetFunction = 'Mapas Mentais';
+      } else if (tableSource === 'RESUMOS-PERSONALIZADOS') {
+        targetFunction = 'Resumos Jurídicos';
+      } else {
+        targetFunction = 'Resumos Jurídicos';
+      }
+      
+      navigationContext.itemData = {
+        ...navigationContext.itemData,
+        resumoTema: originalData?.Tema,
+        resumoSubtema: originalData?.Subtema,
+        resumoArea: originalData?.area
+      };
+    }
+    
+    // NOTÍCIAS
+    else if (result.type === 'noticia') {
+      if (tableSource?.includes('RADAR-JURIDICO')) {
+        targetFunction = 'Radar Jurídico';
+      } else {
+        targetFunction = 'Notícias Comentadas';
+      }
+      
+      navigationContext.itemData = {
+        ...navigationContext.itemData,
+        noticiaData: originalData?.data,
+        noticiaFonte: originalData?.portal
+      };
+    }
+    
+    // VADE MECUM - Navegação específica para leis
+    else if (result.type === 'lei') {
       targetFunction = 'Vade Mecum Digital';
       
       // Extract code and article number for direct navigation
@@ -198,37 +292,41 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
           'CPP': 'cpp',
           'CLT': 'clt',
           'CDC': 'cdc',
+          'CTN': 'ctn',
           'ESTATUTO - OAB': 'estatuto-oab'
         };
         
         navigationContext.itemData = {
           ...navigationContext.itemData,
           selectedCodeId: codeMap[tableSource],
-          articleNumber: originalData["Número do Artigo"]
+          articleNumber: originalData["Número do Artigo"],
+          articleContent: originalData["Artigo"]
         };
       }
-    } else if (result.type === 'resumo') {
-      // Resumo específico
-      if (tableSource === 'MAPAS MENTAIS') {
-        targetFunction = 'Mapas Mentais';
-      } else {
-        targetFunction = 'Resumos Jurídicos';
-      }
-    } else if (result.type === 'artigo') {
-      // Artigo específico
+    }
+    
+    // ARTIGOS E PETIÇÕES
+    else if (result.type === 'artigo') {
       if (tableSource === 'ARITIGOS-COMENTADOS') {
         targetFunction = 'Artigos Comentados';
       } else if (tableSource === 'CURSO-ARTIGOS-LEIS') {
         targetFunction = 'Artigo por Artigo';
+      } else if (tableSource === 'PETICOES') {
+        targetFunction = 'Petições';
       } else if (tableSource === 'OAB -EXAME' || tableSource === 'QUESTÕES-CURSO') {
         targetFunction = 'Banco de Questões';
-      } else if (tableSource === 'BLOGER') {
-        targetFunction = 'Blogger Jurídico';
       } else {
         targetFunction = 'Artigos Comentados';
       }
-    } else {
-      // Default mapping
+    }
+    
+    // BLOG JURÍDICO
+    else if (result.type === 'jusblog') {
+      targetFunction = 'Blogger Jurídico';
+    }
+    
+    // Fallback para tipos não mapeados
+    else {
       const functionMap: Record<SearchResult['type'], string> = {
         videoaulas: 'Videoaulas',
         cursos: 'Cursos Preparatórios',
@@ -239,7 +337,7 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
         flashcard: 'Flashcards',
         noticia: 'Notícias Comentadas',
         lei: 'Vade Mecum Digital',
-        jusblog: 'Blog Jurídico'
+        jusblog: 'Blogger Jurídico'
       };
       
       targetFunction = functionMap[result.type] || 'Biblioteca de Estudos';
@@ -408,7 +506,7 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
                     Busca Global Inteligente
                   </h1>
                   <p className="text-muted-foreground text-sm sm:text-base px-2">
-                    Pesquise em todo o conteúdo do aplicativo
+                    Busque em livros, cursos, videoaulas, resumos, notícias, audioaulas e leis
                   </p>
                 </div>
                 
