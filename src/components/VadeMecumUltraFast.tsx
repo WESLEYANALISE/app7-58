@@ -1049,7 +1049,7 @@ const VadeMecumUltraFast: React.FC = () => {
         <div className="p-4 bg-background min-h-screen">
           {/* Grid responsivo */}
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {currentCodes.map((code) => (
                 <motion.div
                   key={code.id}
