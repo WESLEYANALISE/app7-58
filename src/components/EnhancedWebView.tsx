@@ -130,89 +130,184 @@ export const EnhancedWebView = ({ url, title, onClose }: EnhancedWebViewProps) =
 
     try {
       const prompts = {
-        resumo: `PRIMEIRA ETAPA: LEIA E ANALISE COMPLETAMENTE TODO O ARTIGO ABAIXO
+        resumo: `Analise COMPLETAMENTE o artigo jurídico abaixo e crie um RESUMO EXECUTIVO DETALHADO.
 
-Você é um assistente jurídico EXPERIENTE. Crie um resumo executivo completo e detalhado.
+INSTRUÇÕES:
+- Leia TODO o conteúdo do artigo
+- Faça uma análise completa e profunda
+- Formate sua resposta em MARKDOWN
+- Seja específico e detalhado
+- NÃO seja genérico, analise o caso específico
 
 # 📋 RESUMO EXECUTIVO DA NOTÍCIA JURÍDICA
 
-## 🎯 SÍNTESE PRINCIPAL
-[Resumo completo em 2-3 parágrafos]
+## 🎯 SÍNTESE DO CASO
+[Descreva detalhadamente o caso específico apresentado no artigo]
 
-## ⚖️ DECISÃO/ENTENDIMENTO JURÍDICO
-[Qual foi a decisão e seus fundamentos]
+## ⚖️ DECISÃO JUDICIAL
+[Explique qual foi a decisão específica do tribunal/juiz e seus fundamentos]
 
-## 📚 FUNDAMENTOS LEGAIS
-[Leis, artigos e jurisprudência aplicados]
+## 📚 FUNDAMENTOS LEGAIS APLICADOS
+[Liste as leis, artigos e jurisprudência específicas citadas]
 
-## 💡 IMPLICAÇÕES PRÁTICAS
-[Como isso afeta advogados, empresas e cidadãos]
+## 🏛️ TRIBUNAL E INSTÂNCIA
+[Identifique o tribunal, câmara/turma e magistrado responsável]
 
-**TEXTO COMPLETO DO ARTIGO:**
-${newsContent}`,
+## 💡 IMPACTOS PRÁTICOS
+[Analise como essa decisão afeta advogados, empresas e cidadãos]
 
-        explicar: `PRIMEIRA ETAPA: LEIA TODO O ARTIGO ABAIXO
+## 🔍 PONTOS IMPORTANTES
+[Destaque os aspectos mais relevantes para a prática jurídica]
 
-Você é um PROFESSOR DE DIREITO DIDÁTICO. Explique de forma educativa.
+**ARTIGO COMPLETO A SER ANALISADO:**
+${newsContent}
 
-# 🎓 EXPLICAÇÃO DIDÁTICA COMPLETA
+IMPORTANTE: Analise especificamente este artigo, não dê respostas genéricas!`,
 
-## 📖 CONTEXTO E CENÁRIO
-[Explique o contexto e situação]
+        explicar: `Analise COMPLETAMENTE o artigo jurídico abaixo como um PROFESSOR DE DIREITO experiente.
 
-## 🧠 CONCEITOS JURÍDICOS
-[Defina todos os conceitos mencionados]
+INSTRUÇÕES:
+- Leia TODO o conteúdo do artigo
+- Explique de forma didática e detalhada
+- Formate sua resposta em MARKDOWN
+- Seja específico sobre este caso
+- NÃO seja genérico
+
+# 🎓 EXPLICAÇÃO DIDÁTICA JURÍDICA
+
+## 📖 CONTEXTO DO CASO
+[Explique detalhadamente a situação fática apresentada]
+
+## 🧠 CONCEITOS JURÍDICOS ENVOLVIDOS
+[Defina e explique todos os institutos jurídicos mencionados no artigo]
 
 ## 🔍 ANÁLISE PASSO A PASSO
-[Dissecção didática do caso]
+[Dissecção didática do raciocínio jurídico aplicado]
 
-**TEXTO COMPLETO DO ARTIGO:**
-${newsContent}`,
+## 📚 BASE LEGAL
+[Explique as normas legais aplicadas ao caso]
 
-        exemplo: `PRIMEIRA ETAPA: LEIA TODO O ARTIGO ABAIXO
+## 🎯 RATIO DECIDENDI
+[Explique a razão de decidir do magistrado]
 
-Você é um consultor jurídico prático. Crie exemplos concretos.
+## 💭 CONSIDERAÇÕES PEDAGÓGICAS
+[Lições importantes que este caso ensina]
 
-# 💡 EXEMPLOS PRÁTICOS
+**ARTIGO COMPLETO A SER ANALISADO:**
+${newsContent}
+
+IMPORTANTE: Explique especificamente este caso, não teoria geral!`,
+
+        exemplo: `Analise COMPLETAMENTE o artigo jurídico abaixo e crie EXEMPLOS PRÁTICOS baseados no caso.
+
+INSTRUÇÕES:
+- Leia TODO o conteúdo do artigo
+- Crie exemplos concretos baseados no caso específico
+- Formate sua resposta em MARKDOWN
+- Seja prático e específico
+
+# 💡 EXEMPLOS PRÁTICOS JURÍDICOS
 
 ## 🎯 CASOS SIMILARES
-[Exemplos de situações similares]
+[Apresente situações práticas similares ao caso do artigo]
 
-## 📝 APLICAÇÕES PRÁTICAS
-[Como aplicar na prática jurídica]
+## 📝 APLICAÇÕES NA ADVOCACIA
+[Como advogados podem usar esta decisão em seus casos]
 
-**TEXTO COMPLETO DO ARTIGO:**
-${newsContent}`,
+## 🏢 IMPACTO EMPRESARIAL
+[Como empresas devem se adequar a esta decisão]
 
-        analise: `PRIMEIRA ETAPA: LEIA TODO O ARTIGO ABAIXO
+## 👥 REFLEXOS PARA CIDADÃOS
+[Como esta decisão afeta o cidadão comum]
 
-Você é um analista jurídico sênior. Faça análise técnica profunda.
+## 📋 MODELO DE PETIÇÃO
+[Sugira como elaborar peças processuais baseadas nesta decisão]
 
-# ⚖️ ANÁLISE JURÍDICA TÉCNICA
+## 🔧 FERRAMENTAS PRÁTICAS
+[Estratégias processuais e argumentos que podem ser utilizados]
 
-## 🏛️ FUNDAMENTOS CONSTITUCIONAIS
-[Análise constitucional]
+**ARTIGO COMPLETO A SER ANALISADO:**
+${newsContent}
+
+IMPORTANTE: Base seus exemplos especificamente neste caso!`,
+
+        analise: `Analise COMPLETAMENTE o artigo jurídico abaixo com RIGOR TÉCNICO MÁXIMO.
+
+INSTRUÇÕES:
+- Leia TODO o conteúdo do artigo
+- Faça análise técnica profunda e especializada
+- Formate sua resposta em MARKDOWN
+- Seja técnico e preciso
+
+# ⚖️ ANÁLISE JURÍDICA TÉCNICA ESPECIALIZADA
+
+## 🏛️ ASPECTOS CONSTITUCIONAIS
+[Análise constitucional específica do caso]
 
 ## 📚 LEGISLAÇÃO APLICÁVEL
-[Leis e códigos pertinentes]
+[Leis, códigos e normas específicas do caso]
 
-**TEXTO COMPLETO DO ARTIGO:**
-${newsContent}`,
+## 📖 HERMENÊUTICA JURÍDICA
+[Interpretação das normas aplicadas]
 
-        precedentes: `PRIMEIRA ETAPA: LEIA TODO O ARTIGO ABAIXO
+## 🔍 TÉCNICA DECISÓRIA
+[Análise da fundamentação e metodologia decisória]
 
-Você é um especialista em jurisprudência. Analise precedentes.
+## ⚖️ PRECEDENTES RELACIONADOS
+[Jurisprudência específica sobre o tema]
 
-# 📚 PRECEDENTES E JURISPRUDÊNCIA
+## 🎯 RATIO DECIDENDI TÉCNICA
+[Análise técnica da razão de decidir]
+
+## 📊 IMPACTOS SISTÊMICOS
+[Como esta decisão afeta o sistema jurídico]
+
+## 🔧 ASPECTOS PROCESSUAIS
+[Análise dos aspectos procedimentais envolvidos]
+
+**ARTIGO COMPLETO A SER ANALISADO:**
+${newsContent}
+
+IMPORTANTE: Analise tecnicamente este caso específico!`,
+
+        precedentes: `Analise COMPLETAMENTE o artigo jurídico abaixo focando em PRECEDENTES E JURISPRUDÊNCIA.
+
+INSTRUÇÕES:
+- Leia TODO o conteúdo do artigo
+- Pesquise e relacione precedentes específicos
+- Formate sua resposta em MARKDOWN
+- Seja específico sobre jurisprudência
+
+# 📚 PRECEDENTES E JURISPRUDÊNCIA RELACIONADA
 
 ## 🏛️ JURISPRUDÊNCIA DO STF
-[Casos do Supremo relacionados]
+[Decisões específicas do Supremo relacionadas ao tema do artigo]
 
 ## ⚖️ ENTENDIMENTO DO STJ
-[Precedentes do Superior Tribunal]
+[Precedentes específicos do Superior Tribunal sobre o tema]
 
-**TEXTO COMPLETO DO ARTIGO:**
-${newsContent}`
+## 🏛️ TRIBUNAIS REGIONAIS
+[Decisões de TRFs e TJs sobre casos similares]
+
+## 📊 SÚMULAS APLICÁVEIS
+[Súmulas vinculantes e ordinárias relacionadas]
+
+## 🔍 TESES FIXADAS
+[Teses jurídicas fixadas em recursos repetitivos]
+
+## 📈 EVOLUÇÃO JURISPRUDENCIAL
+[Como o entendimento dos tribunais evoluiu sobre o tema]
+
+## 🎯 BINDING PRECEDENTS
+[Precedentes obrigatórios relacionados ao caso]
+
+## 📋 ORIENTAÇÕES PARA ADVOGADOS
+[Como usar estes precedentes na prática]
+
+**ARTIGO COMPLETO A SER ANALISADO:**
+${newsContent}
+
+IMPORTANTE: Foque nos precedentes específicos relacionados a este caso!`
       };
 
       const { data, error } = await supabase.functions.invoke('gemini-ai-chat', {
