@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import ReactMarkdown from 'react-markdown';
 import { useCursosOrganizados, useProgressoUsuario } from '@/hooks/useCursosPreparatorios';
-import { useOptimizedVideoPlayer } from '@/hooks/useOptimizedVideoPlayer';
 import { normalizeVideoUrl } from '@/utils/videoHelpers';
 import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
@@ -23,88 +22,91 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [selectedLesson, setSelectedLesson] = useState<any>(null);
+  const [playing, setPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const { areas, totalAreas, totalModulos, totalAulas, isLoading } = useCursosOrganizados();
   const { atualizarProgresso, obterProgresso, calcularProgressoModulo, calcularProgressoArea } = useProgressoUsuario();
 
-  const {
-    playing,
-    played,
-    playedSeconds,
-    duration,
-    volume,
-    muted,
-    togglePlay,
-    handleProgress: onVideoProgress,
-    handleDuration,
-    handleEnded,
-    setVolume,
-    toggleMute,
-    seekTo,
-    skipTime,
-    formatTime,
-    getProgressPercentage
-  } = useOptimizedVideoPlayer({
-    onProgress: (played: number, playedSeconds: number, duration: number) => {
-      if (selectedLesson) {
-        atualizarProgresso(selectedLesson.id, playedSeconds, duration);
-      }
-    },
-    onEnded: () => {
-      // Auto-advance to next lesson if available
-      if (selectedModule && selectedLesson) {
-        const currentIndex = selectedModule.aulas.findIndex((a: any) => a.id === selectedLesson.id);
-        const nextLesson = selectedModule.aulas[currentIndex + 1];
-        if (nextLesson) {
-          setSelectedLesson(nextLesson);
-        }
-      }
-    },
-    autoPlay: true
-  });
-
-  // Auto-play video when lesson is selected
+  // Video player setup
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !selectedLesson) return;
 
-    console.log('🎬 Initializing video for lesson:', selectedLesson.nome);
+    console.log('🎬 Setting up video for lesson:', selectedLesson.nome);
+    const normalizedUrl = normalizeVideoUrl(selectedLesson.video);
+    console.log('🎥 Video URL:', normalizedUrl);
     
+    // Reset video state
+    setPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    
+    const handleLoadedMetadata = () => {
+      console.log('📊 Video metadata loaded, duration:', video.duration);
+      setDuration(video.duration || 0);
+    };
+
     const handleLoadedData = () => {
-      console.log('📊 Video loaded, attempting autoplay...');
+      console.log('📊 Video data loaded, attempting autoplay...');
       video.play().then(() => {
         console.log('✅ Autoplay successful');
+        setPlaying(true);
       }).catch((error) => {
         console.warn('⚠️ AutoPlay blocked:', error);
         toast.info('Clique no play para iniciar o vídeo');
       });
     };
 
-    const handleLoadedMetadata = () => handleDuration(video.duration);
-    const handleTimeUpdate = () => onVideoProgress({
-      played: video.currentTime / video.duration,
-      playedSeconds: video.currentTime,
-      loaded: video.buffered.length > 0 ? video.buffered.end(0) / video.duration : 0
-    });
+    const handleTimeUpdate = () => {
+      const current = video.currentTime;
+      const dur = video.duration || 0;
+      setCurrentTime(current);
+      
+      if (dur > 0) {
+        atualizarProgresso(selectedLesson.id, current, dur);
+      }
+    };
 
-    video.addEventListener('loadeddata', handleLoadedData);
+    const handlePlay = () => setPlaying(true);
+    const handlePause = () => setPlaying(false);
+    
+    const handleEnded = () => {
+      setPlaying(false);
+      // Auto-advance to next lesson
+      if (selectedModule) {
+        const currentIndex = selectedModule.aulas.findIndex((a: any) => a.id === selectedLesson.id);
+        const nextLesson = selectedModule.aulas[currentIndex + 1];
+        if (nextLesson) {
+          setSelectedLesson(nextLesson);
+        }
+      }
+    };
+
+    // Add event listeners
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
     video.addEventListener('ended', handleEnded);
 
-    // Load the video
-    video.src = normalizeVideoUrl(selectedLesson.video);
+    // Set video source and load
+    video.src = normalizedUrl;
     video.load();
 
     return () => {
-      video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
     };
-  }, [selectedLesson, handleDuration, onVideoProgress, handleEnded]);
+  }, [selectedLesson?.id, selectedModule]);
 
   const handleBack = () => {
     if (currentView === 'player') {
@@ -138,7 +140,7 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
     if (video && duration) {
       const newTime = (percentage / 100) * duration;
       video.currentTime = newTime;
-      seekTo(newTime);
+      setCurrentTime(newTime);
     }
   };
 
@@ -150,7 +152,6 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       } else {
         video.play().catch(console.error);
       }
-      togglePlay();
     }
   };
 
@@ -168,7 +169,7 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
   // Video Player View
   if (currentView === 'player' && selectedLesson) {
     const progress = obterProgresso(selectedLesson.id);
-    const progressPercentage = getProgressPercentage();
+    const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     return (
       <div className="min-h-screen bg-black text-white">
@@ -192,9 +193,9 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
             ref={videoRef}
             className="w-full h-[300px] object-cover bg-black"
             playsInline
-            autoPlay
             muted={false}
             controls={false}
+            preload="auto"
           />
           
           {/* Video Overlay */}
