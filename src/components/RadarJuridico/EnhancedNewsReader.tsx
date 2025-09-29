@@ -72,9 +72,27 @@ export const EnhancedNewsReader = ({
   isFavorite
 }: EnhancedNewsReaderProps) => {
   const [activeTab, setActiveTab] = useState('article');
-  const [aiAnalysis, setAiAnalysis] = useState<Record<AIActionType, string>>({});
-  const [loadingAI, setLoadingAI] = useState<Record<AIActionType, boolean>>({});
-  const [copySuccess, setCopySuccess] = useState<Record<AIActionType, boolean>>({});
+  const [aiAnalysis, setAiAnalysis] = useState<Record<AIActionType, string>>({
+    resumo: '',
+    explicar: '',
+    exemplo: '',
+    analise: '',
+    precedentes: ''
+  });
+  const [loadingAI, setLoadingAI] = useState<Record<AIActionType, boolean>>({
+    resumo: false,
+    explicar: false,
+    exemplo: false,
+    analise: false,
+    precedentes: false
+  });
+  const [copySuccess, setCopySuccess] = useState<Record<AIActionType, boolean>>({
+    resumo: false,
+    explicar: false,
+    exemplo: false,
+    analise: false,
+    precedentes: false
+  });
   const { toast } = useToast();
 
   const aiActions: { type: AIActionType; label: string; icon: any; description: string; color: string }[] = [
@@ -476,9 +494,14 @@ ${newsContent.content_text}`
                       <Card key={type}>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            {aiActions.find(a => a.type === type)?.icon && (
-                              <aiActions.find(a => a.type === type)!.icon className="h-5 w-5" />
-                            )}
+                            {(() => {
+                              const action = aiActions.find(a => a.type === type);
+                              if (action?.icon) {
+                                const IconComponent = action.icon;
+                                return <IconComponent className="h-5 w-5" />;
+                              }
+                              return null;
+                            })()}
                             {aiActions.find(a => a.type === type)?.label}
                           </CardTitle>
                         </CardHeader>
