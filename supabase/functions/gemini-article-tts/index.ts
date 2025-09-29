@@ -22,9 +22,9 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    // Use a chave API fornecida pelo usuário
-    const geminiApiKey = 'AIzaSyAT8O3IQji1OuOl5PlE3m_ulIzz3BuHI0Q'
-    console.log('✅ Using provided Gemini TTS API Key')
+    // Use Supabase secret for the API key when available
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY') || 'AIzaSyAT8O3IQji1OuOl5PlE3m_ulIzz3BuHI0Q'
+    console.log(`✅ Using Gemini TTS API Key source: ${Deno.env.get('GEMINI_API_KEY') ? 'secret' : 'fallback'}`)
 
     console.log('Generating article TTS for text:', text.substring(0, 100))
 
@@ -47,7 +47,14 @@ serve(async (req) => {
         ],
         generationConfig: {
           temperature: 1,
-          responseModalities: ['AUDIO']
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName: voice
+              }
+            }
+          }
         }
       }),
     })
@@ -95,10 +102,56 @@ serve(async (req) => {
       )
     }
 
+    // Convert PCM (inlineData) to WAV for browser playback
+    const pcmToWavBase64 = (pcmBase64: string, sampleRate = 24000, bitsPerSample = 16, channels = 1): string => {
+      const pcmBytes = Uint8Array.from(atob(pcmBase64), (c) => c.charCodeAt(0));
+      const dataSize = pcmBytes.length;
+      const blockAlign = (channels * bitsPerSample) >> 3; // channels * bytesPerSample
+      const byteRate = sampleRate * blockAlign;
+
+      const buffer = new ArrayBuffer(44 + dataSize);
+      const view = new DataView(buffer);
+      let offset = 0;
+
+      const writeString = (s: string) => {
+        for (let i = 0; i < s.length; i++) {
+          view.setUint8(offset++, s.charCodeAt(i));
+        }
+      };
+
+      // RIFF header
+      writeString('RIFF');
+      view.setUint32(offset, 36 + dataSize, true); offset += 4; // ChunkSize
+      writeString('WAVE');
+
+      // fmt subchunk
+      writeString('fmt ');
+      view.setUint32(offset, 16, true); offset += 4; // Subchunk1Size
+      view.setUint16(offset, 1, true); offset += 2;  // AudioFormat = 1 (PCM)
+      view.setUint16(offset, channels, true); offset += 2; // NumChannels
+      view.setUint32(offset, sampleRate, true); offset += 4; // SampleRate
+      view.setUint32(offset, byteRate, true); offset += 4; // ByteRate
+      view.setUint16(offset, blockAlign, true); offset += 2; // BlockAlign
+      view.setUint16(offset, bitsPerSample, true); offset += 2; // BitsPerSample
+
+      // data subchunk
+      writeString('data');
+      view.setUint32(offset, dataSize, true); offset += 4; // Subchunk2Size
+
+      new Uint8Array(buffer, 44).set(pcmBytes);
+
+      const wavBytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < wavBytes.length; i++) binary += String.fromCharCode(wavBytes[i]);
+      return btoa(binary);
+    };
+
+    const wavBase64 = pcmToWavBase64(audioData);
+
     return new Response(
       JSON.stringify({ 
         success: true,
-        audioData: audioData,
+        audioData: wavBase64,
         mimeType: 'audio/wav'
       }),
       {
