@@ -218,12 +218,12 @@ export const BookDetailPage = () => {
             )}
             <Button
               onClick={handleExplainClick}
-              variant="secondary"
               size="lg"
-              className="border-2 border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary py-3 px-6 rounded-full font-semibold transition-all duration-300"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
               disabled={isAnalyzing}
             >
-              {isAnalyzing ? "🔄 Analisando..." : "🤖 Explicar"}
+              <Bot className="h-5 w-5 mr-2" />
+              {isAnalyzing ? "Analisando..." : "Explicar"}
             </Button>
             {!book.link && !book.download && (
               <Button 

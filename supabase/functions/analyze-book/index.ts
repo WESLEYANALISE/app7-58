@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,8 +18,8 @@ serve(async (req) => {
   try {
     const { bookTitle, author, area, description, benefits } = await req.json();
 
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!openAIApiKey && !geminiApiKey) {
+      throw new Error('AI API key not configured');
     }
 
     const prompt = `Você é um assistente especializado em análise de livros jurídicos. Analise detalhadamente o seguinte livro:
@@ -109,35 +110,6 @@ Faça uma análise COMPLETA e DETALHADA do livro seguindo exatamente esta estrut
 
 IMPORTANTE: Use Markdown adequadamente, seja específico sobre o Direito ${area}, use exemplos práticos reais do sistema jurídico brasileiro, e forneça orientações concretas para estudantes.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'Você é um especialista em educação jurídica e análise de livros de Direito. Suas análises são detalhadas, práticas e focadas em ajudar estudantes e profissionais do Direito a maximizar o aprendizado.' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        max_completion_tokens: 3000,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('OpenAI API error:', error);
-      throw new Error(error.error?.message || 'Failed to analyze book');
-    }
-
-    const data = await response.json();
-    const analysis = data.choices[0].message.content;
-
-    // Convert markdown to HTML for better display
     const markdownToHtml = (markdown: string) => {
       return markdown
         .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mb-4">$1</h1>')
@@ -153,7 +125,78 @@ IMPORTANTE: Use Markdown adequadamente, seja específico sobre o Direito ${area}
         .replace(/<p class="mb-3"><\/p>/g, '');
     };
 
-    const htmlAnalysis = markdownToHtml(analysis);
+    // Prefer Gemini if available (key is present), fallback to OpenAI
+    let analysisMarkdown = '';
+
+    const tryGemini = async () => {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: 'Você é um especialista em educação jurídica e análise de livros de Direito. Suas análises são detalhadas, práticas e focadas em ajudar estudantes e profissionais.' }] },
+            { role: 'user', parts: [{ text: prompt }] }
+          ]
+        })
+      });
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`Gemini API error: ${err}`);
+      }
+      const data = await response.json();
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      return parts.map((p: { text?: string }) => p.text || '').join('\n');
+    };
+
+    const tryOpenAI = async () => {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-2025-08-07',
+          messages: [
+            { 
+              role: 'system', 
+              content: 'Você é um especialista em educação jurídica e análise de livros de Direito. Suas análises são detalhadas, práticas e focadas em ajudar estudantes e profissionais do Direito a maximizar o aprendizado.' 
+            },
+            { role: 'user', content: prompt }
+          ],
+          max_completion_tokens: 3000,
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('OpenAI API error:', error);
+        throw new Error(error.error?.message || 'Failed to analyze book');
+      }
+      const data = await response.json();
+      return data.choices[0].message.content as string;
+    };
+
+    try {
+      if (geminiApiKey) {
+        analysisMarkdown = await tryGemini();
+      } else if (openAIApiKey) {
+        analysisMarkdown = await tryOpenAI();
+      }
+    } catch (e) {
+      // Fallback: if preferred provider failed and the other is available, try it
+      if (geminiApiKey && openAIApiKey) {
+        try {
+          analysisMarkdown = analysisMarkdown || (openAIApiKey ? await tryOpenAI() : '');
+        } catch (_) {
+          analysisMarkdown = await tryGemini();
+        }
+      } else {
+        throw e;
+      }
+    }
+
+    const htmlAnalysis = markdownToHtml(analysisMarkdown);
 
     return new Response(JSON.stringify({ analysis: htmlAnalysis }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
