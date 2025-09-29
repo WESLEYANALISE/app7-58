@@ -16,6 +16,7 @@ import { ProfessoraIAGlobal } from "@/components/ProfessoraIAGlobal";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AIAnalysisDetailPage } from "@/components/AIAnalysisDetailPage";
+import { BookDetailPage } from "@/components/BookDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,11 @@ const App = () => (
                     <Route path="/ai-analysis" element={
                       <ProtectedRoute>
                         <AIAnalysisDetailPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/book/:id" element={
+                      <ProtectedRoute>
+                        <BookDetailPage />
                       </ProtectedRoute>
                     } />
                     <Route path="/" element={

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,21 +24,18 @@ interface JuridicalBookCardProps {
 }
 
 export const JuridicalBookCard = ({ livro, showAreaBadge = false, onClick }: JuridicalBookCardProps) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const navigate = useNavigate();
   const [showLinkModal, setShowLinkModal] = useState(false);
 
   const handleCardClick = () => {
     if (onClick) {
       onClick();
     } else {
-      setShowDetails(true);
+      // Navigate to full page instead of modal
+      navigate(`/book/${livro.id}`, { state: { book: livro } });
     }
   };
 
-  const handleCloseDetails = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowDetails(false);
-  };
 
   const handleDownloadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -163,105 +161,6 @@ export const JuridicalBookCard = ({ livro, showAreaBadge = false, onClick }: Jur
         </Card>
       </motion.div>
 
-      {/* Modal de detalhes */}
-      <AnimatePresence>
-        {showDetails && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50"
-          >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/50" onClick={handleCloseDetails} />
-
-            {/* Fullscreen Reader-like Layout */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="fixed inset-0 bg-background flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header com apenas o botão de fechar */}
-              <div className="flex items-center justify-end p-4 border-b border-border/50">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCloseDetails}
-                  className="rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Conteúdo principal em tela cheia */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="max-w-4xl w-full mx-auto p-8">
-                  {/* 1. Capa centralizada */}
-                  <div className="text-center mb-12">
-                    {(livro.imagem || (livro as any)['capa-livro']) && (
-                      <div className="w-80 h-96 mx-auto mb-8 rounded-xl overflow-hidden shadow-2xl">
-                        <img src={livro.imagem || (livro as any)['capa-livro']} alt={livro.livro} className="w-full h-full object-cover" />
-                      </div>
-                    )}
-
-                    {/* 2. Nome do livro e autor */}
-                    <div className="mb-8">
-                      <h2 className="text-5xl font-bold text-foreground mb-4 leading-tight">{livro.livro}</h2>
-                      {livro.autor && (
-                        <p className="text-2xl text-muted-foreground font-medium">Por {livro.autor}</p>
-                      )}
-                    </div>
-
-                    {/* 3. Botões de ação */}
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 max-w-lg mx-auto">
-                      {livro.link && (
-                        <Button
-                          variant="default"
-                          size="lg"
-                          onClick={handleLinkClick}
-                          className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
-                        >
-                          📖 Ler agora
-                        </Button>
-                      )}
-                      {livro.download && (
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          onClick={handleDownloadClick}
-                          className="flex-1 border-2 border-border hover:bg-muted/50 py-4 px-8 rounded-full font-semibold transition-all duration-300 text-lg"
-                        >
-                          📥 Download
-                        </Button>
-                      )}
-                      {!livro.link && !livro.download && (
-                        <Button variant="outline" size="lg" disabled className="flex-1 opacity-50 py-4 px-8 rounded-full text-lg">
-                          📖 Em breve
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* 4. Sobre o livro - por último */}
-                  {livro.sobre && (
-                    <div className="border-t border-border/30 pt-12">
-                      <div className="max-w-4xl mx-auto">
-                        <h3 className="text-3xl font-bold text-foreground mb-8 text-center">Sobre o livro</h3>
-                        <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-                          <p className="text-xl leading-loose">{livro.sobre}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Modal para visualizar o link dentro do app */}
       <AnimatePresence>

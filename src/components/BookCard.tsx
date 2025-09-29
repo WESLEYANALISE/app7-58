@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,17 +25,14 @@ interface BookCardProps {
 }
 
 export const BookCard = ({ book, areaColor, getProfessionLogo, showAreaBadge = false }: BookCardProps) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const navigate = useNavigate();
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const handleCardClick = () => {
-    setShowDetails(true);
+    // Navigate to full page instead of modal
+    navigate(`/book/${book.livro}`, { state: { book } });
   };
 
-  const handleCloseDetails = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowDetails(false);
-  };
 
   const handleDownloadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -154,122 +152,6 @@ export const BookCard = ({ book, areaColor, getProfessionLogo, showAreaBadge = f
         </Card>
       </motion.div>
 
-      {/* Modal de detalhes */}
-      <AnimatePresence>
-        {showDetails && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={handleCloseDetails}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="book-card-elegant rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-primary/20"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1 pr-4">
-                    <h2 className="gradient-text text-2xl font-bold mb-3">
-                      {book.livro}
-                    </h2>
-                    <div className="flex gap-2 mb-2">
-                      {isClassic && (
-                        <Badge className="classic-badge">
-                          Clássico
-                        </Badge>
-                      )}
-                      <Badge variant="outline" className="border-primary/30 text-primary">
-                        {book.area}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleCloseDetails}
-                    className="flex-shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex gap-6">
-                {/* Imagem do livro */}
-                <div className="w-32 h-44 flex-shrink-0 rounded-lg overflow-hidden shadow-xl border border-primary/20">
-                  {book.imagem ? (
-                    <img
-                      src={book.imagem}
-                      alt={book.livro}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center">
-                      <BookOpen className="h-12 w-12 text-primary/60" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Detalhes */}
-                <div className="flex-1">
-                  {book.sobre && (
-                    <div className="mb-4">
-                      <h3 className="gradient-text text-lg font-bold mb-3">Sinopse</h3>
-                      <p className="text-muted-foreground/80 leading-relaxed">
-                        {book.sobre}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Profissões */}
-                  {book.profissao && (
-                    <div className="mb-6">
-                      <h3 className="gradient-text text-lg font-bold mb-3">Profissões Recomendadas</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {book.profissao.split(',').map((profession: string, idx: number) => {
-                          const trimmedProfession = profession.trim();
-                          const logo = getProfessionLogo(trimmedProfession);
-                          return (
-                            <div key={idx} className="flex items-center gap-2 bg-card/60 border border-primary/20 rounded-lg p-3">
-                              {logo && (
-                                <div className="w-6 h-6 p-1 bg-background rounded-md shadow-sm border border-primary/20">
-                                  <img
-                                    src={logo}
-                                    alt={trimmedProfession}
-                                    className="w-full h-full object-contain"
-                                  />
-                                </div>
-                              )}
-                              <span className="text-sm font-medium text-primary">{trimmedProfession}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Botão de download direto */}
-                  {book.download && (
-                    <Button 
-                      className="download-btn-elegant w-full font-semibold text-base h-12"
-                      onClick={handleDownloadClick}
-                    >
-                      <Download className="h-5 w-5 mr-2" />
-                      Download do Livro
-                    </Button>
-                  )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
     </>
   );
