@@ -261,16 +261,7 @@ export const CursosPreparatoriosElegant = ({
 
                   {/* Interactive Progress Controls */}
                   <div className="space-y-2">
-                    <div className="w-full h-1 bg-muted/50 rounded-full cursor-pointer hover:h-1.5 transition-all" onClick={e => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const percentage = x / rect.width * 100;
-                  handleSeek(percentage);
-                }}>
-                      <div className="h-full bg-primary rounded-full transition-all" style={{
-                    width: `${progressPercentage}%`
-                  }} />
-                    </div>
+                    
                     
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>{Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')}</span>
