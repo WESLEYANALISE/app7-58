@@ -28,7 +28,8 @@ export const FooterMenu = ({
   useEffect(() => {
     const loadAnimation = async () => {
       try {
-        const response = await fetch('/src/assets/professora-animation.lottie');
+        // Fetch the JSON animation data directly from Lottie host
+        const response = await fetch('https://lottie.host/8cd9f993-8f79-4400-bc3b-8b6323ee8164/u08MMvLcmY.json');
         const animationData = await response.json();
         setProfessoraAnimation(animationData);
       } catch (error) {
