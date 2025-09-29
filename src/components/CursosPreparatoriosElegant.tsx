@@ -11,12 +11,12 @@ import { normalizeVideoUrl } from '@/utils/videoHelpers';
 import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
 import professoraAvatar from '@/assets/professora-avatar.png';
-
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
 }
-
-export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegantProps) => {
+export const CursosPreparatoriosElegant = ({
+  onBack
+}: CursosPreparatoriosElegantProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState<'areas' | 'modules' | 'lessons' | 'player'>('areas');
   const [selectedArea, setSelectedArea] = useState<any>(null);
@@ -27,52 +27,55 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
   const [currentTime, setCurrentTime] = useState(0);
   const [showControls, setShowControls] = useState(false);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
-  
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  const { areas, totalAreas, totalModulos, totalAulas, isLoading } = useCursosOrganizados();
-  const { atualizarProgresso, obterProgresso, calcularProgressoModulo, calcularProgressoArea } = useProgressoUsuario();
+  const {
+    areas,
+    totalAreas,
+    totalModulos,
+    totalAulas,
+    isLoading
+  } = useCursosOrganizados();
+  const {
+    atualizarProgresso,
+    obterProgresso,
+    calcularProgressoModulo,
+    calcularProgressoArea
+  } = useProgressoUsuario();
 
   // Video player setup
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !selectedLesson) return;
-
     console.log('🎬 Setting up video for lesson:', selectedLesson.nome);
     const normalizedUrl = normalizeVideoUrl(selectedLesson.video);
     console.log('🎥 Video URL:', normalizedUrl);
-    
+
     // Reset video state
     setPlaying(false);
     setCurrentTime(0);
     setDuration(0);
-    
     const handleLoadedMetadata = () => {
       console.log('📊 Video metadata loaded, duration:', video.duration);
       setDuration(video.duration || 0);
     };
-
     const handleLoadedData = () => {
       console.log('📊 Video data loaded, attempting autoplay...');
       video.play().then(() => {
         console.log('✅ Autoplay successful');
         setPlaying(true);
-      }).catch((error) => {
+      }).catch(error => {
         console.warn('⚠️ AutoPlay blocked:', error);
         toast.info('Clique no play para iniciar o vídeo');
       });
     };
-
     const handleTimeUpdate = () => {
       const current = video.currentTime;
       const dur = video.duration || 0;
       setCurrentTime(current);
-      
       if (dur > 0) {
         atualizarProgresso(selectedLesson.id, current, dur);
       }
     };
-
     const handlePlay = () => {
       setPlaying(true);
       setShowControls(false); // Hide controls when playing
@@ -81,7 +84,6 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       setPlaying(false);
       setShowControls(true); // Show controls when paused
     };
-    
     const handleEnded = () => {
       setPlaying(false);
       // Auto-advance to next lesson
@@ -105,7 +107,6 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
     // Set video source and load
     video.src = normalizedUrl;
     video.load();
-
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('loadeddata', handleLoadedData);
@@ -115,7 +116,6 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       video.removeEventListener('ended', handleEnded);
     };
   }, [selectedLesson?.id, selectedModule]);
-
   const handleBack = () => {
     if (currentView === 'player') {
       setCurrentView('lessons');
@@ -127,31 +127,26 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       onBack();
     }
   };
-
   const handleSelectArea = (area: any) => {
     setSelectedArea(area);
     setCurrentView('modules');
   };
-
   const handleSelectModule = (module: any) => {
     setSelectedModule(module);
     setCurrentView('lessons');
   };
-
   const handleSelectLesson = (lesson: any) => {
     setSelectedLesson(lesson);
     setCurrentView('player');
   };
-
   const handleSeek = (percentage: number) => {
     const video = videoRef.current;
     if (video && duration) {
-      const newTime = (percentage / 100) * duration;
+      const newTime = percentage / 100 * duration;
       video.currentTime = newTime;
       setCurrentTime(newTime);
     }
   };
-
   const togglePlayPause = () => {
     const video = videoRef.current;
     if (video) {
@@ -174,7 +169,6 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       }, 3000);
     }
   };
-
   const handleMouseMove = () => {
     if (playing) {
       setShowControls(true);
@@ -186,32 +180,23 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       }, 3000);
     }
   };
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+    return <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent mx-auto mb-4"></div>
           <p className="text-gray-400">Carregando cursos...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Video Player View
   if (currentView === 'player' && selectedLesson) {
     const progress = obterProgresso(selectedLesson.id);
-    const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-    return (
-      <div className="min-h-screen bg-black text-white">
+    const progressPercentage = duration > 0 ? currentTime / duration * 100 : 0;
+    return <div className="min-h-screen bg-black text-white">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="flex items-center gap-2 text-white hover:bg-gray-800"
-          >
+          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
             <ArrowLeft className="h-5 w-5" />
             <span>Voltar</span>
           </Button>
@@ -221,34 +206,20 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
 
         {/* Video Container */}
         <div className="relative">
-          <video
-            ref={videoRef}
-            className="w-full h-[300px] object-cover bg-black cursor-pointer"
-            playsInline
-            muted={false}
-            controls={false}
-            preload="auto"
-            onClick={handleVideoClick}
-            onMouseMove={handleMouseMove}
-          />
+          <video ref={videoRef} className="w-full h-[300px] object-cover bg-black cursor-pointer" playsInline muted={false} controls={false} preload="auto" onClick={handleVideoClick} onMouseMove={handleMouseMove} />
           
           {/* Always visible progress bar at bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-            <div 
-              className="h-full bg-yellow-500 transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
+            <div className="h-full bg-yellow-500 transition-all duration-300" style={{
+            width: `${progressPercentage}%`
+          }} />
           </div>
 
           {/* Video Overlay - Only show when paused or controls are visible */}
-          {(showControls || !playing) && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300">
+          {(showControls || !playing) && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300">
               {/* Central play/pause button */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <button
-                  onClick={togglePlayPause}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110"
-                >
+                <button onClick={togglePlayPause} className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 flex items-center justify-center transition-all duration-200 hover:scale-110">
                   {playing ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
                 </button>
               </div>
@@ -282,19 +253,15 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
 
                   {/* Interactive Progress Controls */}
                   <div className="space-y-2">
-                    <div 
-                      className="w-full h-3 bg-gray-600 rounded-full cursor-pointer hover:h-4 transition-all"
-                      onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const percentage = (x / rect.width) * 100;
-                        handleSeek(percentage);
-                      }}
-                    >
-                      <div 
-                        className="h-full bg-yellow-500 rounded-full transition-all"
-                        style={{ width: `${progressPercentage}%` }}
-                      />
+                    <div className="w-full h-3 bg-gray-600 rounded-full cursor-pointer hover:h-4 transition-all" onClick={e => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const percentage = x / rect.width * 100;
+                  handleSeek(percentage);
+                }}>
+                      <div className="h-full bg-yellow-500 rounded-full transition-all" style={{
+                    width: `${progressPercentage}%`
+                  }} />
                     </div>
                     
                     <div className="flex items-center justify-between text-sm text-gray-300">
@@ -304,83 +271,80 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
                     </div>
 
                     <div className="flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-white hover:bg-white/20"
-                      >
+                      <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
                         <span>1x</span>
                       </Button>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Loading indicator */}
-          {!playing && currentTime === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          {!playing && currentTime === 0 && <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <div className="text-center text-white">
                 <div className="animate-spin rounded-full h-8 w-8 border-4 border-yellow-500 border-t-transparent mx-auto mb-2"></div>
                 <p className="text-sm">Carregando vídeo...</p>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Action Buttons - Logo abaixo do vídeo */}
-        <div className="p-6">
+        <div className="p-6 px-[7px]">
           <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
             <h3 className="text-base font-semibold mb-3 text-yellow-500">Ferramentas de Estudo</h3>
             <LessonActionButtons lesson={{
-              id: selectedLesson.id,
-              area: selectedLesson.area,
-              tema: selectedLesson.tema,
-              assunto: selectedLesson.nome,
-              conteudo: selectedLesson.conteudo || ''
-            }} />
+            id: selectedLesson.id,
+            area: selectedLesson.area,
+            tema: selectedLesson.tema,
+            assunto: selectedLesson.nome,
+            conteudo: selectedLesson.conteudo || ''
+          }} />
           </div>
         </div>
 
         {/* Lesson Content */}
-        <div className="px-6 pb-6 space-y-6">
-          {selectedLesson.conteudo && (
-            <div className="bg-gray-900 rounded-lg p-6">
+        <div className="pb-6 space-y-6 px-[7px]">
+          {selectedLesson.conteudo && <div className="bg-gray-900 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4 text-yellow-500">Conteúdo da Aula</h3>
               <div className="prose prose-invert prose-sm max-w-none prose-headings:text-yellow-500 prose-strong:text-yellow-400 prose-p:text-gray-300 prose-li:text-gray-300">
-                <ReactMarkdown
-                  components={{
-                    h1: ({ children }) => <h1 className="text-xl font-bold mb-4 text-yellow-500">{children}</h1>,
-                    h2: ({ children }) => <h2 className="text-lg font-bold mb-3 text-yellow-500">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-base font-bold mb-2 text-yellow-500">{children}</h3>,
-                    strong: ({ children }) => <strong className="text-yellow-400 font-bold">{children}</strong>,
-                    p: ({ children }) => <p className="mb-4 leading-relaxed text-gray-300">{children}</p>,
-                    ul: ({ children }) => <ul className="space-y-2 ml-4 text-gray-300">{children}</ul>,
-                    ol: ({ children }) => <ol className="space-y-2 ml-4 text-gray-300">{children}</ol>,
-                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                  }}
-                >
+                <ReactMarkdown components={{
+              h1: ({
+                children
+              }) => <h1 className="text-xl font-bold mb-4 text-yellow-500">{children}</h1>,
+              h2: ({
+                children
+              }) => <h2 className="text-lg font-bold mb-3 text-yellow-500">{children}</h2>,
+              h3: ({
+                children
+              }) => <h3 className="text-base font-bold mb-2 text-yellow-500">{children}</h3>,
+              strong: ({
+                children
+              }) => <strong className="text-yellow-400 font-bold">{children}</strong>,
+              p: ({
+                children
+              }) => <p className="mb-4 leading-relaxed text-gray-300">{children}</p>,
+              ul: ({
+                children
+              }) => <ul className="space-y-2 ml-4 text-gray-300">{children}</ul>,
+              ol: ({
+                children
+              }) => <ol className="space-y-2 ml-4 text-gray-300">{children}</ol>,
+              li: ({
+                children
+              }) => <li className="leading-relaxed">{children}</li>
+            }}>
                   {selectedLesson.conteudo}
                 </ReactMarkdown>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Floating Professor Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <div className="relative">
-            <Button
-              variant="ghost"
-              className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 shadow-lg border-4 border-white"
-              onClick={() => toast.info(`Aula: ${selectedLesson.nome} - ${selectedLesson.tema}`)}
-            >
-              <img 
-                src={professoraAvatar} 
-                alt="Professora"
-                className="w-full h-full rounded-full object-cover"
-              />
+            <Button variant="ghost" className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16 shadow-lg border-4 border-white" onClick={() => toast.info(`Aula: ${selectedLesson.nome} - ${selectedLesson.tema}`)}>
+              <img src={professoraAvatar} alt="Professora" className="w-full h-full rounded-full object-cover" />
             </Button>
             
             {/* Chat indicator */}
@@ -389,21 +353,15 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Lessons List View
   if (currentView === 'lessons' && selectedModule) {
-    return (
-      <div className="min-h-screen bg-black text-white">
+    return <div className="min-h-screen bg-black text-white">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="flex items-center gap-2 text-white hover:bg-gray-800"
-          >
+          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
             <ArrowLeft className="h-5 w-5" />
             <span>Voltar</span>
           </Button>
@@ -445,30 +403,15 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
         {/* Lessons List */}
         <div className="px-6 space-y-4">
           {selectedModule.aulas.map((lesson: any, index: number) => {
-            const progress = obterProgresso(lesson.id);
-            return (
-              <Card 
-                key={lesson.id}
-                className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors"
-                onClick={() => handleSelectLesson(lesson)}
-              >
+          const progress = obterProgresso(lesson.id);
+          return <Card key={lesson.id} className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors" onClick={() => handleSelectLesson(lesson)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Lesson Image */}
                     <div className="relative h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-t-lg">
-                      {lesson.capa && (
-                        <img 
-                          src={lesson.capa} 
-                          alt={lesson.nome}
-                          className="w-full h-full object-cover rounded-t-lg"
-                        />
-                      )}
+                      {lesson.capa && <img src={lesson.capa} alt={lesson.nome} className="w-full h-full object-cover rounded-t-lg" />}
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <Button
-                          variant="ghost"
-                          size="lg"
-                          className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16"
-                        >
+                        <Button variant="ghost" size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16">
                           <Play className="h-8 w-8 ml-1" />
                         </Button>
                       </div>
@@ -476,10 +419,9 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
                       {/* Progress indicator */}
                       <div className="absolute bottom-2 left-2 right-2">
                         <div className="w-full h-1 bg-black/50 rounded-full">
-                          <div 
-                            className="h-full bg-yellow-500 rounded-full"
-                            style={{ width: `${progress?.percentualAssistido || 0}%` }}
-                          />
+                          <div className="h-full bg-yellow-500 rounded-full" style={{
+                        width: `${progress?.percentualAssistido || 0}%`
+                      }} />
                         </div>
                       </div>
                     </div>
@@ -516,25 +458,18 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            );
-          })}
+              </Card>;
+        })}
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Modules List View
   if (currentView === 'modules' && selectedArea) {
-    return (
-      <div className="min-h-screen bg-black text-white">
+    return <div className="min-h-screen bg-black text-white">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="flex items-center gap-2 text-white hover:bg-gray-800"
-          >
+          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
             <ArrowLeft className="h-5 w-5" />
             <span>Voltar</span>
           </Button>
@@ -561,29 +496,17 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
         {/* Modules List */}
         <div className="px-6 space-y-6">
           {selectedArea.modulos.map((module: any, index: number) => {
-            const moduleProgress = calcularProgressoModulo(module.aulas);
-            const completedLessons = module.aulas.filter((lesson: any) => {
-              const progress = obterProgresso(lesson.id);
-              return progress?.concluida;
-            }).length;
-
-            return (
-              <Card 
-                key={index}
-                className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors"
-                onClick={() => handleSelectModule(module)}
-              >
+          const moduleProgress = calcularProgressoModulo(module.aulas);
+          const completedLessons = module.aulas.filter((lesson: any) => {
+            const progress = obterProgresso(lesson.id);
+            return progress?.concluida;
+          }).length;
+          return <Card key={index} className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors" onClick={() => handleSelectModule(module)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Module Image */}
                     <div className="relative h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-t-lg">
-                      {module.capa && (
-                        <img 
-                          src={module.capa} 
-                          alt={module.nome}
-                          className="w-full h-full object-cover rounded-t-lg"
-                        />
-                      )}
+                      {module.capa && <img src={module.capa} alt={module.nome} className="w-full h-full object-cover rounded-t-lg" />}
                       <div className="absolute top-4 left-4">
                         <div className="bg-yellow-500 text-black rounded-full w-8 h-8 flex items-center justify-center font-bold">
                           {index + 1}
@@ -637,24 +560,17 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            );
-          })}
+              </Card>;
+        })}
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Areas List View (Main)
-  return (
-    <div className="min-h-screen bg-black text-white">
+  return <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-800">
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          className="flex items-center gap-2 text-white hover:bg-gray-800"
-        >
+        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
           <ArrowLeft className="h-5 w-5" />
           <span>Voltar</span>
         </Button>
@@ -672,13 +588,7 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Buscar aulas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-              />
+              <Input type="text" placeholder="Buscar aulas..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400" />
             </div>
             <Button variant="ghost" size="sm" className="text-white">
               <BarChart3 className="h-5 w-5" />
@@ -716,31 +626,19 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
       {/* Areas List */}
       <div className="px-6 space-y-6">
         {areas.map((area, index) => {
-          const areaProgress = calcularProgressoArea(area);
-          const completedLessons = area.modulos.reduce((total, module) => {
-            return total + module.aulas.filter((lesson) => {
-              const progress = obterProgresso(lesson.id);
-              return progress?.concluida;
-            }).length;
-          }, 0);
-
-          return (
-            <Card 
-              key={index}
-              className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors"
-              onClick={() => handleSelectArea(area)}
-            >
+        const areaProgress = calcularProgressoArea(area);
+        const completedLessons = area.modulos.reduce((total, module) => {
+          return total + module.aulas.filter(lesson => {
+            const progress = obterProgresso(lesson.id);
+            return progress?.concluida;
+          }).length;
+        }, 0);
+        return <Card key={index} className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors" onClick={() => handleSelectArea(area)}>
               <CardContent className="p-0">
                 <div className="relative">
                   {/* Area Image */}
                   <div className="relative h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-t-lg">
-                    {area.capa && (
-                      <img 
-                        src={area.capa} 
-                        alt={area.nome}
-                        className="w-full h-full object-cover rounded-t-lg"
-                      />
-                    )}
+                    {area.capa && <img src={area.capa} alt={area.nome} className="w-full h-full object-cover rounded-t-lg" />}
                     <div className="absolute top-4 left-4">
                       <div className="bg-yellow-500 text-black rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         <BookOpen className="h-4 w-4" />
@@ -774,10 +672,8 @@ export const CursosPreparatoriosElegant = ({ onBack }: CursosPreparatoriosElegan
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          );
-        })}
+            </Card>;
+      })}
       </div>
-    </div>
-  );
+    </div>;
 };
