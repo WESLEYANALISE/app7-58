@@ -1,0 +1,1030 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles for search modal */
+.search-modal-open {
+  overflow: hidden;
+}
+
+.search-modal-open [data-footer-menu] {
+  display: none !important;
+}
+
+/* Hide header/top elements when search is open */
+.search-modal-open header,
+.search-modal-open [data-header],
+.search-modal-open [data-mobile-header],
+.search-modal-open [data-desktop-header] {
+  display: none !important;
+}
+
+/* Scrollbar styles - Enhanced for search */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Enhanced Legal Studies App - Professional Juridical Color Palette */
+
+@layer base {
+  :root {
+    /* Elegant Red Theme - Sophisticated Legal Design */
+    --background: 0 25% 8%;                /* Deep red-tinted background */
+    --foreground: 0 0% 96%;                /* Clean white text */
+
+    --card: 0 20% 12%;                     /* Dark red cards with subtle contrast */
+    --card-foreground: 0 0% 96%;
+
+    --popover: 0 25% 10%;
+    --popover-foreground: 0 0% 96%;
+
+    /* Elegant Red System - Sophisticated and Premium */
+    --primary: 0 65% 48%;                  /* Elegant deep red - main */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 15% 18%;                /* Dark red secondary */
+    --secondary-foreground: 0 0% 94%;
+
+    --muted: 0 12% 20%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 0 65% 48%;                   /* Elegant red accent */
+    --accent-foreground: 0 0% 98%;
+    --accent-legal: 0 65% 48%;
+
+    /* Vade Mecum specific colors - elegant red theme */
+    --vademecum-yellow: 0 65% 48%;         /* Elegant red instead of yellow */
+    --vademecum-yellow-hover: 0 55% 58%;   /* Lighter red for hover */
+    --vademecum-yellow-text: 0 75% 38%;    /* Darker red for text */
+    --vademecum-bg: 0 25% 5%;              /* Very dark red background */
+    --vademecum-card: 0 20% 8%;            /* Dark red card */
+    --vademecum-border: 0 15% 15%;         /* Red-tinted border */
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 10% 18%;                   /* Red-tinted borders */
+    --input: 0 15% 12%;                    /* Dark red input background */
+    --ring: 0 65% 48%;                     /* Red ring instead of yellow */
+
+    --radius: 0.75rem;
+
+    /* Premium Sidebar - Deep Red with Elegant Accents */
+    --sidebar-background: 0 30% 6%;         /* Very dark red */
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 0 65% 48%;           /* Elegant red */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 20% 10%;            /* Dark red accent */
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 15% 15%;            /* Red-tinted border */
+    --sidebar-ring: 0 65% 48%;              /* Elegant red ring */
+
+    /* Reading fonts for Vade Mecum */
+    --vademecum-font: 'Georgia', 'Times New Roman', serif;
+
+    /* Enhanced Premium Color Palette - Red Theme */
+    --background-deep: 0 35% 3%;           /* Very deep red for maximum depth */
+    --success: 142 69% 45%;                /* Keep green for success */
+    --warning: 35 85% 60%;                 /* Keep orange for warning */
+    --info: 213 85% 65%;                   /* Keep blue for info */
+    
+    /* Store colors - Keep Premium Blue but accent with red */
+    --store-primary: 213 85% 65%;
+    --store-secondary: 213 75% 55%;
+    --store-accent: 0 65% 48%;             /* Red accent for store */
+    
+    /* Community colors - Keep Green but accent with red */  
+    --community-primary: 142 69% 45%;
+    --community-secondary: 142 60% 35%;
+    --community-accent: 0 65% 48%;         /* Red accent for community */
+    
+    /* Premium colors - Keep Purple but accent with red */
+    --premium-primary: 262 70% 60%;
+    --premium-secondary: 262 60% 50%;
+    --premium-accent: 0 65% 48%;           /* Red accent */
+    
+    /* Tools colors - Elegant Red for Minhas Ferramentas */
+    --tools-primary: 0 65% 48%;            /* Elegant red */
+    --tools-secondary: 0 55% 58%;          /* Lighter red */
+    --tools-accent: 0 75% 38%;             /* Deep red accent */
+    
+    /* Footer menu colors - Deep red premium */
+    --footer-bg: 0 30% 6%;                 /* Dark red background */
+    --footer-border: 0 15% 12%;            /* Red-tinted border */
+    --footer-active: 0 65% 48%;            /* Elegant red active */
+    --footer-hover: 0 20% 10%;             /* Dark red hover */
+    
+    /* Elegant Red System - Sophisticated and Premium */
+    --red-elegant: 0 65% 48%;               /* Elegant deep red - main */
+    --red-elegant-light: 0 55% 58%;         /* Lighter elegant red for gradients */
+    --red-elegant-dark: 0 75% 38%;          /* Darker elegant red for depth */
+    --red-elegant-darkest: 0 80% 28%;       /* Darkest for deep sections */
+    --red-foreground: 0 0% 98%;             /* White text on red background */
+    
+    /* Complementary colors for buttons */
+    --burgundy-elegant: 345 65% 45%;        /* Sophisticated burgundy for Plano de Estudo */
+    --wine-elegant: 330 60% 50%;            /* Wine color for Redação Perfeita */
+    --crimson-elegant: 15 70% 52%;          /* Crimson accent for highlights */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+/* Enhanced scrollbar with professional styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background-deep));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--accent-legal) / 0.4));
+    border-radius: 4px;
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(var(--accent-legal) / 0.6));
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.3);
+  }
+
+  /* Optimize scroll performance */
+  * {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbar on mobile and optimize touch scrolling */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Reduce animations on mobile for better performance */
+    .fast-scrolling * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Prefer reduced motion for accessibility and performance */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Professional gradient styles */
+.gradient-store {
+  background: linear-gradient(135deg, hsl(var(--store-primary)), hsl(var(--store-accent)));
+}
+
+.gradient-community {
+  background: linear-gradient(135deg, hsl(var(--community-primary)), hsl(var(--community-accent)));
+}
+
+.gradient-premium {
+  background: linear-gradient(135deg, hsl(var(--premium-primary)), hsl(var(--premium-accent)));
+}
+
+.gradient-legal {
+  background: linear-gradient(135deg, hsl(var(--accent-legal)), hsl(var(--primary)));
+}
+
+.gradient-tools {
+  background: linear-gradient(135deg, hsl(var(--tools-primary)), hsl(var(--tools-accent)));
+}
+
+/* Professional glass effect */
+.glass-effect-modern {
+  backdrop-filter: blur(20px);
+  background: hsl(var(--card) / 0.85);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 
+    0 8px 32px hsl(var(--background) / 0.3),
+    inset 0 1px 0 hsl(var(--foreground) / 0.1);
+}
+
+/* Premium Enhanced Animations */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 25px hsl(var(--primary) / 0.4),
+      0 0 50px hsl(var(--primary) / 0.2),
+      inset 0 1px 0 hsl(var(--primary) / 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 50px hsl(var(--primary) / 0.8),
+      0 0 100px hsl(var(--primary) / 0.4),
+      inset 0 1px 0 hsl(var(--primary) / 0.2);
+  }
+}
+
+@keyframes notification-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsl(var(--red-professional) / 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px hsl(var(--red-professional) / 0);
+  }
+}
+
+@keyframes shimmer-enhanced {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+}
+
+@keyframes float-gentle-enhanced {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-3px) rotate(0.5deg);
+  }
+  66% {
+    transform: translateY(1px) rotate(-0.5deg);
+  }
+}
+
+@keyframes store-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--store-accent) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 35px hsl(var(--store-accent) / 0.8);
+  }
+}
+
+@keyframes community-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--community-accent) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 35px hsl(var(--community-accent) / 0.8);
+  }
+}
+
+@keyframes premium-glow {
+  0%, 100% {
+    box-shadow: 0 0 25px hsl(var(--premium-accent) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--premium-accent) / 0.9);
+  }
+}
+
+/* Icon Animations - Subtle and Professional */
+@keyframes icon-bounce-hover {
+  0%, 20%, 60%, 100% { 
+    transform: translateY(0) scale(1); 
+  }
+  40% { 
+    transform: translateY(-3px) scale(1.05); 
+  }
+  80% { 
+    transform: translateY(-1px) scale(1.02); 
+  }
+}
+
+@keyframes icon-pulse-glow {
+  0%, 100% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px hsl(var(--primary) / 0.4));
+  }
+  50% { 
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px hsl(var(--primary) / 0.8));
+  }
+}
+
+@keyframes icon-rotate-subtle {
+  0%, 100% { 
+    transform: rotate(0deg) scale(1); 
+  }
+  25% { 
+    transform: rotate(-2deg) scale(1.02); 
+  }
+  75% { 
+    transform: rotate(2deg) scale(1.02); 
+  }
+}
+
+@keyframes icon-float-gentle {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-2px); 
+  }
+}
+
+@keyframes icon-scale-pulse {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.1); 
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-store-glow {
+  animation: store-glow 2s ease-in-out infinite;
+}
+
+.animate-community-glow {
+  animation: community-glow 2s ease-in-out infinite;
+}
+
+.animate-premium-glow {
+  animation: premium-glow 2s ease-in-out infinite;
+}
+
+@keyframes tools-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--tools-accent) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 35px hsl(var(--tools-accent) / 0.8);
+  }
+}
+
+.animate-tools-glow {
+  animation: tools-glow 2s ease-in-out infinite;
+}
+
+/* Icon Animation Classes */
+.icon-hover-bounce {
+  transition: all 0.3s ease;
+}
+
+.icon-hover-bounce:hover {
+  animation: icon-bounce-hover 0.6s ease-out;
+}
+
+.icon-pulse-active {
+  animation: icon-pulse-glow 2s ease-in-out infinite;
+}
+
+.icon-float-gentle {
+  animation: icon-float-gentle 3s ease-in-out infinite;
+}
+
+.icon-rotate-hover {
+  transition: all 0.3s ease;
+}
+
+.icon-rotate-hover:hover {
+  animation: icon-rotate-subtle 0.8s ease-in-out;
+}
+
+.icon-scale-hover {
+  transition: all 0.2s ease;
+}
+
+.icon-scale-hover:hover {
+  transform: scale(1.1);
+}
+
+/* Professional button styles */
+.btn-store {
+  background: linear-gradient(135deg, hsl(var(--store-primary)), hsl(var(--store-secondary)));
+  border: 1px solid hsl(var(--store-primary));
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-store:hover {
+  background: linear-gradient(135deg, hsl(var(--store-secondary)), hsl(var(--store-primary)));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px hsl(var(--store-primary) / 0.3);
+}
+
+.btn-community {
+  background: linear-gradient(135deg, hsl(var(--community-primary)), hsl(var(--community-secondary)));
+  border: 1px solid hsl(var(--community-primary));
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-community:hover {
+  background: linear-gradient(135deg, hsl(var(--community-secondary)), hsl(var(--community-primary)));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px hsl(var(--community-primary) / 0.3);
+}
+
+.btn-premium {
+  background: linear-gradient(135deg, hsl(var(--premium-primary)), hsl(var(--premium-secondary)));
+  border: 1px solid hsl(var(--premium-primary));
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-premium:hover {
+  background: linear-gradient(135deg, hsl(var(--premium-secondary)), hsl(var(--premium-primary)));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px hsl(var(--premium-primary) / 0.3);
+}
+
+/* Elegant button styles - Enhanced Red System */
+.btn-elegant-red {
+  background: linear-gradient(135deg, hsl(var(--red-elegant)), hsl(var(--red-elegant-light)));
+  border: 1px solid hsl(var(--red-elegant));
+  color: hsl(var(--red-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-elegant-red:hover {
+  background: linear-gradient(135deg, hsl(var(--red-elegant-dark)), hsl(var(--red-elegant)));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px hsl(var(--red-elegant) / 0.3);
+}
+
+.btn-burgundy {
+  background: linear-gradient(135deg, hsl(var(--burgundy-elegant)), hsl(var(--red-elegant-dark)));
+  border: 1px solid hsl(var(--burgundy-elegant));
+  color: hsl(var(--red-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-burgundy:hover {
+  background: linear-gradient(135deg, hsl(var(--burgundy-elegant) / 0.9), hsl(var(--red-elegant-dark) / 0.9));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px hsl(var(--burgundy-elegant) / 0.3);
+}
+
+.btn-wine {
+  background: linear-gradient(135deg, hsl(var(--wine-elegant)), hsl(var(--crimson-elegant)));
+  border: 1px solid hsl(var(--wine-elegant));
+  color: hsl(var(--red-foreground));
+  transition: all 0.3s ease;
+}
+
+.btn-wine:hover {
+  background: linear-gradient(135deg, hsl(var(--wine-elegant) / 0.9), hsl(var(--crimson-elegant) / 0.9));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px hsl(var(--wine-elegant) / 0.3);
+}
+
+/* Elegant background gradients */
+.gradient-elegant-red {
+  background: linear-gradient(135deg, hsl(var(--red-elegant)), hsl(var(--red-elegant-light)));
+}
+
+.gradient-burgundy {
+  background: linear-gradient(135deg, hsl(var(--burgundy-elegant)), hsl(var(--red-elegant-dark)));
+}
+
+.gradient-wine {
+  background: linear-gradient(135deg, hsl(var(--wine-elegant)), hsl(var(--crimson-elegant)));
+}
+
+/* Professional utility classes */
+.gradient-text-legal {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent-legal)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  will-change: transform;
+}
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent-legal)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    will-change: transform;
+  }
+
+/* Library Book Card Styles */
+.book-card-elegant {
+  background: linear-gradient(145deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.95));
+  border: 1px solid hsl(var(--accent-legal) / 0.2);
+}
+
+.book-card-elegant:hover {
+  border-color: hsl(var(--accent-legal) / 0.4);
+  transform: translateY(-2px);
+}
+
+.shadow-elegant {
+  box-shadow: 
+    0 4px 16px hsl(var(--background) / 0.4),
+    0 2px 8px hsl(var(--accent-legal) / 0.1);
+}
+
+.shadow-glow {
+  box-shadow: 
+    0 8px 32px hsl(var(--background) / 0.5),
+    0 4px 16px hsl(var(--accent-legal) / 0.3),
+    0 0 0 1px hsl(var(--accent-legal) / 0.1);
+}
+
+.classic-badge {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--accent-legal) / 0.8));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary) / 0.3);
+}
+
+.classic-badge-mobile {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--accent-legal) / 0.8));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary) / 0.3);
+}
+
+.abrir-livro-btn {
+  background: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success) / 0.9));
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.abrir-livro-btn:hover {
+  background: linear-gradient(135deg, hsl(var(--success) / 0.9), hsl(var(--success) / 0.8));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px hsl(var(--success) / 0.4);
+}
+
+  /* Additional elegant color variables */
+  --accent-legal-bright: 48 100% 75%;
+  
+  /* Shadow system for elegant cards */
+  --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+  --shadow-glow: 0 0 40px hsl(var(--accent-legal) / 0.4);
+
+  /* Book card styles */
+  .book-card-elegant {
+    background: linear-gradient(135deg, 
+      hsl(var(--card) / 0.6), 
+      hsl(var(--card) / 0.8)
+    );
+    border: 1px solid hsl(var(--accent-legal) / 0.3);
+    box-shadow: var(--shadow-elegant);
+    backdrop-filter: blur(20px);
+  }
+
+  .book-card-elegant:hover {
+    box-shadow: var(--shadow-glow);
+    border-color: hsl(var(--accent-legal) / 0.5);
+  }
+
+  /* Classic badge style */
+  .classic-badge {
+    background: linear-gradient(135deg, hsl(var(--accent-legal)), hsl(var(--accent-legal-bright)));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--accent-legal));
+  }
+
+  /* Button variant styles */
+  .download-btn-elegant {
+    background: linear-gradient(135deg, hsl(var(--accent-legal)), hsl(var(--accent-legal)) 50%, hsl(var(--accent-legal-bright)));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--accent-legal));
+    box-shadow: 0 4px 15px hsl(var(--accent-legal) / 0.3);
+  }
+
+  .download-btn-elegant:hover {
+    background: linear-gradient(135deg, hsl(var(--accent-legal-bright)), hsl(var(--accent-legal)));
+    box-shadow: 0 6px 25px hsl(var(--accent-legal) / 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Mobile specific styles */
+  .classic-badge-mobile {
+    background: linear-gradient(135deg, hsl(var(--accent-legal)), hsl(var(--accent-legal-bright)));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--accent-legal));
+  }
+
+  .abrir-livro-btn {
+    background: linear-gradient(135deg, hsl(var(--accent-legal)), hsl(var(--accent-legal-bright)));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--accent-legal));
+    box-shadow: 0 4px 15px hsl(var(--accent-legal) / 0.3);
+  }
+
+  .abrir-livro-btn:hover {
+    background: linear-gradient(135deg, hsl(var(--accent-legal-bright)), hsl(var(--accent-legal)));
+    box-shadow: 0 6px 25px hsl(var(--accent-legal) / 0.4);
+    transform: translateY(-1px);
+  }
+
+/* Book Card Premium Styles */
+.book-card-elegant {
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.8) 100%);
+  border: 1px solid hsl(var(--primary) / 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.book-card-elegant:hover {
+  background: linear-gradient(135deg, hsl(var(--card) / 0.9) 0%, hsl(var(--card)) 100%);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 
+    0 10px 30px hsl(var(--background) / 0.5),
+    0 0 20px hsl(var(--primary) / 0.3);
+}
+
+.classic-badge {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent-legal)));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary) / 0.3);
+  box-shadow: 0 2px 8px hsl(var(--primary) / 0.2);
+}
+
+.download-btn-elegant {
+  background: linear-gradient(135deg, hsl(var(--success)), hsl(142 69% 35%));
+  border: 1px solid hsl(var(--success));
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.download-btn-elegant:hover {
+  background: linear-gradient(135deg, hsl(142 69% 35%), hsl(var(--success)));
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px hsl(var(--success) / 0.3);
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+/* Professional Shadow System - Enhanced Depth */
+.shadow-professional {
+  box-shadow: 
+    0 4px 20px hsl(var(--background) / 0.1),
+    0 8px 40px hsl(var(--primary) / 0.08),
+    0 2px 8px hsl(var(--border) / 0.15);
+}
+
+.shadow-deep {
+  box-shadow: 
+    0 8px 32px hsl(var(--background) / 0.2),
+    0 16px 64px hsl(var(--primary) / 0.12),
+    0 4px 16px hsl(var(--border) / 0.2),
+    inset 0 1px 2px hsl(var(--foreground) / 0.05);
+}
+
+.shadow-red-glow {
+  box-shadow: 
+    0 4px 20px hsl(var(--red-professional) / 0.15),
+    0 8px 40px hsl(var(--red-professional) / 0.1),
+    0 2px 8px hsl(var(--red-background) / 0.08);
+}
+
+.shadow-interactive {
+  box-shadow: 
+    0 2px 12px hsl(var(--background) / 0.08),
+    0 4px 24px hsl(var(--primary) / 0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.shadow-interactive:hover {
+  box-shadow: 
+    0 8px 32px hsl(var(--red-professional) / 0.2),
+    0 16px 64px hsl(var(--red-professional) / 0.15),
+    0 4px 16px hsl(var(--red-background) / 0.1);
+}
+
+/* Professional Red Icon System */
+.icon-red {
+  color: hsl(var(--red-professional));
+}
+
+.icon-container-red {
+  background: hsl(var(--red-background) / 0.15);
+  border: 1px solid hsl(var(--red-background) / 0.3);
+}
+
+.icon-container-red:hover {
+  background: hsl(var(--red-background) / 0.25);
+  border-color: hsl(var(--red-accent) / 0.5);
+}
+
+.bg-red-professional {
+  background: hsl(var(--red-background));
+}
+
+.text-red-professional {
+  color: hsl(var(--red-professional));
+}
+
+.card-legal {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--border) / 0.5);
+  transition: all 0.3s ease;
+}
+
+.card-legal:hover {
+  background: hsl(var(--card) / 0.8);
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: 0 8px 32px hsl(var(--primary) / 0.1);
+}
+
+/* Professional legal animations */
+@keyframes legal-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes legal-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
+}
+
+.animate-legal-shimmer {
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent);
+  background-size: 200px 100%;
+  animation: legal-shimmer 2s infinite;
+}
+
+
+/* Enhanced Professional Cards and Components */
+.card-premium {
+  background: linear-gradient(135deg, 
+    hsl(var(--card) / 0.95) 0%, 
+    hsl(var(--card) / 0.85) 50%, 
+    hsl(var(--card) / 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--border) / 0.3);
+  box-shadow: 
+    0 8px 32px hsl(var(--background) / 0.3),
+    0 16px 64px hsl(var(--primary) / 0.05),
+    inset 0 1px 0 hsl(var(--foreground) / 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 
+    0 12px 48px hsl(var(--background) / 0.4),
+    0 24px 96px hsl(var(--primary) / 0.08),
+    inset 0 1px 0 hsl(var(--foreground) / 0.15);
+}
+
+/* Enhanced Button Styles */
+.btn-enhanced {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, 
+    hsl(var(--primary) / 0.9), 
+    hsl(var(--accent-legal) / 0.8));
+  border: 1px solid hsl(var(--primary) / 0.3);
+  box-shadow: 
+    0 4px 16px hsl(var(--primary) / 0.2),
+    inset 0 1px 0 hsl(var(--primary) / 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    hsl(var(--foreground) / 0.1), 
+    transparent);
+  transition: left 0.5s;
+}
+
+.btn-enhanced:hover::before {
+  left: 100%;
+}
+
+.btn-enhanced:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 8px 32px hsl(var(--primary) / 0.3),
+    inset 0 1px 0 hsl(var(--primary) / 0.2);
+}
+
+/* Enhanced Notification Styles */
+.notification-badge {
+  background: linear-gradient(135deg, 
+    hsl(var(--red-professional)), 
+    hsl(var(--red-accent)));
+  border: 2px solid hsl(var(--background));
+  box-shadow: 
+    0 0 0 2px hsl(var(--red-professional) / 0.3),
+    0 4px 12px hsl(var(--red-professional) / 0.4);
+  animation: notification-glow 2s ease-in-out infinite;
+}
+
+/* Vade Mecum readable font styles */
+.vademecum-text {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.7;
+  letter-spacing: 0.015em;
+  font-size: 0.9rem;
+}
+
+@media (min-width: 768px) {
+  .vademecum-text {
+    font-size: 1rem;
+  }
+}
+
+/* Enhanced Animation Classes */
+.animate-shimmer-enhanced {
+  animation: shimmer-enhanced 2s linear infinite;
+}
+
+.animate-float-enhanced {
+  animation: float-enhanced 6s ease-in-out infinite;
+}
+
+.animate-notification-glow {
+  animation: notification-glow 2s ease-in-out infinite;
+}
+
+/* Slide up animation for chat */
+@keyframes slide-up {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+/* Scroll optimization */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Keyframes para animações personalizadas */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px 10px rgba(99, 102, 241, 0.1); }
+  50% { box-shadow: 0 0 40px 20px rgba(99, 102, 241, 0.2); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px 5px rgba(99, 102, 241, 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 0 30px 10px rgba(99, 102, 241, 0.4); }
+}
+
+@keyframes float-enhanced {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+    opacity: 0.7;
+  }
+  50% { 
+    transform: translateY(-10px) rotate(2deg); 
+    opacity: 0.9;
+  }
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Grid pattern para backgrounds */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Aplicação das animações */
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float-enhanced {
+  animation: float-enhanced 4s ease-in-out infinite;
+}
+
+/* Mobile specific animations for ProfessoraIA */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.8) translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}

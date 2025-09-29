@@ -1,0 +1,2 @@
+INSERT INTO "APP" (funcao, descricao, link, capa) VALUES 
+('Vade Mecum', 'Legislação brasileira com busca avançada em cada código', '/vade-mecum', 'https://phzcazcyjhlmdchcjagy.supabase.co/storage/v1/object/public/flashcard-uploads/temis.png');

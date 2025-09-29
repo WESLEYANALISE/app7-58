@@ -1,0 +1,1 @@
+export { TaskListContainer as ListaTarefas } from './TaskList/TaskListContainer';

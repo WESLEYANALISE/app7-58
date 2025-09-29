@@ -1,0 +1,1 @@
+UPDATE "APP" SET link = '/vade-mecum-interno', descricao = 'Legislação brasileira com busca avançada em cada código' WHERE id = 1;
