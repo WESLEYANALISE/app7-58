@@ -210,11 +210,15 @@ export const CursosPreparatoriosElegant = ({
         <div className="relative">
           <video ref={videoRef} className="w-full h-auto max-h-[70vh] object-contain bg-black cursor-pointer" playsInline muted={false} controls={false} preload="auto" onClick={handleVideoClick} onMouseMove={handleMouseMove} />
           
-          {/* Minimalist progress bar at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black/20">
-            <div className="h-full bg-primary/80 transition-all duration-300" style={{
-            width: `${progressPercentage}%`
-          }} />
+          {/* Progress bar at bottom with percentage */}
+          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/50">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            />
+            <div className="absolute -top-6 right-2 text-xs px-2 py-1 rounded-md bg-background/80 text-foreground border border-border">
+              {Math.round(progressPercentage)}%
+            </div>
           </div>
 
           {/* Video Overlay - Only show when paused or controls are visible */}
@@ -410,18 +414,18 @@ export const CursosPreparatoriosElegant = ({
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Lesson Image */}
-                    <div className="relative h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-t-lg">
+                    <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
                       {lesson.capa && <img src={lesson.capa} alt={lesson.nome} className="w-full h-full object-cover rounded-t-lg" />}
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <Button variant="ghost" size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black rounded-full w-16 h-16">
+                        <Button variant="ghost" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16">
                           <Play className="h-8 w-8 ml-1" />
                         </Button>
                       </div>
                       
                       {/* Progress indicator */}
                       <div className="absolute bottom-2 left-2 right-2">
-                        <div className="w-full h-1 bg-black/50 rounded-full">
-                          <div className="h-full bg-yellow-500 rounded-full" style={{
+                        <div className="w-full h-1 bg-muted/50 rounded-full">
+                          <div className="h-full bg-primary rounded-full" style={{
                         width: `${progress?.percentualAssistido || 0}%`
                       }} />
                         </div>
@@ -431,23 +435,23 @@ export const CursosPreparatoriosElegant = ({
                     {/* Lesson Info */}
                     <div className="p-4 space-y-3">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-yellow-500 text-black font-medium">
+                        <Badge className="bg-primary text-primary-foreground font-medium">
                           Aula {index + 1}
                         </Badge>
-                        <Badge variant="outline" className="border-yellow-500 text-yellow-500">
+                        <Badge variant="outline" className="border-primary text-primary">
                           {selectedModule.nome}
                         </Badge>
-                        <Badge variant="outline" className="border-gray-600 text-gray-400">
+                        <Badge variant="outline" className="border-border text-muted-foreground">
                           Em andamento
                         </Badge>
                       </div>
 
                       <h3 className="text-lg font-bold">{lesson.nome}</h3>
-                      <p className="text-gray-400 text-sm line-clamp-2">
+                      <p className="text-muted-foreground text-sm line-clamp-2">
                         {lesson.tema}
                       </p>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
                           <span>{lesson.duracao}min</span>
@@ -468,10 +472,10 @@ export const CursosPreparatoriosElegant = ({
 
   // Modules List View
   if (currentView === 'modules' && selectedArea) {
-    return <div className="min-h-screen bg-black text-white">
+    return <div className="min-h-screen bg-background text-foreground">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-foreground hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />
             <span>Voltar</span>
           </Button>
@@ -481,16 +485,16 @@ export const CursosPreparatoriosElegant = ({
 
         {/* Area Header */}
         <div className="p-6 space-y-4">
-          <div className="flex items-center gap-2 text-yellow-500">
+          <div className="flex items-center gap-2 text-primary">
             <BookOpen className="h-5 w-5" />
             <span className="font-medium">Curso Pro</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4 text-yellow-500" />
+            <ArrowLeft className="h-4 w-4 text-primary" />
             <div>
               <h2 className="text-xl font-bold">{selectedArea.nome}</h2>
-              <p className="text-gray-400">{selectedArea.modulos.length} módulos disponíveis</p>
+              <p className="text-muted-foreground">{selectedArea.modulos.length} módulos disponíveis</p>
             </div>
           </div>
         </div>
@@ -503,19 +507,19 @@ export const CursosPreparatoriosElegant = ({
             const progress = obterProgresso(lesson.id);
             return progress?.concluida;
           }).length;
-          return <Card key={index} className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors" onClick={() => handleSelectModule(module)}>
+          return <Card key={index} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectModule(module)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Module Image */}
-                    <div className="relative h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-t-lg">
+                    <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
                       {module.capa && <img src={module.capa} alt={module.nome} className="w-full h-full object-cover rounded-t-lg" />}
                       <div className="absolute top-4 left-4">
-                        <div className="bg-yellow-500 text-black rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                        <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold">
                           {index + 1}
                         </div>
                       </div>
                       <div className="absolute top-4 right-4">
-                        <Badge className="bg-green-500 text-black font-medium">
+                        <Badge className="bg-secondary text-secondary-foreground font-medium">
                           Novo
                         </Badge>
                       </div>
@@ -524,39 +528,39 @@ export const CursosPreparatoriosElegant = ({
                     {/* Module Info */}
                     <div className="p-6 space-y-4">
                       <h3 className="text-xl font-bold">{module.nome}</h3>
-                      <p className="text-gray-400">
+                      <p className="text-muted-foreground">
                         Fundamentos jurídicos e princípios básicos
                       </p>
                       
-                      <Badge variant="outline" className="border-yellow-500 text-yellow-500">
+                      <Badge variant="outline" className="border-primary text-primary">
                         {selectedArea.nome}
                       </Badge>
 
                       <div className="flex items-center justify-around text-center">
                         <div>
                           <div className="flex items-center justify-center mb-1">
-                            <BookOpen className="h-5 w-5 text-yellow-500" />
+                            <BookOpen className="h-5 w-5 text-primary" />
                           </div>
-                          <div className="text-2xl font-bold text-yellow-500">{module.aulas.length}</div>
-                          <div className="text-sm text-gray-400">Aulas</div>
+                          <div className="text-2xl font-bold text-primary">{module.aulas.length}</div>
+                          <div className="text-sm text-muted-foreground">Aulas</div>
                         </div>
                         <div>
                           <div className="flex items-center justify-center mb-1">
-                            <Clock className="h-5 w-5 text-yellow-500" />
+                            <Clock className="h-5 w-5 text-primary" />
                           </div>
-                          <div className="text-2xl font-bold text-yellow-500">{module.totalDuracao}min</div>
-                          <div className="text-sm text-gray-400">Duração</div>
+                          <div className="text-2xl font-bold text-primary">{module.totalDuracao}min</div>
+                          <div className="text-sm text-muted-foreground">Duração</div>
                         </div>
                         <div>
                           <div className="flex items-center justify-center mb-1">
-                            <CheckCircle className="h-5 w-5 text-yellow-500" />
+                            <CheckCircle className="h-5 w-5 text-primary" />
                           </div>
-                          <div className="text-2xl font-bold text-yellow-500">{completedLessons}</div>
-                          <div className="text-sm text-gray-400">Feitas</div>
+                          <div className="text-2xl font-bold text-primary">{completedLessons}</div>
+                          <div className="text-sm text-muted-foreground">Feitas</div>
                         </div>
                       </div>
 
-                      <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-medium">
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                         Começar
                       </Button>
                     </div>
@@ -569,10 +573,10 @@ export const CursosPreparatoriosElegant = ({
   }
 
   // Areas List View (Main)
-  return <div className="min-h-screen bg-black text-white">
+  return <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-white hover:bg-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2 text-foreground hover:bg-muted">
           <ArrowLeft className="h-5 w-5" />
           <span>Voltar</span>
         </Button>
@@ -583,27 +587,27 @@ export const CursosPreparatoriosElegant = ({
       {/* Course Pro Header */}
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-yellow-500">
+          <div className="flex items-center gap-2 text-primary">
             <BookOpen className="h-5 w-5" />
             <span className="font-medium text-lg">Curso Pro</span>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input type="text" placeholder="Buscar aulas..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input type="text" placeholder="Buscar aulas..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground" />
             </div>
-            <Button variant="ghost" size="sm" className="text-white">
+            <Button variant="ghost" size="sm" className="text-foreground">
               <BarChart3 className="h-5 w-5" />
             </Button>
           </div>
         </div>
         
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center bg-yellow-500 text-black px-4 py-2 rounded-full font-medium">
+          <div className="inline-flex items-center bg-primary text-primary-foreground px-4 py-2 rounded-full font-medium">
             ● Escolha sua Área de Estudo
           </div>
           <h2 className="text-2xl font-bold">Áreas de Conhecimento Jurídico</h2>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             Selecione uma área para explorar os módulos e aulas especializadas
           </p>
         </div>
@@ -611,16 +615,16 @@ export const CursosPreparatoriosElegant = ({
         {/* Stats */}
         <div className="flex items-center justify-around text-center">
           <div>
-            <div className="text-3xl font-bold text-yellow-500">{totalAreas}</div>
-            <div className="text-sm text-gray-400">Áreas</div>
+            <div className="text-3xl font-bold text-primary">{totalAreas}</div>
+            <div className="text-sm text-muted-foreground">Áreas</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-yellow-500">{totalModulos}</div>
-            <div className="text-sm text-gray-400">Módulos</div>
+            <div className="text-3xl font-bold text-primary">{totalModulos}</div>
+            <div className="text-sm text-muted-foreground">Módulos</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-yellow-500">{totalAulas}</div>
-            <div className="text-sm text-gray-400">Aulas</div>
+            <div className="text-3xl font-bold text-primary">{totalAulas}</div>
+            <div className="text-sm text-muted-foreground">Aulas</div>
           </div>
         </div>
       </div>
@@ -635,14 +639,14 @@ export const CursosPreparatoriosElegant = ({
             return progress?.concluida;
           }).length;
         }, 0);
-        return <Card key={index} className="bg-gray-900 border-gray-700 cursor-pointer hover:bg-gray-800 transition-colors" onClick={() => handleSelectArea(area)}>
+        return <Card key={index} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectArea(area)}>
               <CardContent className="p-0">
                 <div className="relative">
                   {/* Area Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-t-lg">
+                  <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
                     {area.capa && <img src={area.capa} alt={area.nome} className="w-full h-full object-cover rounded-t-lg" />}
                     <div className="absolute top-4 left-4">
-                      <div className="bg-yellow-500 text-black rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                      <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         <BookOpen className="h-4 w-4" />
                       </div>
                     </div>
@@ -651,7 +655,7 @@ export const CursosPreparatoriosElegant = ({
                   {/* Area Info */}
                   <div className="p-6 space-y-4">
                     <h3 className="text-xl font-bold">{area.nome}</h3>
-                    <div className="flex items-center gap-1 text-sm text-gray-400">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <span>{area.modulos.length} módulos</span>
                       <span>•</span>
                       <span>{area.totalAulas} aulas</span>
@@ -659,16 +663,16 @@ export const CursosPreparatoriosElegant = ({
 
                     <div className="flex items-center justify-around text-center">
                       <div>
-                        <div className="text-2xl font-bold text-green-500">{completedLessons}</div>
-                        <div className="text-sm text-gray-400">Concluídas</div>
+                        <div className="text-2xl font-bold text-primary">{completedLessons}</div>
+                        <div className="text-sm text-muted-foreground">Concluídas</div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-yellow-500">{area.totalAulas - completedLessons}</div>
-                        <div className="text-sm text-gray-400">Pendentes</div>
+                        <div className="text-2xl font-bold text-primary">{area.totalAulas - completedLessons}</div>
+                        <div className="text-sm text-muted-foreground">Pendentes</div>
                       </div>
                     </div>
 
-                    <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-medium">
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                       📝 Começar Agora
                     </Button>
                   </div>

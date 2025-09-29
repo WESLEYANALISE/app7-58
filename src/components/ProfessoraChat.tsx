@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { X, Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import professoraAvatar from '@/assets/professora-avatar.png';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProfessoraChatProps {
   isOpen: boolean;
@@ -23,16 +24,36 @@ export const ProfessoraChat = ({ isOpen, onClose, context }: ProfessoraChatProps
       content: `👩‍🏫 Olá! Sou sua Professora de Direito IA especializada!\n\n${context ? `📚 Vamos estudar "${context.titulo}" na área de ${context.area}.\n\n` : ''}✨ Posso ajudá-lo com:\n\n📖 Explicações detalhadas sobre a aula\n💡 Esclarecimento de conceitos jurídicos\n📝 Exemplos práticos e casos reais\n🎯 Preparação para OAB e concursos\n❓ Qualquer dúvida sobre o conteúdo\n\nComo posso te ajudar hoje?`
     }
   ]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-
-    setMessages(prev => [
-      ...prev,
-      { type: 'user', content: message },
-      { type: 'bot', content: '📚 Obrigada pela sua pergunta! Estou processando sua dúvida sobre o conteúdo da aula. Em breve terei acesso completo à IA para fornecer respostas detalhadas e personalizadas sobre Direito.' }
-    ]);
+  const handleSendMessage = async () => {
+    if (!message.trim() || isLoading) return;
+    const userMsg = { type: 'user' as const, content: message };
+    setMessages(prev => [...prev, userMsg]);
     setMessage('');
+    setIsLoading(true);
+    try {
+      const history = [...messages, userMsg].map((m: any) => ({
+        role: m.type === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
+      const { data, error } = await supabase.functions.invoke('gemini-ai-chat', {
+        body: {
+          message: userMsg.content,
+          history,
+          context,
+        },
+      });
+
+      if (error) throw error;
+      const botContent = data?.response || data?.generatedText || data?.message || 'Não consegui gerar uma resposta agora.';
+      setMessages(prev => [...prev, { type: 'bot', content: botContent }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { type: 'bot', content: 'Desculpe, houve um erro ao consultar a IA. Tente novamente.' }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -46,7 +67,7 @@ export const ProfessoraChat = ({ isOpen, onClose, context }: ProfessoraChatProps
       />
       
       {/* Chat Container - Full screen on mobile, centered on desktop */}
-      <div className="relative w-full h-full md:w-[90%] md:h-[90%] md:max-w-4xl bg-gradient-to-br from-background to-background/95 md:rounded-2xl shadow-2xl overflow-hidden border border-border">
+      <div className="relative w-full h-full bg-gradient-to-br from-background to-background/95 rounded-none shadow-2xl overflow-hidden border border-border">
         {/* Header */}
         <div className="bg-primary/10 backdrop-blur-sm p-4 flex items-center justify-between border-b border-border">
           <div className="flex items-center space-x-3">
@@ -71,7 +92,7 @@ export const ProfessoraChat = ({ isOpen, onClose, context }: ProfessoraChatProps
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 p-4 h-[calc(100vh-140px)] md:h-[calc(90vh-140px)]">
+        <ScrollArea className="flex-1 p-4 h-[calc(100vh-180px)]">
           <div className="space-y-4">
             {messages.map((msg, index) => (
               <div
@@ -93,7 +114,7 @@ export const ProfessoraChat = ({ isOpen, onClose, context }: ProfessoraChatProps
         </ScrollArea>
 
         {/* Input */}
-        <div className="p-4 bg-muted/30 backdrop-blur-sm border-t border-border">
+        <div className="p-6 pb-8 bg-muted/30 backdrop-blur-sm border-t border-border">
           <div className="flex space-x-2">
             <Input
               value={message}
