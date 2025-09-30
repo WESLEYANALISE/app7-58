@@ -490,7 +490,7 @@ const FlashcardsModern = () => {
                   onClick={virarCard}
                 >
                   {/* Frente do Card */}
-                  <div className={`backface-hidden absolute inset-0 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}>
+                  <div className="backface-hidden absolute inset-0 bg-card">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge variant="outline" className="border-primary/30 text-primary">
@@ -504,7 +504,7 @@ const FlashcardsModern = () => {
                     <CardContent className="flex items-center justify-center min-h-[320px]">
                       <div className="text-center px-6">
                         <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary opacity-20" />
-                        <p className="text-xl font-medium leading-relaxed mb-6">
+                        <p className="text-xl font-medium leading-relaxed mb-6 text-foreground">
                           {flashcardsFiltrados[currentCardIndex]?.pergunta || 'Pergunta não disponível'}
                         </p>
                         <p className="text-sm text-muted-foreground">Clique para ver a resposta</p>
@@ -513,7 +513,7 @@ const FlashcardsModern = () => {
                   </div>
 
                   {/* Verso do Card */}
-                  <div className={`backface-hidden absolute inset-0 rotate-y-180 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="backface-hidden absolute inset-0 rotate-y-180 bg-card rounded-lg">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge variant="default" className="bg-primary">
@@ -526,13 +526,13 @@ const FlashcardsModern = () => {
                     </CardHeader>
                     <CardContent className="flex items-center justify-center min-h-[320px]">
                       <div className="text-center px-6">
-                        <p className="text-lg leading-relaxed mb-4">
+                        <p className="text-lg leading-relaxed mb-4 text-foreground">
                           {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
                         </p>
                         {flashcardsFiltrados[currentCardIndex]?.exemplo && (
                           <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
                             <p className="text-sm font-semibold text-primary mb-2">💡 Exemplo</p>
-                            <p className="text-sm">{flashcardsFiltrados[currentCardIndex]?.exemplo}</p>
+                            <p className="text-sm text-foreground">{flashcardsFiltrados[currentCardIndex]?.exemplo}</p>
                           </div>
                         )}
                       </div>
