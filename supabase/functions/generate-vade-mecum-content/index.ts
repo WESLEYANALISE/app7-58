@@ -33,46 +33,75 @@ serve(async (req) => {
     let generateResponse: any;
 
     if (type === 'flashcard') {
-      prompt = `
-        Baseado no seguinte artigo jurídico, gere EXATAMENTE 10 flashcards de estudo detalhados, desmembrando o artigo parte por parte:
-        
-        Artigo: ${articleNumber} - ${codeName}
-        Conteúdo: ${articleContent}
-        
-        IMPORTANTE: Desmembre o artigo em 10 flashcards, abordando:
-        - Conceito principal e definição
-        - Elementos essenciais e requisitos
-        - Exceções e ressalvas
-        - Aplicações práticas e casos de uso
-        - Consequências jurídicas
-        - Relações com outros artigos
-        - Aspectos procedimentais
-        - Prazos e condições (se houver)
-        - Jurisprudência relevante
-        - Pontos de atenção e pegadinhas comuns
-        
-        Para cada flashcard, crie:
-        1. Uma pergunta clara e específica sobre um aspecto detalhado do artigo
-        2. Uma resposta completa, educativa e precisa
-        3. Um exemplo prático real de aplicação (situação concreta ou caso hipotético)
-        
-        Retorne APENAS um JSON válido com EXATAMENTE 10 flashcards no formato:
-        {
-          "flashcards": [
-            {
-              "pergunta": "pergunta 1 aqui",
-              "resposta": "resposta 1 aqui", 
-              "exemplo": "exemplo prático 1 aqui"
-            },
-            {
-              "pergunta": "pergunta 2 aqui",
-              "resposta": "resposta 2 aqui", 
-              "exemplo": "exemplo prático 2 aqui"
-            },
-            ... (total de 10 flashcards)
-          ]
-        }
-      `;
+      prompt = `Você é um especialista em criar flashcards educativos de Direito.
+
+TAREFA: Analise o artigo jurídico abaixo e crie EXATAMENTE 10 flashcards detalhados.
+
+ARTIGO: ${articleNumber} do ${codeName}
+CONTEÚDO: ${articleContent}
+
+INSTRUÇÕES OBRIGATÓRIAS:
+1. Gere EXATAMENTE 10 flashcards (não menos, não mais)
+2. Cada flashcard deve cobrir um aspecto diferente do artigo
+3. Desmembre o artigo completamente: conceito, elementos, exceções, aplicações, consequências, procedimentos, prazos, jurisprudência, dicas e pegadinhas
+
+FORMATO JSON OBRIGATÓRIO (copie exatamente esta estrutura):
+{
+  "flashcards": [
+    {
+      "pergunta": "texto da pergunta 1",
+      "resposta": "texto da resposta 1",
+      "exemplo": "texto do exemplo 1"
+    },
+    {
+      "pergunta": "texto da pergunta 2",
+      "resposta": "texto da resposta 2",
+      "exemplo": "texto do exemplo 2"
+    },
+    {
+      "pergunta": "texto da pergunta 3",
+      "resposta": "texto da resposta 3",
+      "exemplo": "texto do exemplo 3"
+    },
+    {
+      "pergunta": "texto da pergunta 4",
+      "resposta": "texto da resposta 4",
+      "exemplo": "texto do exemplo 4"
+    },
+    {
+      "pergunta": "texto da pergunta 5",
+      "resposta": "texto da resposta 5",
+      "exemplo": "texto do exemplo 5"
+    },
+    {
+      "pergunta": "texto da pergunta 6",
+      "resposta": "texto da resposta 6",
+      "exemplo": "texto do exemplo 6"
+    },
+    {
+      "pergunta": "texto da pergunta 7",
+      "resposta": "texto da resposta 7",
+      "exemplo": "texto do exemplo 7"
+    },
+    {
+      "pergunta": "texto da pergunta 8",
+      "resposta": "texto da resposta 8",
+      "exemplo": "texto do exemplo 8"
+    },
+    {
+      "pergunta": "texto da pergunta 9",
+      "resposta": "texto da resposta 9",
+      "exemplo": "texto do exemplo 9"
+    },
+    {
+      "pergunta": "texto da pergunta 10",
+      "resposta": "texto da resposta 10",
+      "exemplo": "texto do exemplo 10"
+    }
+  ]
+}
+
+ATENÇÃO: Retorne APENAS o JSON válido, sem texto adicional antes ou depois.`;
 
       const aiResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
@@ -83,9 +112,10 @@ serve(async (req) => {
         body: JSON.stringify({
           model: 'google/gemini-2.5-flash',
           messages: [
-            { role: 'system', content: 'Você é uma IA jurídica. Gere flashcards claros, objetivos e corretos. Responda APENAS com JSON válido.' },
+            { role: 'system', content: 'Você é uma IA jurídica especializada em criar flashcards. Gere SEMPRE exatamente 10 flashcards. Responda APENAS com JSON válido, sem texto adicional.' },
             { role: 'user', content: prompt }
-          ]
+          ],
+          temperature: 0.7
         })
       });
 
@@ -107,13 +137,43 @@ serve(async (req) => {
         throw new Error('Resposta vazia do modelo');
       }
       
-      // Extrair JSON do texto gerado
-      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+      console.log('Resposta bruta do modelo:', generatedText.substring(0, 500));
+      
+      // Extrair JSON do texto gerado (limpar markdown se houver)
+      let cleanedText = generatedText.trim();
+      
+      // Remover markdown code blocks se existirem
+      if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```json?\s*/i, '').replace(/```\s*$/, '');
+      }
+      
+      // Encontrar o JSON
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.error('Texto completo da resposta:', generatedText);
         throw new Error('Não foi possível extrair JSON válido da resposta');
       }
 
-      generateResponse = JSON.parse(jsonMatch[0]);
+      try {
+        generateResponse = JSON.parse(jsonMatch[0]);
+        
+        // Validar que temos exatamente 10 flashcards
+        if (!generateResponse.flashcards || !Array.isArray(generateResponse.flashcards)) {
+          throw new Error('JSON não contém array de flashcards');
+        }
+        
+        console.log(`Total de flashcards gerados: ${generateResponse.flashcards.length}`);
+        
+        if (generateResponse.flashcards.length < 10) {
+          console.warn(`Aviso: Apenas ${generateResponse.flashcards.length} flashcards foram gerados (esperado: 10)`);
+        }
+        
+      } catch (parseError) {
+        console.error('Erro ao parsear JSON:', parseError);
+        console.error('JSON problemático:', jsonMatch[0].substring(0, 1000));
+        const errorMessage = parseError instanceof Error ? parseError.message : 'Erro desconhecido';
+        throw new Error(`Erro ao processar JSON: ${errorMessage}`);
+      }
 
       // Salvar múltiplos flashcards no banco
       const flashcardsToInsert = generateResponse.flashcards.map((card: any) => ({
