@@ -145,6 +145,59 @@ export const vademecumConfig: FunctionSidebarConfig = {
           badge: '8'
         }
       ]
+    },
+    {
+      title: 'Estatutos',
+      items: [
+        {
+          id: 'estatuto-oab',
+          label: 'Estatuto da OAB',
+          icon: Scale,
+          badge: '78'
+        },
+        {
+          id: 'estatuto-eca',
+          label: 'Estatuto da Criança e Adolescente',
+          icon: Users,
+          badge: '267'
+        },
+        {
+          id: 'estatuto-idoso',
+          label: 'Estatuto do Idoso',
+          icon: Users,
+          badge: '118'
+        },
+        {
+          id: 'estatuto-pcd',
+          label: 'Estatuto da Pessoa com Deficiência',
+          icon: Users,
+          badge: '127'
+        },
+        {
+          id: 'estatuto-igualdade-racial',
+          label: 'Estatuto da Igualdade Racial',
+          icon: Users,
+          badge: '65'
+        },
+        {
+          id: 'estatuto-cidade',
+          label: 'Estatuto da Cidade',
+          icon: Building,
+          badge: '58'
+        },
+        {
+          id: 'estatuto-desarmamento',
+          label: 'Estatuto do Desarmamento',
+          icon: Shield,
+          badge: '38'
+        },
+        {
+          id: 'estatuto-torcedor',
+          label: 'Estatuto do Torcedor',
+          icon: Users,
+          badge: '47'
+        }
+      ]
     }
   ]
 };

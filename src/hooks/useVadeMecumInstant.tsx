@@ -190,10 +190,52 @@ export const useVadeMecumInstant = () => {
       textColor: 'text-background'
     },
     { 
+      id: 'estatuto-eca', name: 'Estatuto da Criança e Adolescente', fullName: 'Estatuto da Criança e do Adolescente', 
+      description: 'Lei nº 8.069/1990', 
+      icon: '👶', 
+      color: 'bg-gradient-to-br from-blue-600/90 to-blue-700/80 border border-blue-500/30',
+      textColor: 'text-white'
+    },
+    { 
       id: 'estatuto-idoso', name: 'Estatuto do Idoso', fullName: 'Estatuto do Idoso', 
       description: 'Lei nº 10.741/2003', 
       icon: '👴', 
       color: 'bg-gradient-to-br from-emerald-600/90 to-emerald-700/80 border border-emerald-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'estatuto-pcd', name: 'Estatuto da Pessoa com Deficiência', fullName: 'Estatuto da Pessoa com Deficiência', 
+      description: 'Lei nº 13.146/2015', 
+      icon: '♿', 
+      color: 'bg-gradient-to-br from-indigo-600/90 to-indigo-700/80 border border-indigo-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'estatuto-igualdade-racial', name: 'Estatuto da Igualdade Racial', fullName: 'Estatuto da Igualdade Racial', 
+      description: 'Lei nº 12.288/2010', 
+      icon: '🤝', 
+      color: 'bg-gradient-to-br from-amber-600/90 to-amber-700/80 border border-amber-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'estatuto-cidade', name: 'Estatuto da Cidade', fullName: 'Estatuto da Cidade', 
+      description: 'Lei nº 10.257/2001', 
+      icon: '🏙️', 
+      color: 'bg-gradient-to-br from-slate-600/90 to-slate-700/80 border border-slate-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'estatuto-desarmamento', name: 'Estatuto do Desarmamento', fullName: 'Estatuto do Desarmamento', 
+      description: 'Lei nº 10.826/2003', 
+      icon: '🔫', 
+      color: 'bg-gradient-to-br from-red-600/90 to-red-700/80 border border-red-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'estatuto-torcedor', name: 'Estatuto do Torcedor', fullName: 'Estatuto de Defesa do Torcedor', 
+      description: 'Lei nº 10.671/2003', 
+      icon: '⚽', 
+      color: 'bg-gradient-to-br from-green-600/90 to-green-700/80 border border-green-500/30',
       textColor: 'text-white'
     }
   ], []);
@@ -280,7 +322,13 @@ export const useVadeMecumInstant = () => {
         'ctb': 'CTB',
         'ce': 'CE',
         'estatuto-oab': 'ESTATUTO - OAB',
-        'estatuto-idoso': 'ESTATUTO - IDOSO'
+        'estatuto-eca': 'ESTATUTO - ECA',
+        'estatuto-idoso': 'ESTATUTO - IDOSO',
+        'estatuto-pcd': 'ESTATUTO - PESSOA COM DEFICIENCIA',
+        'estatuto-igualdade-racial': 'ESTATUTO - IGUALDADE RACIAL',
+        'estatuto-cidade': 'ESTATUTO - CIDADE',
+        'estatuto-desarmamento': 'ESTATUTO - DESARMAMENTO',
+        'estatuto-torcedor': 'ESTATUTO - TORCEDOR'
       };
 
       const tableName = tableMap[codeId];
