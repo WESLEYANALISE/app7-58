@@ -4,11 +4,13 @@ import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 export const ProfessoraIAGlobal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [bookContext, setBookContext] = useState<any>(null);
+  const [area, setArea] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const handleOpenChat = (event: CustomEvent) => {
-      const { livro } = event.detail;
-      setBookContext(livro);
+      const { livro, area: evtArea } = (event as any).detail || {};
+      if (livro) setBookContext(livro);
+      if (evtArea) setArea(String(evtArea));
       setIsOpen(true);
     };
 
@@ -27,6 +29,7 @@ export const ProfessoraIAGlobal = () => {
         setBookContext(null);
       }}
       bookContext={bookContext}
+      area={area}
     />
   );
 };

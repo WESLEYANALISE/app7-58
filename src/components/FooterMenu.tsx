@@ -86,6 +86,11 @@ export const FooterMenu = ({
     setActiveItem(item.id);
     if (item.id === 'assistenteia') {
       setCurrentFunction('Professora IA');
+      // Abrir o chat global da Professora IA via evento (ouvido por ProfessoraIAGlobal)
+      const event = new CustomEvent('openProfessoraChat', {
+        detail: { area: 'Direito' }
+      });
+      window.dispatchEvent(event);
     } else {
       setCurrentFunction(item.function);
     }
