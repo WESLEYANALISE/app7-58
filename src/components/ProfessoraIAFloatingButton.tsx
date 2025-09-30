@@ -10,7 +10,7 @@ export const ProfessoraIAFloatingButton = ({
 }: ProfessoraIAFloatingButtonProps) => {
   const [isHovered, setIsHovered] = useState(false);
   return <AnimatePresence>
-      <motion.div initial={{
+      <motion.div className="fixed bottom-6 right-6 z-40" initial={{
       y: 100,
       opacity: 0,
       scale: 0.8
@@ -37,14 +37,7 @@ export const ProfessoraIAFloatingButton = ({
         stiffness: 400,
         damping: 25
       }}>
-          <Button
-            onClick={onOpen}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-400/50 p-0"
-          >
-            <Brain className="h-6 w-6 text-white" />
-          </Button>
+          
         </motion.div>
         
         {/* Tooltip */}
