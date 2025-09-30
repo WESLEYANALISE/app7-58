@@ -32,8 +32,7 @@ export const useStaggerAnimation = (itemCount: number, baseDelay: number = 0.1) 
     animate: { opacity: 1, y: 0 },
     transition: {
       duration: 0.5,
-      delay: index * baseDelay,
-      ease: "easeOut"
+      delay: index * baseDelay
     }
   });
 };

@@ -199,7 +199,7 @@ export const CursosPreparatoriosUltraModern = ({ onBack }: CursosPreparatoriosUl
                     <div className="relative aspect-video overflow-hidden">
                       <img
                         src={optimizeCourseImage(aula.capa)}
-                        alt={aula.titulo}
+                        alt={aula.nome}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
