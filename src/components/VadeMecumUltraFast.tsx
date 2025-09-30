@@ -480,6 +480,15 @@ const VadeMecumUltraFast: React.FC = () => {
     overscan: 5, // Renderiza 5 itens extras acima/abaixo
   });
 
+  // Ao alterar a busca, garanta que o primeiro resultado fique visível
+  useEffect(() => {
+    if (!parentRef.current) return;
+    parentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      virtualizer.scrollToIndex(0, { align: 'start' });
+    } catch {/* ignore */}
+  }, [searchTerm]);
+
   // Carregar artigos com cache instantâneo e otimização extrema
   const loadArticles = useCallback(async (code: VadeMecumLegalCode) => {
     const cacheKey = `articles-${code.id}`;
