@@ -35,8 +35,8 @@ export const BookReaderPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border/50">
-        <div className="flex items-center justify-between p-4">
+      <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border/50 pointer-events-auto">
+        <div className="flex items-center justify-between p-4 pointer-events-auto">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
@@ -65,10 +65,10 @@ export const BookReaderPage = () => {
       </div>
 
       {/* Reader Content */}
-      <div className="h-[calc(100vh-80px)]">
+      <div className="h-[calc(100vh-80px)] relative">
         <iframe 
           src={url} 
-          className="w-full h-full border-0" 
+          className="w-full h-full border-0 pointer-events-auto" 
           title={book.livro}
           loading="lazy"
         />

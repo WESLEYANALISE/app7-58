@@ -85,11 +85,12 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
             const extractedText = extractData.text || '';
             console.log('PDF text extracted, length:', extractedText.length);
             
-            // Limitar texto extraído a ~15k caracteres
-            const truncatedText = extractedText.substring(0, 15000);
+            // Aumentar limite para PDFs grandes - até 50k caracteres
+            const maxLength = 50000;
+            const truncatedText = extractedText.substring(0, maxLength);
             userMessage.content.push({
               type: 'text',
-              text: `[Conteúdo do PDF "${fileData.name}"]\n\n${truncatedText}${extractedText.length > 15000 ? '\n\n[... texto truncado por tamanho]' : ''}`
+              text: `[Conteúdo do PDF "${fileData.name}" - ${extractedText.length} caracteres]\n\n${truncatedText}${extractedText.length > maxLength ? '\n\n[... documento possui mais conteúdo, peça para continuar se necessário]' : ''}`
             });
           } else {
             console.error('Failed to extract PDF text:', extractResponse.status);
@@ -134,8 +135,8 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
         model: 'google/gemini-2.5-flash',
         messages,
         stream: true,
-        max_tokens: 2000,
-        temperature: 0.2,
+        max_tokens: 4000,
+        temperature: 0.3,
       }),
     });
 
