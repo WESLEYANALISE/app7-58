@@ -1181,8 +1181,8 @@ const VadeMecumUltraFast: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[140px] sm:h-[160px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
-                    <div className="mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[160px] sm:h-[180px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
+                    <div className="mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                       {(() => {
                         const iconMap: Record<string, React.ComponentType<any>> = {
                           'Handshake': Handshake,
@@ -1201,12 +1201,14 @@ const VadeMecumUltraFast: React.FC = () => {
                         return IconComponent ? <IconComponent className="h-8 w-8 sm:h-10 sm:w-10" /> : null;
                       })()}
                     </div>
-                    <h3 className={`font-bold text-lg sm:text-xl mb-1 ${code.textColor}`}>
-                      {code.name}
-                    </h3>
-                    <p className={`text-xs sm:text-sm ${code.textColor} opacity-80 leading-tight`}>
-                      {code.fullName}
-                    </p>
+                    <div className="flex-1 flex flex-col justify-center min-h-0">
+                      <h3 className={`font-bold text-base sm:text-lg mb-1 ${code.textColor} line-clamp-2`}>
+                        {code.name}
+                      </h3>
+                      <p className={`text-xs sm:text-sm ${code.textColor} opacity-80 leading-tight line-clamp-2`}>
+                        {code.fullName}
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               ))}
