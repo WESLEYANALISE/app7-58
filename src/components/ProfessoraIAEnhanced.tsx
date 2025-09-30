@@ -44,13 +44,15 @@ interface ProfessoraIAEnhancedProps {
   onClose: () => void;
   bookContext?: any;
   area?: string;
+  initialMessage?: string;
 }
 
 export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
   isOpen,
   onClose,
   bookContext,
-  area
+  area,
+  initialMessage
 }) => {
   const areaLabel = typeof area === 'string' ? area : (area ? String(area) : '');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -115,7 +117,7 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         role: 'assistant',
-        content: `🎓 Olá! Sou sua **Professora de Direito IA Premium**!
+        content: initialMessage || `🎓 Olá! Sou sua **Professora de Direito IA Premium**!
 
 ${bookContext && typeof bookContext === 'object' && bookContext?.livro ? `📚 Estou aqui para ajudar com o livro **"${bookContext.livro}"**` : ''}
 ${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
