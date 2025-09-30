@@ -366,11 +366,11 @@ const FlashcardsModern = () => {
             duration: 0.6,
             type: "spring",
             stiffness: 100
-          }} className="preserve-3d w-full relative min-h-[400px]">
+          }} className="preserve-3d w-full relative min-h-[300px] max-h-[80vh]">
                 {/* Frente do Card */}
                 <div className="backface-hidden absolute inset-0">
-                  <Card className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30" onClick={virarCard}>
-                    <CardHeader className="pb-2">
+                  <Card className="h-full cursor-pointer shadow-xl border-2 border-primary/30 flex flex-col" onClick={virarCard}>
+                    <CardHeader className="pb-2 flex-shrink-0">
                       <div className="flex justify-between items-center">
                         <Badge variant="outline" className="border-primary/30 text-primary">
                           {flashcardsFiltrados[currentCardIndex]?.area}
@@ -380,8 +380,8 @@ const FlashcardsModern = () => {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex items-center justify-center min-h-[320px]">
-                      <div className="text-center px-6">
+                    <CardContent className="flex-1 flex items-center justify-center overflow-y-auto py-8">
+                      <div className="text-center px-6 w-full">
                         <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary opacity-20" />
                         <p className="text-xl font-medium leading-relaxed mb-6 text-foreground">
                           {flashcardsFiltrados[currentCardIndex]?.pergunta || 'Pergunta não disponível'}
@@ -394,8 +394,8 @@ const FlashcardsModern = () => {
 
                 {/* Verso do Card */}
                 <div className="backface-hidden absolute inset-0 rotate-y-180">
-                  <Card className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30" onClick={virarCard}>
-                    <CardHeader className="pb-2">
+                  <Card className="h-full cursor-pointer shadow-xl border-2 border-primary/30 flex flex-col" onClick={virarCard}>
+                    <CardHeader className="pb-2 flex-shrink-0">
                       <div className="flex justify-between items-center">
                         <Badge variant="default" className="bg-primary">
                           Resposta
@@ -405,9 +405,9 @@ const FlashcardsModern = () => {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex items-center justify-center min-h-[320px]">
-                      <div className="text-center px-0">
-                        <p className="text-base leading-relaxed mb-4 text-foreground">
+                    <CardContent className="flex-1 flex items-center justify-center overflow-y-auto py-8">
+                      <div className="text-center px-6 w-full">
+                        <p className="text-base leading-relaxed mb-4 text-foreground whitespace-pre-wrap">
                           {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
                         </p>
                         {flashcardsFiltrados[currentCardIndex]?.exemplo && <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">

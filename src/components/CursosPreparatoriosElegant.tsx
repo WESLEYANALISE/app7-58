@@ -717,7 +717,7 @@ export const CursosPreparatoriosElegant = ({
                         src={area.capa} 
                         alt={area.nome} 
                         className="w-full h-full rounded-t-lg"
-                        loading="lazy"
+                        loading="eager"
                       />
                     )}
                     <div className="absolute top-4 left-4">

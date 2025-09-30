@@ -24,29 +24,45 @@ export const optimizeCourseImage = (url: string): string => {
   return url;
 };
 
-// Preload de imagens críticas com prioridade
+// Preload de imagens críticas com prioridade ultra-alta
 export const preloadCourseImages = (urls: string[], priority: 'high' | 'low' = 'high') => {
-  urls.forEach(url => {
-    if (!url || preloadedImages.has(url)) return;
-    
-    const optimizedUrl = optimizeCourseImage(url);
-    
-    // Preload agressivo para melhor performance
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = optimizedUrl;
-    if (priority === 'high') {
-      link.fetchPriority = 'high';
+  // Usar requestIdleCallback para não bloquear thread principal
+  const preloadBatch = () => {
+    urls.forEach(url => {
+      if (!url || preloadedImages.has(url)) return;
+      
+      const optimizedUrl = optimizeCourseImage(url);
+      
+      // Preload agressivo para melhor performance
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = optimizedUrl;
+      if (priority === 'high') {
+        link.fetchPriority = 'high';
+      }
+      document.head.appendChild(link);
+      
+      // Também criar objeto Image para cache do navegador
+      const img = new Image();
+      img.src = optimizedUrl;
+      img.loading = 'eager';
+      
+      preloadedImages.add(url);
+    });
+  };
+
+  // Se prioridade alta, executar imediatamente
+  if (priority === 'high') {
+    preloadBatch();
+  } else {
+    // Se prioridade baixa, usar requestIdleCallback
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(preloadBatch);
+    } else {
+      setTimeout(preloadBatch, 1);
     }
-    document.head.appendChild(link);
-    
-    // Também criar objeto Image para cache do navegador
-    const img = new Image();
-    img.src = optimizedUrl;
-    
-    preloadedImages.add(url);
-  });
+  }
 };
 
 // Cache para dados de progresso
