@@ -182,15 +182,15 @@ export const RadarJuridico = () => {
       <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/50">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={handleBack} className="hover:bg-accent">
+            <Button variant="ghost" size="icon" onClick={handleBack} className="hover:bg-accent px-[18px] py-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <h1 className="text-xl font-bold text-foreground flex items-center gap-2 mx-[8px]">
                 <TrendingUp className="h-6 w-6 text-yellow-400" />
                 Radar Jurídico
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground py-0 px-[14px]">
                 Notícias jurídicas com análise inteligente
                 {lastUpdate && <span className="ml-2">
                     • Atualizado às {lastUpdate.toLocaleTimeString('pt-BR', {
