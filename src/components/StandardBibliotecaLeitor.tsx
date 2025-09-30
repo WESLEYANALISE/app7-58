@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { BotaoAudioRelaxante } from '@/components/BotaoAudioRelaxante';
+import { AmbientSoundPlayer } from './AmbientSoundPlayer';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
 import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 import { motion } from 'framer-motion';
@@ -139,7 +140,10 @@ export const StandardBibliotecaLeitor = ({
 
       </motion.div>
       
-      {/* Botão Flutuante da Professora IA */}
+      {/* Botão de Som Ambiente - canto inferior esquerdo */}
+      <AmbientSoundPlayer />
+
+      {/* Botão Flutuante da Professora IA - canto inferior direito */}
       <div className="fixed bottom-6 right-6 z-40">
         <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
       </div>

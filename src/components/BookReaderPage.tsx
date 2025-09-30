@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, X } from 'lucide-react';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
 import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
+import { AmbientSoundPlayer } from './AmbientSoundPlayer';
 import { useState } from 'react';
 
 interface BookData {
@@ -69,7 +70,10 @@ export const BookReaderPage = () => {
         />
       </div>
 
-      {/* Floating Professor Button - posicionado corretamente */}
+      {/* Botão de Som Ambiente - canto inferior esquerdo */}
+      <AmbientSoundPlayer />
+
+      {/* Floating Professor Button - canto inferior direito */}
       <div className="fixed bottom-6 right-6 z-40">
         <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
       </div>

@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, X, Brain } from 'lucide-react';
 import { BotaoAudioRelaxante } from '@/components/BotaoAudioRelaxante';
-import { motion } from 'framer-motion';
+import { AmbientSoundPlayer } from './AmbientSoundPlayer';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
 import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
+import { motion } from 'framer-motion';
 
 interface LivroJuridico {
   id: number;
@@ -166,28 +167,24 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
         )}
       </div>
 
-      {/* Rodapé com botão da Professora */}
-      <div className="flex-shrink-0 border-t border-border/30 bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center justify-center p-4">
-          <Button
-            variant="default"
-            size="lg"
-            onClick={() => {
-              // Usar a mesma lógica do FloatingProfessoraButton
-              const event = new CustomEvent('openProfessoraChat', {
-                detail: { livro, area: livro.area }
-              });
-              window.dispatchEvent(event);
-            }}
-            className="flex items-center gap-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Brain className="h-4 w-4" />
-            </div>
-            Perguntar sobre o livro
-          </Button>
-        </div>
+      {/* Botão de Som Ambiente - canto inferior esquerdo */}
+      <AmbientSoundPlayer />
+
+      {/* Botão Flutuante da Professora IA - canto inferior direito */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
       </div>
+
+      {/* Chat da Professora IA */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        bookContext={{
+          livro: livro.livro,
+          autor: livro.autor
+        }}
+        area={livro.area}
+      />
     </motion.div>
     
     {/* Modal de áudio relaxante controlado manualmente */}
