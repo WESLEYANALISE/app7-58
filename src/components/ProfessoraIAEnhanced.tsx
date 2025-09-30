@@ -703,6 +703,22 @@ Responda APENAS com JSON válido:
                             Copiar
                           </Button>
                           
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              await exportConversationToPDF(
+                                [message],
+                                `Resposta - ${bookContext?.livro || areaLabel || 'Professora IA'}`
+                              );
+                            }}
+                            disabled={exporting}
+                            className="text-xs text-red-200 hover:text-white hover:bg-red-800/30"
+                          >
+                            <Download className="w-3 h-3 mr-1" />
+                            Exportar PDF
+                          </Button>
+                          
                           {message.content.length > 200 && (
                             <>
                               <Button
@@ -725,6 +741,28 @@ Responda APENAS com JSON válido:
                               >
                                 <HelpCircle className="w-3 h-3 mr-1" />
                                 Questões
+                              </Button>
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => sendMessage(`Resuma mais este conteúdo:\n\n${message.content.substring(0, 500)}`)}
+                                disabled={isLoading}
+                                className="text-xs text-red-200 hover:text-white hover:bg-red-800/30"
+                              >
+                                <Zap className="w-3 h-3 mr-1" />
+                                Resumir mais
+                              </Button>
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => sendMessage(`Explique com mais detalhes e exemplos práticos:\n\n${message.content.substring(0, 500)}`)}
+                                disabled={isLoading}
+                                className="text-xs text-red-200 hover:text-white hover:bg-red-800/30"
+                              >
+                                <BookOpen className="w-3 h-3 mr-1" />
+                                Explicar mais
                               </Button>
                             </>
                           )}
