@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { BotaoAudioRelaxante } from '@/components/BotaoAudioRelaxante';
+import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
+import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 import { motion } from 'framer-motion';
 interface StandardLivro {
   id: number;
@@ -30,6 +32,7 @@ export const StandardBibliotecaLeitor = ({
 }: StandardBibliotecaLeitorProps) => {
   const [showAudioModal, setShowAudioModal] = useState(false);
   const [showFullText, setShowFullText] = useState(false);
+  const [showProfessora, setShowProfessora] = useState(false);
   const getCapaLivro = () => {
     return livro.imagem || livro['capa-livro'] || livro.capaLivro || livro.capaLivroLink || (livro as any)['Capa-livro'];
   };
@@ -134,11 +137,23 @@ export const StandardBibliotecaLeitor = ({
             </div>}
         </div>
 
-        {/* Rodapé com botão da Professora */}
-        <div className="flex-shrink-0 border-t border-border/30 bg-background/95 backdrop-blur-sm">
-          
-        </div>
       </motion.div>
+      
+      {/* Botão Flutuante da Professora IA */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      </div>
+
+      {/* Chat da Professora IA */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        bookContext={{
+          livro: getTitulo(),
+          autor: livro.autor
+        }}
+        area={livro.area}
+      />
       
       {/* Modal de áudio relaxante controlado manualmente */}
       {showAudioModal && <div className="fixed inset-0 z-[60] pointer-events-none">

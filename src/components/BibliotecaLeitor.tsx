@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, X, Brain } from 'lucide-react';
 import { BotaoAudioRelaxante } from '@/components/BotaoAudioRelaxante';
 import { motion } from 'framer-motion';
+import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
+import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 
 interface LivroJuridico {
   id: number;
@@ -22,6 +24,7 @@ interface BibliotecaLeitorProps {
 
 export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
   const [showAudioModal, setShowAudioModal] = useState(false);
+  const [showProfessora, setShowProfessora] = useState(false);
 
   return (
     <>
