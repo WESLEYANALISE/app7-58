@@ -59,14 +59,61 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
     // Adicionar mensagem atual
     const userMessage: any = { role: 'user', content: [] };
 
+    // Processar arquivo anexado
     if (fileData) {
-      // Suporte a imagens e PDFs
-      userMessage.content.push({
-        type: 'image_url',
-        image_url: {
-          url: `data:${fileData.mimeType};base64,${fileData.data}`
+      console.log('Processing file:', { mimeType: fileData.mimeType, size: fileData.data?.length });
+      
+      // Se for PDF, extrair texto via edge function
+      if (fileData.mimeType === 'application/pdf') {
+        try {
+          console.log('Extracting text from PDF...');
+          const extractResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/extract-text`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': req.headers.get('Authorization') || '',
+            },
+            body: JSON.stringify({
+              fileUrl: `data:${fileData.mimeType};base64,${fileData.data}`,
+              fileType: fileData.mimeType,
+              fileName: fileData.name
+            })
+          });
+
+          if (extractResponse.ok) {
+            const extractData = await extractResponse.json();
+            const extractedText = extractData.text || '';
+            console.log('PDF text extracted, length:', extractedText.length);
+            
+            // Limitar texto extraído a ~15k caracteres
+            const truncatedText = extractedText.substring(0, 15000);
+            userMessage.content.push({
+              type: 'text',
+              text: `[Conteúdo do PDF "${fileData.name}"]\n\n${truncatedText}${extractedText.length > 15000 ? '\n\n[... texto truncado por tamanho]' : ''}`
+            });
+          } else {
+            console.error('Failed to extract PDF text:', extractResponse.status);
+            userMessage.content.push({
+              type: 'text',
+              text: `[Documento PDF anexado: ${fileData.name}]\nNão foi possível extrair o texto automaticamente.`
+            });
+          }
+        } catch (extractError) {
+          console.error('Error extracting PDF:', extractError);
+          userMessage.content.push({
+            type: 'text',
+            text: `[Documento PDF anexado: ${fileData.name}]\nErro na extração de texto.`
+          });
         }
-      });
+      } else {
+        // Para imagens, enviar como image_url
+        userMessage.content.push({
+          type: 'image_url',
+          image_url: {
+            url: `data:${fileData.mimeType};base64,${fileData.data}`
+          }
+        });
+      }
     }
 
     userMessage.content.push({
@@ -87,7 +134,8 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
         model: 'google/gemini-2.5-flash',
         messages,
         stream: true,
-        max_tokens: 4000,
+        max_tokens: 2000,
+        temperature: 0.2,
       }),
     });
 
