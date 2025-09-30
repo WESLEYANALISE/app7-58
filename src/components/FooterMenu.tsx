@@ -85,8 +85,8 @@ export const FooterMenu = ({
   const handleItemClick = (item: typeof menuItems[0]) => {
     setActiveItem(item.id);
     if (item.id === 'assistenteia') {
-      setCurrentFunction('Professora IA');
-      // Abrir o chat global da Professora IA via evento (ouvido por ProfessoraIAGlobal)
+      // Não mudar currentFunction aqui para evitar abrir o chat legado automaticamente
+      // Abrir apenas o chat global via evento
       const event = new CustomEvent('openProfessoraChat', {
         detail: { area: 'Direito' }
       });
