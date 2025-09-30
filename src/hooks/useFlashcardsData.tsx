@@ -48,14 +48,32 @@ export const useFlashcardsData = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Carregar flashcards do Supabase com otimização para grande volume
+  // Carregar flashcards do Supabase com cache local (stale-while-revalidate)
   useEffect(() => {
+    const cacheKey = 'flashcards-cache-v1';
+    let hadCache = false;
+
+    // Tentar servir imediatamente do cache local
+    try {
+      const cachedRaw = localStorage.getItem(cacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (Array.isArray(cached?.data)) {
+          setFlashcards(cached.data);
+          setLoading(false); // entrada instantânea
+          hadCache = true;
+          console.log(`⚡ Flashcards carregados do cache: ${cached.data.length}`);
+        }
+      }
+    } catch (e) {
+      console.warn('Falha ao ler cache de flashcards', e);
+    }
+
     const loadFlashcards = async () => {
       try {
         console.log('Iniciando carregamento de flashcards...');
-        
-        // Carregar todos os flashcards - Supabase tem limite de 1000 por padrão
-        // Vamos buscar em lotes para garantir que pegamos todos os 8000+
+
+        // Carregar todos os flashcards em lotes (evita limite do Supabase)
         let allFlashcards: any[] = [];
         let from = 0;
         const batchSize = 1000;
@@ -70,10 +88,9 @@ export const useFlashcardsData = () => {
             .range(from, from + batchSize - 1);
 
           if (batchError) throw batchError;
-          
+
           if (batchData && batchData.length > 0) {
             allFlashcards = [...allFlashcards, ...batchData];
-            console.log(`📥 Carregados ${batchData.length} flashcards (${from} a ${from + batchData.length - 1})`);
             from += batchSize;
             hasMore = batchData.length === batchSize;
           } else {
@@ -81,34 +98,33 @@ export const useFlashcardsData = () => {
           }
         }
 
-        const data = allFlashcards;
-        
-        console.log(`✅ ${data?.length || 0} flashcards carregados com sucesso`);
-        
-        // Mapear os dados para o formato esperado de forma otimizada
-        const mappedData = data?.map(item => ({
+        const mappedData = (allFlashcards || []).map(item => ({
           id: item.id,
           area: item.area || '',
           tema: item.tema || '',
           pergunta: item.pergunta || '',
           resposta: item.resposta || '',
           exemplo: item.exemplo || ''
-        })) || [];
-        
+        }));
+
         setFlashcards(mappedData);
-        
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ data: mappedData, updatedAt: Date.now() }));
+        } catch {}
+
         const uniqueAreas = [...new Set(mappedData.map(f => f.area))].filter(Boolean);
-        console.log(`📚 ${uniqueAreas.length} áreas únicas encontradas:`, uniqueAreas);
-        
+        console.log(`📚 ${uniqueAreas.length} áreas únicas encontradas`);
       } catch (error) {
         console.error('❌ Erro ao carregar flashcards:', error);
-        toast({
-          title: "Erro ao Carregar",
-          description: "Não foi possível carregar os flashcards. Tente novamente.",
-          variant: "destructive"
-        });
+        if (!hadCache) {
+          toast({
+            title: "Erro ao Carregar",
+            description: "Não foi possível carregar os flashcards. Tente novamente.",
+            variant: "destructive"
+          });
+        }
       } finally {
-        setLoading(false);
+        if (!hadCache) setLoading(false);
       }
     };
 

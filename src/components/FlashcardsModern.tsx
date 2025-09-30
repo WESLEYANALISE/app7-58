@@ -127,14 +127,6 @@ const FlashcardsModern = () => {
     setSelectedCategorias([]);
     resetSession();
   };
-  if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">Carregando flashcards...</p>
-        </div>
-      </div>;
-  }
   return <div className="min-h-screen bg-background">
       <AnimatePresence mode="wait">
         {viewMode === 'dashboard' && <motion.div key="dashboard" initial={{
@@ -415,7 +407,7 @@ const FlashcardsModern = () => {
                     </CardHeader>
                     <CardContent className="flex items-center justify-center min-h-[320px]">
                       <div className="text-center px-0">
-                        <p className="text-lg leading-relaxed mb-4 text-foreground">
+                        <p className="text-base leading-relaxed mb-4 text-foreground">
                           {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
                         </p>
                         {flashcardsFiltrados[currentCardIndex]?.exemplo && <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
@@ -487,7 +479,7 @@ const FlashcardsModern = () => {
             </div>
           </motion.div>}
 
-        {(viewMode === 'estudo' || viewMode === 'review') && flashcardsFiltrados.length === 0 && <motion.div key="no-cards" initial={{
+        {(viewMode === 'estudo' || viewMode === 'review') && !loading && flashcardsFiltrados.length === 0 && <motion.div key="no-cards" initial={{
         opacity: 0
       }} animate={{
         opacity: 1
