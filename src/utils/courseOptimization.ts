@@ -1,11 +1,10 @@
-// Otimizações específicas para cursos - Ultra Performance
+// Otimizações específicas para cursos
 import { cacheManager } from './cacheManager';
 
-// Cache para imagens de curso com preload
+// Cache para imagens de curso
 const imageCache = new Map<string, string>();
-const preloadedImages = new Set<string>();
 
-export const optimizeCourseImage = (url: string, width: number = 400): string => {
+export const optimizeCourseImage = (url: string): string => {
   if (!url) return '/placeholder.svg';
   
   // Se já está no cache, retorna imediatamente
@@ -13,9 +12,9 @@ export const optimizeCourseImage = (url: string, width: number = 400): string =>
     return imageCache.get(url)!;
   }
 
-  // Para imagens do Supabase, adiciona parâmetros de otimização agressivos
+  // Para imagens do Supabase, adiciona parâmetros de otimização
   if (url.includes('supabase')) {
-    const optimizedUrl = `${url}?width=${width}&quality=75&format=webp`;
+    const optimizedUrl = `${url}?width=400&quality=80`;
     imageCache.set(url, optimizedUrl);
     return optimizedUrl;
   }
@@ -24,33 +23,15 @@ export const optimizeCourseImage = (url: string, width: number = 400): string =>
   return url;
 };
 
-// Preload de imagens críticas com prioridade
-export const preloadCourseImages = (urls: string[], priority: 'high' | 'low' = 'high') => {
-  urls.forEach((url, index) => {
-    if (!url || preloadedImages.has(url)) return;
-    
-    const delay = priority === 'high' ? 0 : index * 100;
-    
-    setTimeout(() => {
+// Preload de imagens críticas
+export const preloadCourseImages = (urls: string[]) => {
+  urls.forEach(url => {
+    if (url && !imageCache.has(url)) {
       const img = new Image();
       img.src = optimizeCourseImage(url);
-      img.loading = priority === 'high' ? 'eager' : 'lazy';
       img.onload = () => {
-        preloadedImages.add(url);
-        cacheManager.set(`course_image_${url}`, url, 30 * 60 * 1000); // 30 minutos
+        imageCache.set(url, url);
       };
-    }, delay);
-  });
-};
-
-// Limpar cache de imagens antigas
-export const clearOldImageCache = () => {
-  const now = Date.now();
-  imageCache.forEach((value, key) => {
-    const cached = cacheManager.get(`course_image_${key}`);
-    if (!cached) {
-      imageCache.delete(key);
-      preloadedImages.delete(key);
     }
   });
 };
