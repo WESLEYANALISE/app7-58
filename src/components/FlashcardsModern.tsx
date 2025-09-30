@@ -414,7 +414,7 @@ const FlashcardsModern = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="flex items-center justify-center min-h-[320px]">
-                      <div className="text-center px-6">
+                      <div className="text-center px-[16px]">
                         <p className="text-lg leading-relaxed mb-4 text-foreground">
                           {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
                         </p>
