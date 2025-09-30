@@ -430,7 +430,7 @@ const FlashcardsModern = () => {
             </div>
 
             {/* Controles de Navegação */}
-            <div className="flex justify-between items-center mb-6 px-0">
+            <div className="flex justify-between items-center mb-6 px-0 py-[38px]">
               <Button variant="outline" onClick={cardAnterior} disabled={currentCardIndex === 0} size="lg" className="flex items-center gap-2">
                 <ChevronLeft className="h-5 w-5" />
                 Anterior
