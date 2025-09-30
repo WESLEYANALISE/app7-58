@@ -13,9 +13,11 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigation } from '@/context/NavigationContext';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfessoraIAFloatingButton } from '@/components/ProfessoraIAFloatingButton';
 import { ProfessoraIA } from '@/components/ProfessoraIA';
+import { VadeMecumFlashcardsSession } from '@/components/VadeMecumFlashcardsSession';
 import ReactMarkdown from 'react-markdown';
 import { copyToClipboard } from '@/utils/clipboardUtils';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
@@ -75,6 +77,10 @@ const VadeMecumUltraFast: React.FC = () => {
   // Estado para Professora IA
   const [showProfessora, setShowProfessora] = useState(false);
   
+  // Estados para Flashcards
+  const [generatedFlashcards, setGeneratedFlashcards] = useState<any[]>([]);
+  const [showFlashcardsSession, setShowFlashcardsSession] = useState(false);
+  
   // Estado centralizado para modais de conteúdo gerado
   const [generatedModal, setGeneratedModal] = useState<{
     open: boolean;
@@ -93,6 +99,7 @@ const VadeMecumUltraFast: React.FC = () => {
   const searchRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { setCurrentFunction } = useNavigation();
+  const { user } = useAuth();
 
   // Controle de scroll otimizado sem piscar
   useEffect(() => {
@@ -636,6 +643,51 @@ const VadeMecumUltraFast: React.FC = () => {
     }
   }, [toast]);
 
+  // Função para gerar flashcards
+  const generateFlashcards = useCallback(async (articleContent: string, articleNumber: string) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para gerar flashcards.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vade-mecum-content', {
+        body: {
+          articleContent,
+          articleNumber,
+          codeName: selectedCode?.name || 'Código Legal',
+          userId: user.id,
+          type: 'flashcard'
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.flashcards) {
+        setGeneratedFlashcards(data.flashcards);
+        setShowFlashcardsSession(true);
+        toast({
+          title: "Sucesso!",
+          description: `${data.flashcards.length} flashcards gerados com IA`,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao gerar flashcards:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar os flashcards. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [user, selectedCode, toast]);
+
   // Função para formatar texto com estilos específicos
   const formatVademecumText = useCallback((text: string) => {
     if (!text) return text;
@@ -954,6 +1006,20 @@ const VadeMecumUltraFast: React.FC = () => {
                       Exemplo
                     </>
                   )}
+                </Button>
+                <Button
+                  onClick={() => generateFlashcards(articleContent, articleNumber)}
+                  disabled={isGenerating}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <Bookmark className="h-3 w-3 mr-1" />
+                  )}
+                  Flashcards
                 </Button>
               </div>
             </div>
@@ -1351,6 +1417,19 @@ const VadeMecumUltraFast: React.FC = () => {
           conteudo: generatedModal.content || 'Consulta sobre artigos do Vade Mecum'
         }} 
       />
+
+      {/* Flashcards Session */}
+      {showFlashcardsSession && generatedFlashcards.length > 0 && (
+        <VadeMecumFlashcardsSession
+          flashcards={generatedFlashcards}
+          articleNumber=""
+          codeName={selectedCode?.name || 'Código Legal'}
+          onClose={() => {
+            setShowFlashcardsSession(false);
+            setGeneratedFlashcards([]);
+          }}
+        />
+      )}
     </div>
   );
 };

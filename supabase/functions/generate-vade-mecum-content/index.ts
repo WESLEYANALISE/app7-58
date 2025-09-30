@@ -42,7 +42,7 @@ serve(async (req) => {
         Para cada flashcard, crie:
         1. Uma pergunta clara e objetiva sobre diferentes aspectos do artigo
         2. Uma resposta completa e educativa
-        3. Uma dica útil para memorização
+        3. Um exemplo prático de aplicação do artigo (situação real ou caso hipotético)
         
         Retorne APENAS um JSON válido com um array no formato:
         {
@@ -50,12 +50,12 @@ serve(async (req) => {
             {
               "pergunta": "pergunta 1 aqui",
               "resposta": "resposta 1 aqui", 
-              "dica": "dica 1 aqui"
+              "exemplo": "exemplo prático 1 aqui"
             },
             {
               "pergunta": "pergunta 2 aqui",
               "resposta": "resposta 2 aqui", 
-              "dica": "dica 2 aqui"
+              "exemplo": "exemplo prático 2 aqui"
             },
             ...
           ]
@@ -97,7 +97,7 @@ serve(async (req) => {
         article_content: articleContent,
         pergunta: card.pergunta,
         resposta: card.resposta,
-        dica: card.dica
+        dica: card.exemplo || card.dica // Aceita tanto exemplo quanto dica para retrocompatibilidade
       }));
 
       const { data: flashcardsData, error: flashcardsError } = await supabase

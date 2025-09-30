@@ -10,7 +10,7 @@ interface Flashcard {
   id: string;
   pergunta: string;
   resposta: string;
-  dica?: string;
+  exemplo?: string;
 }
 
 interface VadeMecumFlashcardsSessionProps {
@@ -233,10 +233,10 @@ export const VadeMecumFlashcardsSession = ({
                       <p className="text-base leading-relaxed mb-4 text-foreground">
                         {currentCard?.resposta || 'Resposta não disponível'}
                       </p>
-                      {currentCard?.dica && (
+                      {(currentCard?.exemplo || (currentCard as any)?.dica) && (
                         <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                          <p className="text-sm text-muted-foreground mb-1">💡 Dica</p>
-                          <p className="text-sm text-foreground">{currentCard.dica}</p>
+                          <p className="text-sm font-semibold text-primary mb-2">💡 Exemplo Prático</p>
+                          <p className="text-sm text-foreground">{currentCard?.exemplo || (currentCard as any)?.dica}</p>
                         </div>
                       )}
                     </div>
@@ -257,18 +257,18 @@ export const VadeMecumFlashcardsSession = ({
                 onClick={handleRevisar}
                 size="lg"
                 variant="outline"
-                className="h-14 border-2 border-destructive/30 text-destructive hover:bg-destructive/10"
+                className="h-14 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 border-orange-500/30 dark:text-orange-400"
               >
                 <XCircle className="h-5 w-5 mr-2" />
-                Revisar
+                Preciso Revisar
               </Button>
               <Button
                 onClick={handleConhecido}
                 size="lg"
-                className="h-14 bg-primary hover:bg-primary/90"
+                className="h-14 bg-green-500 hover:bg-green-600 text-white"
               >
                 <CheckCircle className="h-5 w-5 mr-2" />
-                Conheci
+                Já Conheço
               </Button>
             </motion.div>
           )}
