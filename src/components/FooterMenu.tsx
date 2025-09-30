@@ -116,7 +116,7 @@ export const FooterMenu = ({
                     {isProfessoraIA ? (
                       <div className="w-8 h-8 overflow-hidden rounded-full">
                         <iframe
-                          src="https://lottie.host/embed/462be1de-7e6c-4d35-bd11-bf0c61cd91c8/u08MMvLcmY.lottie"
+                          src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie"
                           style={{ 
                             width: '100%', 
                             height: '100%', 
@@ -178,7 +178,7 @@ export const FooterMenu = ({
                       {isProfessoraIA ? (
                         <div className="w-7 h-7 overflow-hidden rounded-full">
                           <iframe
-                            src="https://lottie.host/embed/462be1de-7e6c-4d35-bd11-bf0c61cd91c8/u08MMvLcmY.lottie"
+                            src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie"
                             style={{ 
                               width: '100%', 
                               height: '100%', 

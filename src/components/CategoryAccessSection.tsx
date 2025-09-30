@@ -99,7 +99,7 @@ const CategoryAccessSection = memo(() => {
             
             {/* Animação Lottie Central */}
             <iframe 
-              src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie" 
+              src="https://lottie.host/embed/4801f3f0-7d55-4e49-b808-02032f215495/yAzqvAcH2m.lottie" 
               className="w-full h-32 border-0" 
               title="Animação de Justiça" 
             />
