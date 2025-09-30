@@ -479,18 +479,13 @@ const FlashcardsModern = () => {
             <div className="perspective-1000 mb-6">
               <motion.div
                 key={currentCardIndex}
-                initial={{ rotateY: 0 }}
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
                 transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                className="preserve-3d w-full"
-                style={{ transformStyle: "preserve-3d" }}
+                className="preserve-3d w-full relative min-h-[400px]"
               >
-                <Card 
-                  className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30 relative"
-                  onClick={virarCard}
-                >
-                  {/* Frente do Card */}
-                  <div className="backface-hidden absolute inset-0 bg-card rotate-y-0">
+                {/* Frente do Card */}
+                <div className="backface-hidden absolute inset-0">
+                  <Card className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30" onClick={virarCard}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge variant="outline" className="border-primary/30 text-primary">
@@ -510,10 +505,12 @@ const FlashcardsModern = () => {
                         <p className="text-sm text-muted-foreground">Clique para ver a resposta</p>
                       </div>
                     </CardContent>
-                  </div>
+                  </Card>
+                </div>
 
-                  {/* Verso do Card */}
-                  <div className="backface-hidden absolute inset-0 rotate-y-180 bg-card rounded-lg">
+                {/* Verso do Card */}
+                <div className="backface-hidden absolute inset-0 rotate-y-180">
+                  <Card className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30" onClick={virarCard}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge variant="default" className="bg-primary">
@@ -537,8 +534,8 @@ const FlashcardsModern = () => {
                         )}
                       </div>
                     </CardContent>
-                  </div>
-                </Card>
+                  </Card>
+                </div>
               </motion.div>
             </div>
 
