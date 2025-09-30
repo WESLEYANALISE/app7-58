@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, X, Brain } from 'lucide-react';
+import { ArrowLeft, X, Brain, Sparkles } from 'lucide-react';
 import { BotaoAudioRelaxante } from '@/components/BotaoAudioRelaxante';
 import { AmbientSoundPlayer } from './AmbientSoundPlayer';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
 import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
-import { motion } from 'framer-motion';
+import { ProgressIndicator } from './ProgressIndicator';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LivroJuridico {
   id: number;
@@ -26,6 +27,26 @@ interface BibliotecaLeitorProps {
 export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
   const [showAudioModal, setShowAudioModal] = useState(false);
   const [showProfessora, setShowProfessora] = useState(false);
+  const [isGeneratingExplanation, setIsGeneratingExplanation] = useState(false);
+  const [explanationProgress, setExplanationProgress] = useState(0);
+
+  const handleExplain = () => {
+    setIsGeneratingExplanation(true);
+    setExplanationProgress(0);
+    
+    // Simular progresso
+    const interval = setInterval(() => {
+      setExplanationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsGeneratingExplanation(false);
+          setShowProfessora(true);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+  };
 
   return (
     <>
@@ -112,14 +133,14 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
                 )}
               </div>
               
-              {/* 3. Botões "Ler agora" e "Download" */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 max-w-md mx-auto">
+              {/* 3. Botões "Ler agora", "Download" e "Explicar" */}
+              <div className="flex flex-col gap-4 justify-center mb-12 max-w-md mx-auto">
                 {livro.link && (
                   <Button
                     variant="default"
                     size="lg"
                     onClick={() => window.open(livro.link, '_blank')}
-                    className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     📖 Ler agora
                   </Button>
@@ -130,11 +151,22 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
                     variant="outline"
                     size="lg"
                     onClick={() => window.open(livro.download, '_blank')}
-                    className="flex-1 border-2 border-foreground/20 hover:bg-muted/50 py-3 px-6 rounded-full font-semibold transition-all duration-300"
+                    className="w-full border-2 border-foreground/20 hover:bg-muted/50 py-3 px-6 rounded-full font-semibold transition-all duration-300"
                   >
                     📥 Download
                   </Button>
                 )}
+                
+                <Button
+                  variant="default"
+                  size="lg"
+                  onClick={handleExplain}
+                  disabled={isGeneratingExplanation}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  Explicar
+                </Button>
                 
                 {!livro.link && !livro.download && (
                   <div className="text-center py-4">
@@ -142,13 +174,30 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
                       variant="outline"
                       size="lg"
                       disabled
-                      className="flex-1 opacity-50 py-3 px-6 rounded-full"
+                      className="w-full opacity-50 py-3 px-6 rounded-full"
                     >
                       📖 Em breve
                     </Button>
                   </div>
                 )}
               </div>
+              
+              {/* Indicador de progresso */}
+              <AnimatePresence>
+                {isGeneratingExplanation && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="mb-8"
+                  >
+                    <ProgressIndicator 
+                      progress={explanationProgress}
+                      label="Gerando Explicação"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               {/* 4. Sobre o livro - abaixo dos botões */}
               {livro.sobre && (

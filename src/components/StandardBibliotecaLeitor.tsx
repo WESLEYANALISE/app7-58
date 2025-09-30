@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, X, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { BotaoAudioRelaxante } from '@/components/BotaoAudioRelaxante';
 import { AmbientSoundPlayer } from './AmbientSoundPlayer';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
 import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
-import { motion } from 'framer-motion';
+import { ProgressIndicator } from './ProgressIndicator';
+import { motion, AnimatePresence } from 'framer-motion';
 interface StandardLivro {
   id: number;
   imagem?: string;
@@ -34,6 +35,27 @@ export const StandardBibliotecaLeitor = ({
   const [showAudioModal, setShowAudioModal] = useState(false);
   const [showFullText, setShowFullText] = useState(false);
   const [showProfessora, setShowProfessora] = useState(false);
+  const [isGeneratingExplanation, setIsGeneratingExplanation] = useState(false);
+  const [explanationProgress, setExplanationProgress] = useState(0);
+
+  const handleExplain = () => {
+    setIsGeneratingExplanation(true);
+    setExplanationProgress(0);
+    
+    // Simular progresso
+    const interval = setInterval(() => {
+      setExplanationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsGeneratingExplanation(false);
+          setShowProfessora(true);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+  };
+
   const getCapaLivro = () => {
     return livro.imagem || livro['capa-livro'] || livro.capaLivro || livro.capaLivroLink || (livro as any)['Capa-livro'];
   };
@@ -99,22 +121,50 @@ export const StandardBibliotecaLeitor = ({
                     </p>}
                 </div>
                 
-                {/* 3. Botões "Ler agora" e "Download" */}
-                <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 max-w-lg mx-auto">
-                  {livro.link && <Button variant="default" size="lg" onClick={() => window.open(livro.link, '_blank')} className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-bold py-6 px-10 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 text-xl">
+                {/* 3. Botões "Ler agora", "Download" e "Explicar" */}
+                <div className="flex flex-col gap-6 justify-center mb-16 max-w-lg mx-auto">
+                  {livro.link && <Button variant="default" size="lg" onClick={() => window.open(livro.link, '_blank')} className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-bold py-6 px-10 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 text-xl">
                       📖 Ler agora
                     </Button>}
                   
-                  {livro.download && <Button variant="outline" size="lg" onClick={() => window.open(livro.download, '_blank')} className="flex-1 border-2 border-foreground/20 hover:bg-muted/50 py-6 px-10 rounded-full font-bold transition-all duration-300 text-xl">
+                  {livro.download && <Button variant="outline" size="lg" onClick={() => window.open(livro.download, '_blank')} className="w-full border-2 border-foreground/20 hover:bg-muted/50 py-6 px-10 rounded-full font-bold transition-all duration-300 text-xl">
                       📥 Download
                     </Button>}
                   
+                  <Button
+                    variant="default"
+                    size="lg"
+                    onClick={handleExplain}
+                    disabled={isGeneratingExplanation}
+                    className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold py-6 px-10 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 text-xl flex items-center justify-center gap-3"
+                  >
+                    <Sparkles className="h-6 w-6" />
+                    Explicar
+                  </Button>
+                  
                   {!livro.link && !livro.download && <div className="text-center py-4">
-                      <Button variant="outline" size="lg" disabled className="flex-1 opacity-50 py-6 px-10 rounded-full text-xl">
+                      <Button variant="outline" size="lg" disabled className="w-full opacity-50 py-6 px-10 rounded-full text-xl">
                         📖 Em breve
                       </Button>
                     </div>}
                 </div>
+                
+                {/* Indicador de progresso */}
+                <AnimatePresence>
+                  {isGeneratingExplanation && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="mb-12 px-4"
+                    >
+                      <ProgressIndicator 
+                        progress={explanationProgress}
+                        label="Gerando Explicação"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 
                 {/* 4. Sobre o livro - com "ver mais" */}
                 {livro.sobre && <div className="border-t border-border/30 pt-12 max-w-4xl mx-auto">
