@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search, ArrowLeft, Scale, BookOpen, ChevronRight, Copy, X, Home, FileText, Scroll, Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2, Zap, Swords, Handshake, Building, Briefcase, Shield, DollarSign, Baby, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,12 +47,11 @@ const VadeMecumUltraFast: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [articles, setArticles] = useState<VadeMecumArticle[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [displayedArticles, setDisplayedArticles] = useState<VadeMecumArticle[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const ARTICLES_PER_PAGE = 20;
   const [fontSize, setFontSize] = useState(16);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  
+  // Ref para virtualização
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // Estados para indicador de progresso
   const [loadingProgress, setLoadingProgress] = useState<{
@@ -423,31 +423,34 @@ const VadeMecumUltraFast: React.FC = () => {
     }, 500);
   }, []);
 
-  // Sistema de busca otimizado com paginação
+  // Sistema de busca otimizado - SEM paginação, virtualização cuida da performance
   const filteredArticles = useMemo(() => {
     const allValidArticles = articles.filter(article => {
       const articleContent = article["Artigo"] || article.conteudo || '';
       return articleContent.trim() !== '';
     });
     if (!searchTerm.trim()) return allValidArticles;
+    
     const searchLower = searchTerm.toLowerCase().trim();
     const searchNumbers = searchTerm.replace(/[^\d]/g, '');
-    const results: {
-      article: VadeMecumArticle;
-      score: number;
-    }[] = [];
-    for (let i = 0; i < allValidArticles.length; i++) {
-      const article = allValidArticles[i];
+    
+    // Match exato - retorna imediatamente
+    const exactMatch = allValidArticles.find(article => {
+      const articleNumber = article["Número do Artigo"] || article.numero || '';
+      return articleNumber.toLowerCase() === searchLower;
+    });
+    if (exactMatch) return [exactMatch];
+    
+    // Busca otimizada com early break
+    const results: { article: VadeMecumArticle; score: number }[] = [];
+    
+    for (const article of allValidArticles) {
       const articleNumber = article["Número do Artigo"] || article.numero || '';
       const articleContent = article["Artigo"] || article.conteudo || '';
       let score = 0;
 
-      // Match exato - prioridade máxima
-      if (articleNumber.toLowerCase() === searchLower) {
-        return [article];
-      }
       // Número puro
-      else if (searchNumbers && articleNumber.replace(/[^\d]/g, '') === searchNumbers) {
+      if (searchNumbers && articleNumber.replace(/[^\d]/g, '') === searchNumbers) {
         score = 900;
       }
       // Número contém
@@ -458,52 +461,22 @@ const VadeMecumUltraFast: React.FC = () => {
       else if (articleContent.toLowerCase().includes(searchLower)) {
         score = 100;
       }
+      
       if (score > 0) {
-        results.push({
-          article,
-          score
-        });
+        results.push({ article, score });
       }
     }
+    
     return results.sort((a, b) => b.score - a.score).map(item => item.article);
   }, [articles, searchTerm]);
-
-  // Infinite scroll setup
-  useEffect(() => {
-    if (searchTerm.trim()) {
-      // When searching, show all results
-      setDisplayedArticles(filteredArticles);
-      setHasMore(false);
-    } else {
-      // When not searching, show paginated results
-      const startIndex = 0;
-      const endIndex = page * ARTICLES_PER_PAGE;
-      const newDisplayed = filteredArticles.slice(startIndex, endIndex);
-      setDisplayedArticles(newDisplayed);
-      setHasMore(endIndex < filteredArticles.length);
-    }
-  }, [filteredArticles, page, searchTerm]);
-
-  // Reset pagination when articles change
-  useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-  }, [articles]);
-
-  // Infinite scroll handler
-  useEffect(() => {
-    if (searchTerm.trim()) return; // Don't use infinite scroll during search
-
-    const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000) {
-        if (hasMore && !isLoading) {
-          setPage(prev => prev + 1);
-        }
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasMore, isLoading, searchTerm]);
+  
+  // Configuração do virtualizador
+  const virtualizer = useVirtualizer({
+    count: filteredArticles.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 200, // Altura estimada de cada card
+    overscan: 5, // Renderiza 5 itens extras acima/abaixo
+  });
 
   // Carregar artigos com cache instantâneo e otimização extrema
   const loadArticles = useCallback(async (code: VadeMecumLegalCode) => {
@@ -1106,7 +1079,7 @@ const VadeMecumUltraFast: React.FC = () => {
       </div>;
   }
 
-  // Lista de artigos
+  // Lista de artigos com virtualização
   return <div className="min-h-screen bg-background">
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b z-10">
         <div className="flex items-center justify-between p-4">
@@ -1128,42 +1101,49 @@ const VadeMecumUltraFast: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-4">
-        {isLoading ? <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-3 text-muted-foreground">Carregando artigos...</span>
-          </div> : filteredArticles.length === 0 ? <div className="text-center py-12">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              {searchTerm ? 'Nenhum artigo encontrado.' : 'Nenhum artigo disponível.'}
-            </p>
-          </div> : <motion.div className="max-w-4xl mx-auto" initial={{
-        opacity: 0
-      }} animate={{
-        opacity: 1
-      }} transition={{
-        duration: 0.3
-      }}>
-            {displayedArticles.map((article, index) => <motion.div key={`${article.id}-${index}`} initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.4,
-          delay: index * 0.05,
-          ease: "easeOut"
-        }}>
-                <VadeMecumArticleCard article={article} index={index} />
-              </motion.div>)}
-            
-            {hasMore && !searchTerm && <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                <span className="ml-3 text-muted-foreground">Carregando mais artigos...</span>
-              </div>}
-          </motion.div>}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="ml-3 text-muted-foreground">Carregando artigos...</span>
+        </div>
+      ) : filteredArticles.length === 0 ? (
+        <div className="text-center py-12">
+          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            {searchTerm ? 'Nenhum artigo encontrado.' : 'Nenhum artigo disponível.'}
+          </p>
+        </div>
+      ) : (
+        <div ref={parentRef} className="h-[calc(100vh-180px)] overflow-auto p-4">
+          <div
+            className="max-w-4xl mx-auto"
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const article = filteredArticles[virtualItem.index];
+              return (
+                <div
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <VadeMecumArticleCard article={article} index={virtualItem.index} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Modal Centralizado para Conteúdo Gerado */}
       <Dialog open={generatedModal.open} onOpenChange={open => setGeneratedModal(prev => ({
