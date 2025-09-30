@@ -38,13 +38,28 @@ const CategoryAccessSection = memo(() => {
     "A aprovação não vai cair do céu! ☁️",
     "Questões de ontem resolvidas? 🤔",
     "Domingo de estudo vale ouro! 💎",
-    "Café + Livro = Aprovação! ☕"
+    "Café + Livro = Aprovação! ☕",
+    "Parou de estudar? Tá errado! 🚫",
+    "Seu concorrente está estudando agora! 🏃",
+    "Instagram pode esperar, estude! 📱",
+    "Doutrina não se lê sozinha! 📕",
+    "Meta de hoje cumprida? 🎯",
+    "Menos desculpas, mais disciplina! 💪",
+    "Jurisprudência não vai se decorar! ⚖️",
+    "Acordou? Então estude! ☀️",
+    "Sono? Toma café e vai estudar! ☕",
+    "Feriado é dia de estudar também! 🗓️",
+    "Sua nomeação depende de hoje! 📜",
+    "Posse no cargo ou na preguiça? 🤔",
+    "Edital saiu, e você aí parado! 📢",
+    "Vade Mecum não vai se ler sozinho! ⚖️",
+    "Simulado feito hoje é aprovação amanhã! ✅"
   ], []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentMessageIndex((prev) => (prev + 1) % motivationalMessages.length);
-    }, 5000); // Troca a cada 5 segundos
+    }, 6000); // Troca a cada 6 segundos
 
     return () => clearInterval(interval);
   }, [motivationalMessages.length]);
