@@ -117,22 +117,11 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         role: 'assistant',
-        content: initialMessage || `🎓 Olá! Sou sua **Professora de Direito IA Premium**!
+        content: initialMessage || `Oi! 👋
 
-${bookContext && typeof bookContext === 'object' && bookContext?.livro ? `📚 Estou aqui para ajudar com o livro **"${bookContext.livro}"**` : ''}
-${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
+Pode me chamar de Evelyn. Sou sua professora de Direito e estou aqui pra conversar com você.
 
-**Posso te ajudar de várias formas:**
-
-📄 Analisar documentos (PDFs com imagens, textos jurídicos)
-💡 Explicar conceitos de forma detalhada e prática  
-📝 Gerar flashcards personalizados para estudos
-❓ Criar questões objetivas e discursivas
-📋 Resumir artigos e documentos complexos
-⚖️ Sugerir casos práticos e jurisprudências relevantes
-📤 Exportar conversas em PDF
-
-Como posso te ajudar hoje? 🚀`,
+${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?` : 'No que posso te ajudar?'}`,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
@@ -350,19 +339,6 @@ Como posso te ajudar hoje? 🚀`,
         return newMessages;
       });
 
-      // Adicionar sugestões inteligentes
-      const suggestions = generateSmartSuggestions(assistantContent);
-      if (suggestions.length > 0) {
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastMessage = newMessages[newMessages.length - 1];
-          if (lastMessage.role === 'assistant') {
-            lastMessage.suggestions = suggestions;
-          }
-          return newMessages;
-        });
-      }
-
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
       toast({
@@ -473,20 +449,11 @@ Como posso te ajudar hoje? 🚀`,
   const clearConversation = () => {
     const welcomeMessage: Message = {
       role: 'assistant',
-      content: `Olá! Sou a Professora Evelyn, sua assistente de Direito. 🎓
-${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
+      content: `Oi! 👋
 
-**Posso te ajudar de várias formas:**
+Pode me chamar de Evelyn. Sou sua professora de Direito e estou aqui pra conversar com você.
 
-📄 Analisar documentos (PDFs com imagens, textos jurídicos)
-💡 Explicar conceitos de forma detalhada e prática  
-📝 Gerar flashcards personalizados para estudos
-❓ Criar questões objetivas e discursivas
-📋 Resumir artigos e documentos complexos
-⚖️ Sugerir casos práticos e jurisprudências relevantes
-📤 Exportar conversas em PDF
-
-Como posso te ajudar hoje? 🚀`,
+${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?` : 'No que posso te ajudar?'}`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -494,7 +461,7 @@ Como posso te ajudar hoje? 🚀`,
     setUploadedFile(null);
     toast({
       title: "Conversa limpa",
-      description: "Histórico de mensagens foi removido.",
+      description: "Histórico removido.",
     });
   };
 
@@ -929,11 +896,15 @@ Responda APENAS com JSON válido:
                     className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 ${
+                      className={`max-w-[85%] md:max-w-[75%] rounded-3xl p-5 ${
                         message.role === 'user'
-                          ? 'bg-red-600 text-white text-base'
-                          : 'bg-red-950/80 text-red-50 border border-red-800/50 text-base leading-relaxed'
+                          ? 'bg-red-600 text-white rounded-br-md'
+                          : 'bg-red-950/60 text-red-50 border border-red-800/30 rounded-bl-md'
                       }`}
+                      style={{
+                        fontSize: message.role === 'user' ? '16px' : '17px',
+                        lineHeight: message.role === 'user' ? '1.5' : '1.7'
+                      }}
                     >
                       {message.file && (
                         <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
@@ -1040,26 +1011,6 @@ Responda APENAS com JSON válido:
                         </div>
                       )}
 
-                      {/* Sugestões */}
-                      {message.suggestions && message.suggestions.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-red-800/30">
-                          <p className="text-xs text-red-300 mb-2">Sugestões:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {message.suggestions.map((suggestion, i) => (
-                              <button
-                                key={i}
-                                onClick={() => {
-                                  setInput(suggestion);
-                                  textareaRef.current?.focus();
-                                }}
-                                className="text-xs bg-red-800/30 hover:bg-red-800/50 text-red-100 px-3 py-1.5 rounded-full transition-colors"
-                              >
-                                {suggestion}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -1186,8 +1137,9 @@ Responda APENAS com JSON válido:
                       sendMessage();
                     }
                   }}
-                  placeholder="Digite sua pergunta jurídica..."
-                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none text-base"
+                  placeholder="Digite sua mensagem..."
+                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none"
+                  style={{ fontSize: '16px', lineHeight: '1.5' }}
                   disabled={isLoading}
                 />
                 
