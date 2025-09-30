@@ -172,78 +172,58 @@ export const VadeMecumFlashcardsSession = ({
       {/* Card Area */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
-          {/* Card com Flip 3D */}
-          <div className="perspective-1000 mb-6">
-            <motion.div
-              key={currentCardIndex}
-              animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{
-                duration: 0.6,
-                type: "spring",
-                stiffness: 100
-              }}
-              className="preserve-3d w-full relative min-h-[400px]"
+          {/* Card simples sem flip 3D */}
+          <div className="mb-6">
+            <Card 
+              className="min-h-[400px] shadow-xl border-2 border-primary/30 bg-background/50"
             >
-              {/* Frente do Card */}
-              <div className="backface-hidden absolute inset-0">
-                <Card 
-                  className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30 bg-background/50"
-                  onClick={virarCard}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <Badge variant="outline" className="border-primary/30 text-primary">
-                        {codeName}
-                      </Badge>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">
-                        Art. {articleNumber}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-center min-h-[320px]">
-                    <div className="text-center px-6">
-                      <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary opacity-20" />
-                      <p className="text-xl font-medium leading-relaxed mb-6 text-foreground">
-                        {currentCard?.pergunta || 'Pergunta não disponível'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Clique para ver a resposta</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Verso do Card */}
-              <div className="backface-hidden absolute inset-0 rotate-y-180">
-                <Card 
-                  className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30 bg-background/50"
-                  onClick={virarCard}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <Badge variant="default" className="bg-primary">
-                        Resposta
-                      </Badge>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">
-                        Art. {articleNumber}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-center min-h-[320px]">
-                    <div className="text-center px-6">
-                      <p className="text-base leading-relaxed mb-4 text-foreground">
-                        {currentCard?.resposta || 'Resposta não disponível'}
-                      </p>
-                      {(currentCard?.exemplo || (currentCard as any)?.dica) && (
-                        <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                          <p className="text-sm font-semibold text-primary mb-2">💡 Exemplo Prático</p>
-                          <p className="text-sm text-foreground">{currentCard?.exemplo || (currentCard as any)?.dica}</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <Badge variant="outline" className="border-primary/30 text-primary">
+                    {codeName}
+                  </Badge>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    Art. {articleNumber}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center min-h-[320px]">
+                {!isFlipped ? (
+                  <div className="text-center px-6">
+                    <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary opacity-20" />
+                    <p className="text-xl font-medium leading-relaxed mb-6 text-foreground">
+                      {currentCard?.pergunta || 'Pergunta não disponível'}
+                    </p>
+                    <Button 
+                      onClick={virarCard}
+                      variant="outline"
+                      className="mt-4"
+                    >
+                      Ver Resposta
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center px-6 w-full">
+                    <p className="text-base leading-relaxed mb-4 text-foreground">
+                      {currentCard?.resposta || 'Resposta não disponível'}
+                    </p>
+                    {(currentCard?.exemplo || (currentCard as any)?.dica) && (
+                      <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                        <p className="text-sm font-semibold text-primary mb-2">💡 Exemplo Prático</p>
+                        <p className="text-sm text-foreground">{currentCard?.exemplo || (currentCard as any)?.dica}</p>
+                      </div>
+                    )}
+                    <Button 
+                      onClick={virarCard}
+                      variant="outline"
+                      className="mt-4"
+                    >
+                      Ver Pergunta
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Botões de Ação */}
