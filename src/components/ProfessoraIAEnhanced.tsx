@@ -383,9 +383,6 @@ Como posso te ajudar hoje? 🚀`,
     if (content.toLowerCase().includes('artigo') || content.toLowerCase().includes('código')) {
       suggestions.push('Explique com exemplo prático');
     }
-    if (content.toLowerCase().includes('jurisprudência')) {
-      suggestions.push('Mostre casos semelhantes');
-    }
     if (content.length > 500) {
       suggestions.push('Resuma os pontos principais');
       suggestions.push('Gere flashcards sobre isso');
@@ -622,7 +619,7 @@ Responda APENAS com JSON válido:
       className="mt-4 p-4 bg-red-900/20 rounded-xl border border-red-800/30"
     >
       <p className="text-xs text-red-300 mb-3 font-medium">⚡ Ações Rápidas:</p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -642,26 +639,6 @@ Responda APENAS com JSON válido:
         >
           <BookOpen className="w-4 h-4" />
           Explicar
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => sendMessage('Sugira casos práticos relacionados ao tema')}
-          disabled={isLoading}
-          className="text-xs text-red-100 hover:text-white hover:bg-red-800/40 h-auto py-2 flex-col gap-1"
-        >
-          <Scale className="w-4 h-4" />
-          Casos
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => sendMessage('Indique jurisprudências relevantes (se existirem)')}
-          disabled={isLoading}
-          className="text-xs text-red-100 hover:text-white hover:bg-red-800/40 h-auto py-2 flex-col gap-1"
-        >
-          <FileText className="w-4 h-4" />
-          Jurisprudências
         </Button>
         <Button
           variant="ghost"
@@ -954,8 +931,8 @@ Responda APENAS com JSON válido:
                     <div
                       className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 ${
                         message.role === 'user'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-red-950/80 text-red-50 border border-red-800/50'
+                          ? 'bg-red-600 text-white text-base'
+                          : 'bg-red-950/80 text-red-50 border border-red-800/50 text-base leading-relaxed'
                       }`}
                     >
                       {message.file && (

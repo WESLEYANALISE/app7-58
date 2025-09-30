@@ -62,7 +62,12 @@ export const AudioPlayerScreen: React.FC<AudioPlayerScreenProps> = ({
   const hasPrevious = playlist.length > 0 && currentIndex > 0;
   const audioIsFavorite = isFavorite(currentAudio.id);
   const handleBackToHome = () => {
-    setCurrentFunction(null);
+    // Pausar áudio antes de voltar
+    if (isPlaying) {
+      togglePlayPause();
+    }
+    // Chamar o onBack que foi passado como prop
+    onBack();
   };
   const handleToggleFavorite = () => {
     if (audioIsFavorite) {
