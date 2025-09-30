@@ -1,0 +1,138 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { message, fileData, conversationHistory, area, contextType } = await req.json();
+    
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY não configurada');
+    }
+
+    // Construir contexto baseado no tipo
+    let systemPrompt = `Você é uma Professora de Direito extremamente experiente e didática, especializada em ensinar Direito Brasileiro.
+
+INSTRUÇÕES IMPORTANTES:
+- Seja EXPANSIVA e DETALHADA nas explicações - explique conceitos profundamente
+- Use exemplos práticos REAIS do cotidiano jurídico brasileiro
+- Cite legislação específica (artigos, leis, códigos) quando relevante
+- Mencione jurisprudência importante (STF, STJ, tribunais superiores)
+- Organize suas respostas com markdown: use **negrito**, *itálico*, listas, subtítulos
+- Divida respostas longas em seções numeradas
+- Conecte o conteúdo com casos práticos e situações do dia a dia
+- Seja acessível mas mantenha precisão técnica jurídica
+
+${area ? `ÁREA DE ESPECIALIZAÇÃO: ${area}` : ''}
+${contextType ? `CONTEXTO: ${contextType}` : ''}
+
+RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
+
+    const messages: any[] = [
+      { role: 'system', content: systemPrompt }
+    ];
+
+    // Adicionar histórico
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      conversationHistory.forEach((msg: ChatMessage) => {
+        messages.push({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        });
+      });
+    }
+
+    // Adicionar mensagem atual
+    const userMessage: any = { role: 'user', content: [] };
+
+    if (fileData) {
+      // Suporte a imagens e PDFs
+      userMessage.content.push({
+        type: 'image_url',
+        image_url: {
+          url: `data:${fileData.mimeType};base64,${fileData.data}`
+        }
+      });
+    }
+
+    userMessage.content.push({
+      type: 'text',
+      text: message
+    });
+
+    messages.push(userMessage);
+
+    // Chamar Lovable AI com streaming
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages,
+        stream: true,
+        max_tokens: 4000,
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ 
+          error: 'Limite de uso atingido. Aguarde alguns instantes e tente novamente.' 
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ 
+          error: 'Créditos insuficientes. Adicione créditos em Settings -> Workspace -> Usage.' 
+        }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const errorText = await response.text();
+      console.error('Erro na API Lovable:', response.status, errorText);
+      throw new Error(`Erro na API: ${response.status}`);
+    }
+
+    // Retornar stream diretamente
+    return new Response(response.body, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      },
+    });
+
+  } catch (error) {
+    console.error('Erro no chat da professora:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'Erro desconhecido' 
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
+  }
+});
