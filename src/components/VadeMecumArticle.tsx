@@ -3,13 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Copy, Share2, Bookmark, Volume2, QrCode, Scale, BookOpen, Presentation, FileText, Lightbulb } from 'lucide-react';
+import { Search, Copy, Share2, Bookmark, Volume2, QrCode, Scale, BookOpen, Presentation, FileText, Lightbulb, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VadeMecumSlideShow } from './VadeMecumSlideShow';
 import QRCode from 'qrcode';
 import { VadeMecumLegalCode } from './VadeMecum';
+import { VadeMecumFlashcardsSession } from './VadeMecumFlashcardsSession';
+import { useAuth } from '@/context/AuthContext';
 
 interface VadeMecumArticleProps {
   article: any;
@@ -26,7 +28,10 @@ export const VadeMecumArticle = ({ article, codeInfo }: VadeMecumArticleProps) =
   const [showExplanation, setShowExplanation] = useState(false);
   const [showExample, setShowExample] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [generatedFlashcards, setGeneratedFlashcards] = useState<any[]>([]);
+  const [showFlashcardsSession, setShowFlashcardsSession] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const articleText = article.Artigo || '';
   const articleNumber = article["Número do Artigo"] || article.numero || '';
@@ -159,6 +164,50 @@ export const VadeMecumArticle = ({ article, codeInfo }: VadeMecumArticleProps) =
     });
   };
 
+  const generateFlashcards = async () => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para gerar flashcards.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vade-mecum-content', {
+        body: {
+          articleContent: articleText,
+          articleNumber,
+          codeName: codeInfo?.name || 'Código Legal',
+          userId: user.id,
+          type: 'flashcard'
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.flashcards) {
+        setGeneratedFlashcards(data.flashcards);
+        setShowFlashcardsSession(true);
+        toast({
+          title: "Sucesso!",
+          description: `${data.flashcards.length} flashcards gerados com IA`,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao gerar flashcards:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar os flashcards. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const playAudio = () => {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(`Artigo ${articleNumber}. ${articleText}`);
@@ -245,6 +294,14 @@ export const VadeMecumArticle = ({ article, codeInfo }: VadeMecumArticleProps) =
               >
                 <Presentation className="h-4 w-4 mr-2" />
                 Apresentar
+              </Button>
+              <Button
+                onClick={generateFlashcards}
+                disabled={isLoading}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                Flashcards
               </Button>
             </div>
 
@@ -380,6 +437,19 @@ export const VadeMecumArticle = ({ article, codeInfo }: VadeMecumArticleProps) =
         articleNumber={articleNumber}
         codeName={codeInfo?.name || 'Código Legal'}
       />
+
+      {/* Flashcards Session */}
+      {showFlashcardsSession && generatedFlashcards.length > 0 && (
+        <VadeMecumFlashcardsSession
+          flashcards={generatedFlashcards}
+          articleNumber={articleNumber}
+          codeName={codeInfo?.name || 'Código Legal'}
+          onClose={() => {
+            setShowFlashcardsSession(false);
+            setGeneratedFlashcards([]);
+          }}
+        />
+      )}
     </>
   );
 };

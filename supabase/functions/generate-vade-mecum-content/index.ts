@@ -34,21 +34,31 @@ serve(async (req) => {
 
     if (type === 'flashcard') {
       prompt = `
-        Baseado no seguinte artigo jurídico, gere um flashcard de estudo:
+        Baseado no seguinte artigo jurídico, gere 5 flashcards de estudo variados:
         
         Artigo: ${articleNumber} - ${codeName}
         Conteúdo: ${articleContent}
         
-        Crie:
-        1. Uma pergunta clara e objetiva sobre o artigo
+        Para cada flashcard, crie:
+        1. Uma pergunta clara e objetiva sobre diferentes aspectos do artigo
         2. Uma resposta completa e educativa
         3. Uma dica útil para memorização
         
-        Retorne APENAS um JSON válido no formato:
+        Retorne APENAS um JSON válido com um array no formato:
         {
-          "pergunta": "pergunta aqui",
-          "resposta": "resposta aqui", 
-          "dica": "dica aqui"
+          "flashcards": [
+            {
+              "pergunta": "pergunta 1 aqui",
+              "resposta": "resposta 1 aqui", 
+              "dica": "dica 1 aqui"
+            },
+            {
+              "pergunta": "pergunta 2 aqui",
+              "resposta": "resposta 2 aqui", 
+              "dica": "dica 2 aqui"
+            },
+            ...
+          ]
         }
       `;
 
@@ -63,7 +73,7 @@ serve(async (req) => {
           }],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 800,
+            maxOutputTokens: 2500,
           }
         })
       });
@@ -79,26 +89,27 @@ serve(async (req) => {
 
       generateResponse = JSON.parse(jsonMatch[0]);
 
-      // Salvar flashcard no banco
-      const { data: flashcardData, error: flashcardError } = await supabase
-        .from('vade_mecum_flashcards')
-        .insert({
-          user_id: userId,
-          article_number: articleNumber,
-          code_name: codeName,
-          article_content: articleContent,
-          pergunta: generateResponse.pergunta,
-          resposta: generateResponse.resposta,
-          dica: generateResponse.dica
-        })
-        .select()
-        .single();
+      // Salvar múltiplos flashcards no banco
+      const flashcardsToInsert = generateResponse.flashcards.map((card: any) => ({
+        user_id: userId,
+        article_number: articleNumber,
+        code_name: codeName,
+        article_content: articleContent,
+        pergunta: card.pergunta,
+        resposta: card.resposta,
+        dica: card.dica
+      }));
 
-      if (flashcardError) throw flashcardError;
+      const { data: flashcardsData, error: flashcardsError } = await supabase
+        .from('vade_mecum_flashcards')
+        .insert(flashcardsToInsert)
+        .select();
+
+      if (flashcardsError) throw flashcardsError;
 
       return new Response(JSON.stringify({ 
         success: true, 
-        flashcard: flashcardData,
+        flashcards: flashcardsData,
         type: 'flashcard'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
