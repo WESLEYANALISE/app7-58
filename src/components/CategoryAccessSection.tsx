@@ -59,7 +59,7 @@ const CategoryAccessSection = memo(() => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentMessageIndex((prev) => (prev + 1) % motivationalMessages.length);
-    }, 6000); // Troca a cada 6 segundos
+    }, 10000); // Troca a cada 10 segundos
 
     return () => clearInterval(interval);
   }, [motivationalMessages.length]);
