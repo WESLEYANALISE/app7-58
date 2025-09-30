@@ -119,9 +119,7 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
         role: 'assistant',
         content: initialMessage || `Oi! 👋
 
-Pode me chamar de Evelyn. Sou sua professora de Direito e estou aqui pra conversar com você.
-
-${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?` : 'No que posso te ajudar?'}`,
+${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` : 'Sou sua professora de Direito. Como posso te ajudar?'}`,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
@@ -169,6 +167,8 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
       let fileData = null;
       
       if (currentFile) {
+        console.log('Processing file:', { name: currentFile.name, type: currentFile.type, size: currentFile.size });
+        
         if (/heic|heif/i.test(currentFile.type)) {
           toast({
             title: 'Formato não suportado',
@@ -179,15 +179,19 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
           return;
         } else if (currentFile.type.startsWith('image/')) {
           try {
+            console.log('Compressing image...');
             const compressed = await compressImage(currentFile);
+            console.log('Image compressed successfully, base64 length:', compressed.data.length);
             fileData = compressed;
           } catch (e) {
+            console.error('Error compressing image, using fallback:', e);
             const buffer = await currentFile.arrayBuffer();
             const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
             fileData = { data: base64, mimeType: currentFile.type, name: currentFile.name };
           }
         } else {
           // PDF ou outros
+          console.log('Processing PDF/document...');
           const buffer = await currentFile.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
           fileData = {
@@ -195,6 +199,7 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
             mimeType: currentFile.type,
             name: currentFile.name
           };
+          console.log('Document processed, base64 length:', base64.length);
         }
       }
 
@@ -204,6 +209,14 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
       }
 
       // Streaming com fetch
+      console.log('Calling edge function with:', {
+        hasFile: !!fileData,
+        fileName: fileData?.name,
+        mimeType: fileData?.mimeType,
+        dataLength: fileData?.data?.length,
+        messageLength: currentInput.length
+      });
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/professora-ai-chat`,
         {
@@ -224,6 +237,8 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
           }),
         }
       );
+
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -246,7 +261,9 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
           setIsLoading(false);
           return;
         }
-        throw new Error(`Erro ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error response:', { status: response.status, error: errorData });
+        throw new Error(errorData.error || `Erro ${response.status}`);
       }
 
       // Processar stream com buffer (coalescência)
@@ -451,9 +468,7 @@ ${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?`
       role: 'assistant',
       content: `Oi! 👋
 
-Pode me chamar de Evelyn. Sou sua professora de Direito e estou aqui pra conversar com você.
-
-${areaLabel ? `Vejo que você está em ${areaLabel}. Quer conversar sobre isso?` : 'No que posso te ajudar?'}`,
+${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` : 'Sou sua professora de Direito. Como posso te ajudar?'}`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
