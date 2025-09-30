@@ -37,6 +37,7 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
   bookContext,
   area
 }) => {
+  const areaLabel = typeof area === 'string' ? area : (area ? String(area) : '');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +51,39 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Utilitário: comprimir imagens para melhorar upload no mobile
+  const compressImage = (file: File, maxSize = 1600, quality = 0.8): Promise<{ data: string; mimeType: string; name: string }> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Canvas não suportado'));
+
+          let { width, height } = img;
+          if (width > height && width > maxSize) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else if (height > maxSize) {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve({ data: dataUrl.split(',')[1], mimeType: 'image/jpeg', name: file.name.replace(/\.[^.]+$/, '.jpg') });
+        };
+        img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+        img.src = reader.result as string;
+      };
+      reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
+      reader.readAsDataURL(file);
+    });
+  };
 
   // Efeito para enviar imagem capturada automaticamente
   useEffect(() => {
@@ -66,8 +100,8 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
         role: 'assistant',
         content: `🎓 Olá! Sou sua **Professora de Direito IA Premium**!
 
-${bookContext ? `📚 Estou aqui para ajudar com o livro **"${bookContext.livro}"**` : ''}
-${area ? `📖 Especializada em **${area}**` : ''}
+${bookContext && typeof bookContext === 'object' && bookContext?.livro ? `📚 Estou aqui para ajudar com o livro **"${bookContext.livro}"**` : ''}
+${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
 
 **O que posso fazer por você:**
 
@@ -136,13 +170,37 @@ Como posso te ajudar hoje? 🚀`,
           name: 'screenshot.png'
         };
       } else if (currentFile) {
-        const buffer = await currentFile.arrayBuffer();
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-        fileData = {
-          data: base64,
-          mimeType: currentFile.type,
-          name: currentFile.name
-        };
+        if (/heic|heif/i.test(currentFile.type)) {
+          toast({
+            title: 'Formato não suportado',
+            description: 'Imagens HEIC/HEIF não são suportadas no navegador. Tire a foto em JPG/PNG.',
+            variant: 'destructive'
+          });
+        } else if (currentFile.type.startsWith('image/')) {
+          // Comprimir para otimizar envio no mobile
+          try {
+            const compressed = await compressImage(currentFile);
+            fileData = {
+              data: compressed.data,
+              mimeType: compressed.mimeType,
+              name: compressed.name
+            };
+          } catch (e) {
+            // fallback para base64 bruto
+            const buffer = await currentFile.arrayBuffer();
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+            fileData = { data: base64, mimeType: currentFile.type, name: currentFile.name };
+          }
+        } else {
+          // PDF ou outros suportados
+          const buffer = await currentFile.arrayBuffer();
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+          fileData = {
+            data: base64,
+            mimeType: currentFile.type,
+            name: currentFile.name
+          };
+        }
       }
 
       let contextType = '';
@@ -584,6 +642,7 @@ Responda APENAS com JSON válido:
               ref={fileInputRef}
               onChange={handleFileUpload}
               accept=".pdf,image/*"
+              capture="environment"
               className="hidden"
             />
             
