@@ -36,6 +36,7 @@ interface Message {
   suggestions?: string[];
   flashcards?: Flashcard[];
   questoes?: Questao[];
+  area?: string;
 }
 
 interface ProfessoraIAEnhancedProps {
@@ -65,6 +66,7 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
   const [currentQuestaoIndex, setCurrentQuestaoIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showQuestaoExplanation, setShowQuestaoExplanation] = useState(false);
+  const [showImageMenu, setShowImageMenu] = useState(false);
   
   const { toast } = useToast();
   const { exporting, exportConversationToPDF } = useProfessoraAIPDFExport();
@@ -318,12 +320,30 @@ Como posso te ajudar hoje? 🚀`,
 
       clearInterval(flushInterval);
 
+      // Detectar mudança de contexto/área se arquivo foi enviado
+      let detectedArea = areaLabel;
+      if (currentFile && assistantContent) {
+        const areasJuridicas = [
+          'Direito Penal', 'Direito Civil', 'Direito Constitucional',
+          'Direito Administrativo', 'Direito Tributário', 'Direito do Trabalho',
+          'Direito Empresarial', 'Direito Processual', 'Direito Eleitoral'
+        ];
+        
+        for (const areaName of areasJuridicas) {
+          if (assistantContent.toLowerCase().includes(areaName.toLowerCase())) {
+            detectedArea = areaName;
+            break;
+          }
+        }
+      }
+
       // Flush final
       setMessages(prev => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
         if (lastMessage.role === 'assistant') {
           lastMessage.content = assistantContent;
+          lastMessage.area = detectedArea;
         }
         return newMessages;
       });
@@ -447,6 +467,35 @@ Como posso te ajudar hoje? 🚀`,
     toast({
       title: "Imagem carregada",
       description: `${file.name} será comprimida automaticamente`,
+    });
+  };
+
+  // Limpar conversa
+  const clearConversation = () => {
+    const welcomeMessage: Message = {
+      role: 'assistant',
+      content: `Olá! Sou a Professora Evelyn, sua assistente de Direito. 🎓
+${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
+
+**Posso te ajudar de várias formas:**
+
+📄 Analisar documentos (PDFs com imagens, textos jurídicos)
+💡 Explicar conceitos de forma detalhada e prática  
+📝 Gerar flashcards personalizados para estudos
+❓ Criar questões objetivas e discursivas
+📋 Resumir artigos e documentos complexos
+⚖️ Sugerir casos práticos e jurisprudências relevantes
+📤 Exportar conversas em PDF
+
+Como posso te ajudar hoje? 🚀`,
+      timestamp: new Date()
+    };
+    setMessages([welcomeMessage]);
+    setShowQuickActions(true);
+    setUploadedFile(null);
+    toast({
+      title: "Conversa limpa",
+      description: "Histórico de mensagens foi removido.",
     });
   };
 
@@ -847,6 +896,9 @@ Responda APENAS com JSON válido:
 
   if (!isOpen) return null;
 
+  // Contar quantas mensagens da assistente existem
+  const assistantMessageCount = messages.filter(m => m.role === 'assistant').length;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -859,18 +911,28 @@ Responda APENAS com JSON válido:
           {/* Header */}
           <div className="p-4 border-b border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
             <div className="flex items-center justify-between">
-              <h1 className="text-white text-xl md:text-2xl flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-red-400" />
-                Professora IA Premium
-                {areaLabel && <span className="text-sm md:text-base text-red-300">• {areaLabel}</span>}
-              </h1>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="text-red-200 hover:text-white hover:bg-red-800/50"
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Professora Evelyn</h2>
+                  <p className="text-sm text-red-200">Assistente IA de Direito{areaLabel ? ` • ${areaLabel}` : ''}</p>
+                </div>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onClose}
-                className="text-red-100 hover:text-white hover:bg-red-800/50"
+                onClick={clearConversation}
+                className="text-red-200 hover:text-white hover:bg-red-800/50 gap-2"
               >
-                <X className="w-5 h-5" />
+                <RotateCcw className="h-4 w-4" />
+                Limpar
               </Button>
             </div>
           </div>
@@ -948,7 +1010,8 @@ Responda APENAS com JSON válido:
                             Exportar PDF
                           </Button>
                           
-                          {message.content.length > 200 && !message.flashcards && !message.questoes && (
+                          {/* Ações rápidas aparecem apenas a partir da segunda mensagem da assistente */}
+                          {assistantMessageCount >= 2 && message.content.length > 200 && !message.flashcards && !message.questoes && (
                             <>
                               <Button
                                 variant="ghost"
@@ -1089,16 +1152,47 @@ Responda APENAS com JSON válido:
                   <span className="font-medium">Documento</span>
                 </Button>
                 
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => imageInputRef.current?.click()}
-                  disabled={isLoading}
-                  className="flex-1 bg-red-900/30 border-red-700 hover:bg-red-800/50 text-white h-14 flex items-center justify-center gap-3"
-                >
-                  <Camera className="w-5 h-5" />
-                  <span className="font-medium">Imagem</span>
-                </Button>
+                <div className="flex-1 relative">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setShowImageMenu(!showImageMenu)}
+                    disabled={isLoading}
+                    className="w-full bg-red-900/30 border-red-700 hover:bg-red-800/50 text-white h-14 flex items-center justify-center gap-3"
+                  >
+                    <Camera className="w-5 h-5" />
+                    <span className="font-medium">Imagem</span>
+                  </Button>
+                  
+                  {showImageMenu && (
+                    <div className="absolute bottom-16 left-0 right-0 bg-red-900/95 backdrop-blur-sm border border-red-700 rounded-lg shadow-xl overflow-hidden">
+                      <button
+                        onClick={() => {
+                          imageInputRef.current?.click();
+                          setShowImageMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left text-white hover:bg-red-800/50 transition-colors flex items-center gap-3"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Câmera</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'image/*';
+                          input.onchange = (e) => handleImageUpload(e as any);
+                          input.click();
+                          setShowImageMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left text-white hover:bg-red-800/50 transition-colors flex items-center gap-3 border-t border-red-800"
+                      >
+                        <FileUp className="w-4 h-4" />
+                        <span>Enviar Imagem</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Textarea + Botão de enviar */}

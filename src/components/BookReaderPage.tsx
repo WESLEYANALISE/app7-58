@@ -77,11 +77,10 @@ export const BookReaderPage = () => {
         isOpen={showProfessora}
         onClose={() => setShowProfessora(false)}
         bookContext={{
-          titulo: book.livro,
-          autor: book.autor,
-          area: book.area,
-          sobre: book.sobre
+          livro: book.livro,
+          autor: book.autor
         }}
+        area={book.area}
       />
     </div>
   );

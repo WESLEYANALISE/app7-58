@@ -18,6 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import { useVadeMecumInstant } from '@/hooks/useVadeMecumInstant';
 import { useArtigoPDFExport } from '@/hooks/useArtigoPDFExport';
+import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
+import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 
 export interface VadeMecumLegalCode {
   id: string;
@@ -71,6 +73,7 @@ export const VadeMecumEnhanced: React.FC = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [showExplanation, setShowExplanation] = useState(false);
+  const [showProfessora, setShowProfessora] = useState(false);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -332,8 +335,6 @@ export const VadeMecumEnhanced: React.FC = () => {
               />
             </div>
 
-            {/* Botões de ação compactos */}
-            <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => handleAIActionWrapper('explicar')}
                 disabled={isLoading || generatingAI}
@@ -706,7 +707,7 @@ export const VadeMecumEnhanced: React.FC = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-20 right-6 z-40"
           >
             <Button
               onClick={scrollToTop}
@@ -718,6 +719,16 @@ export const VadeMecumEnhanced: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Professora IA Floating Button */}
+      <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      
+      {/* Professora IA Chat */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        area={selectedCode?.fullName}
+      />
 
       {/* Modal de explicação IA */}
       <Dialog open={showAIResponse} onOpenChange={setShowAIResponse}>
