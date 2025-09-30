@@ -621,22 +621,11 @@ Responda APENAS com JSON válido:
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
-      >
-        <DialogContent 
-          className="max-w-4xl h-[90vh] p-0 flex flex-col bg-gradient-to-br from-red-950 via-red-900 to-black border-red-800"
-          asChild
-        >
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+    <AnimatePresence>
+      {isOpen && (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <DialogContent 
+            className="max-w-4xl h-[90vh] p-0 flex flex-col bg-gradient-to-br from-red-950 via-red-900 to-black border-red-800"
           >
             {/* Header */}
             <DialogHeader className="p-4 border-b border-red-800 shrink-0">
@@ -900,9 +889,9 @@ Responda APENAS com JSON válido:
                 {messages.length - 1} mensagens • Ultra-rápida com IA Premium
               </p>
             </div>
-          </motion.div>
-        </DialogContent>
-      </motion.div>
-    </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 };
