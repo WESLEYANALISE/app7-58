@@ -78,7 +78,20 @@ serve(async (req) => {
         })
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Gemini API error response:', errorText);
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log('Gemini API response:', JSON.stringify(data));
+      
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        console.error('Invalid response structure:', data);
+        throw new Error('Resposta inválida da API Gemini');
+      }
+
       const generatedText = data.candidates[0].content.parts[0].text;
       
       // Extrair JSON do texto gerado
@@ -156,7 +169,20 @@ serve(async (req) => {
         })
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Gemini API error response:', errorText);
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log('Gemini API response:', JSON.stringify(data));
+      
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        console.error('Invalid response structure:', data);
+        throw new Error('Resposta inválida da API Gemini');
+      }
+
       const generatedText = data.candidates[0].content.parts[0].text;
       
       // Extrair JSON do texto gerado
