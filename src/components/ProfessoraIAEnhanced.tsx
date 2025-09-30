@@ -1039,11 +1039,11 @@ Responda APENAS com JSON válido:
             </div>
           </ScrollArea>
 
-          {/* Input Area - Destaque nos botões */}
+          {/* Input Area - Botões acima do textarea */}
           <div className="p-4 border-t border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-5xl mx-auto space-y-3">
               {uploadedFile && (
-                <div className="mb-3 flex items-center gap-2 bg-red-900/30 p-3 rounded-lg">
+                <div className="flex items-center gap-2 bg-red-900/30 p-3 rounded-lg">
                   <FileText className="w-5 h-5 text-red-300" />
                   <span className="text-sm text-red-100 flex-1">{uploadedFile.name}</span>
                   <Button
@@ -1057,8 +1057,9 @@ Responda APENAS com JSON válido:
                 </div>
               )}
               
-              <div className="flex gap-2 items-end">
-                {/* Input PDF separado - DESTAQUE */}
+              {/* Botões de anexo - ACIMA do textarea */}
+              <div className="flex gap-3">
+                {/* Input PDF separado */}
                 <input
                   type="file"
                   ref={pdfInputRef}
@@ -1067,7 +1068,7 @@ Responda APENAS com JSON válido:
                   className="hidden"
                 />
                 
-                {/* Input Imagem separado com capture - DESTAQUE */}
+                {/* Input Imagem separado com capture */}
                 <input
                   type="file"
                   ref={imageInputRef}
@@ -1078,27 +1079,30 @@ Responda APENAS com JSON válido:
                 />
                 
                 <Button
-                  variant="default"
+                  variant="outline"
                   size="lg"
                   onClick={() => pdfInputRef.current?.click()}
                   disabled={isLoading}
-                  title="Anexar PDF"
-                  className="bg-red-700 hover:bg-red-600 text-white shadow-lg px-4"
+                  className="flex-1 bg-red-900/30 border-red-700 hover:bg-red-800/50 text-white h-14 flex items-center justify-center gap-3"
                 >
-                  <FileUp className="w-6 h-6" />
+                  <FileUp className="w-5 h-5" />
+                  <span className="font-medium">Documento</span>
                 </Button>
                 
                 <Button
-                  variant="default"
+                  variant="outline"
                   size="lg"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={isLoading}
-                  title="Anexar Imagem / Tirar Foto"
-                  className="bg-red-700 hover:bg-red-600 text-white shadow-lg px-4"
+                  className="flex-1 bg-red-900/30 border-red-700 hover:bg-red-800/50 text-white h-14 flex items-center justify-center gap-3"
                 >
-                  <Camera className="w-6 h-6" />
+                  <Camera className="w-5 h-5" />
+                  <span className="font-medium">Imagem</span>
                 </Button>
-                
+              </div>
+              
+              {/* Textarea + Botão de enviar */}
+              <div className="flex gap-2 items-end">
                 <Textarea
                   ref={textareaRef}
                   value={input}
@@ -1109,7 +1113,7 @@ Responda APENAS com JSON válido:
                       sendMessage();
                     }
                   }}
-                  placeholder="Digite sua pergunta jurídica ou anexe documentos..."
+                  placeholder="Digite sua pergunta jurídica..."
                   className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none text-base"
                   disabled={isLoading}
                 />
@@ -1118,7 +1122,7 @@ Responda APENAS com JSON válido:
                   onClick={() => sendMessage()}
                   disabled={isLoading || (!input.trim() && !uploadedFile)}
                   size="lg"
-                  className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6"
+                  className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6 h-[60px]"
                 >
                   {isLoading ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -1128,7 +1132,7 @@ Responda APENAS com JSON válido:
                 </Button>
               </div>
               
-              <p className="text-xs text-red-300/70 mt-2 text-center">
+              <p className="text-xs text-red-300/70 text-center">
                 {messages.length - 1} mensagens • Contexto inteligente com histórico completo
               </p>
             </div>
