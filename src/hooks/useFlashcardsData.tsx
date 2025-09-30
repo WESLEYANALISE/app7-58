@@ -48,22 +48,25 @@ export const useFlashcardsData = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Carregar flashcards do Supabase
+  // Carregar flashcards do Supabase com otimização para grande volume
   useEffect(() => {
     const loadFlashcards = async () => {
       try {
+        console.log('Iniciando carregamento de flashcards...');
+        
+        // Carregar todos os flashcards sem limite
+        // Usando order para manter consistência
         const { data, error } = await (supabase as any)
           .from('FLASH-CARDS-FINAL')
           .select('id, area, tema, pergunta, resposta, exemplo')
-          .range(0, 99999)
           .order('area', { ascending: true })
           .order('tema', { ascending: true });
 
         if (error) throw error;
-        console.log('Flashcards carregados:', data?.length || 0);
-        console.log('Áreas encontradas:', [...new Set(data?.map(f => f.area) || [])]);
         
-        // Mapear os dados para o formato esperado
+        console.log(`✅ ${data?.length || 0} flashcards carregados com sucesso`);
+        
+        // Mapear os dados para o formato esperado de forma otimizada
         const mappedData = data?.map(item => ({
           id: item.id,
           area: item.area || '',
@@ -74,11 +77,15 @@ export const useFlashcardsData = () => {
         })) || [];
         
         setFlashcards(mappedData);
+        
+        const uniqueAreas = [...new Set(mappedData.map(f => f.area))].filter(Boolean);
+        console.log(`📚 ${uniqueAreas.length} áreas únicas encontradas:`, uniqueAreas);
+        
       } catch (error) {
-        console.error('Erro ao carregar flashcards:', error);
+        console.error('❌ Erro ao carregar flashcards:', error);
         toast({
-          title: "Erro",
-          description: "Não foi possível carregar os flashcards",
+          title: "Erro ao Carregar",
+          description: "Não foi possível carregar os flashcards. Tente novamente.",
           variant: "destructive"
         });
       } finally {

@@ -9,7 +9,6 @@ import {
   RotateCcw, 
   CheckCircle, 
   XCircle, 
-  Lightbulb,
   TrendingUp,
   BookOpen,
   Target,
@@ -17,7 +16,9 @@ import {
   BarChart3,
   Plus,
   Play,
-  Eye
+  Eye,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useFlashcardsData } from '@/hooks/useFlashcardsData';
 import FlashcardsDashboard from './FlashcardsDashboard';
@@ -35,8 +36,6 @@ const FlashcardsModern = () => {
   const [selectedCategorias, setSelectedCategorias] = useState<string[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const [hint, setHint] = useState('');
   const [sessionStats, setSessionStats] = useState({ correct: 0, total: 0 });
 
   const {
@@ -71,23 +70,6 @@ const FlashcardsModern = () => {
     return filtered;
   }, [flashcards, selectedArea, selectedCategorias, viewMode, cardsForReview]);
 
-  const gerarDica = async (pergunta: string, resposta: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('gemini-ai-chat', {
-        body: {
-          message: `Com base nesta pergunta: "${pergunta}" e resposta: "${resposta}", gere uma dica útil e breve (máximo 2 linhas) que ajude a lembrar da resposta sem revelá-la completamente.`
-        }
-      });
-
-      if (error) throw error;
-      setHint(data.reply || 'Dica não disponível no momento.');
-      setShowHint(true);
-    } catch (error) {
-      console.error('Erro ao gerar dica:', error);
-      setHint('Dica não disponível no momento.');
-      setShowHint(true);
-    }
-  };
 
   const handleConhecido = () => {
     const currentCard = flashcardsFiltrados[currentCardIndex];
@@ -111,8 +93,6 @@ const FlashcardsModern = () => {
     if (currentCardIndex < flashcardsFiltrados.length - 1) {
       setCurrentCardIndex(prev => prev + 1);
       setIsFlipped(false);
-      setShowHint(false);
-      setHint('');
     } else {
       finalizarSessao();
     }
@@ -122,8 +102,6 @@ const FlashcardsModern = () => {
     if (currentCardIndex > 0) {
       setCurrentCardIndex(prev => prev - 1);
       setIsFlipped(false);
-      setShowHint(false);
-      setHint('');
     }
   };
 
@@ -150,8 +128,6 @@ const FlashcardsModern = () => {
   const resetSession = () => {
     setCurrentCardIndex(0);
     setIsFlipped(false);
-    setShowHint(false);
-    setHint('');
     setSessionStats({ correct: 0, total: 0 });
   };
 
@@ -499,103 +475,127 @@ const FlashcardsModern = () => {
               </div>
             </div>
 
-            <motion.div
-              key={currentCardIndex}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.02 }}
-            >
-              <Card 
-                className="min-h-[360px] cursor-pointer shadow-lg border-primary/20 bg-gradient-to-br from-card to-primary/5"
-                onClick={virarCard}
+            {/* Card com Flip 3D */}
+            <div className="perspective-1000 mb-6">
+              <motion.div
+                key={currentCardIndex}
+                initial={{ rotateY: 0 }}
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+                className="preserve-3d w-full"
+                style={{ transformStyle: "preserve-3d" }}
               >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="outline" className="border-primary/30 text-primary">
-                      {flashcardsFiltrados[currentCardIndex]?.area}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-primary/10 text-primary">
-                      {flashcardsFiltrados[currentCardIndex]?.tema}
-                    </Badge>
+                <Card 
+                  className="min-h-[400px] cursor-pointer shadow-xl border-2 border-primary/30 relative"
+                  onClick={virarCard}
+                >
+                  {/* Frente do Card */}
+                  <div className={`backface-hidden absolute inset-0 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <Badge variant="outline" className="border-primary/30 text-primary">
+                          {flashcardsFiltrados[currentCardIndex]?.area}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-primary/10 text-primary">
+                          {flashcardsFiltrados[currentCardIndex]?.tema}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex items-center justify-center min-h-[320px]">
+                      <div className="text-center px-6">
+                        <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary opacity-20" />
+                        <p className="text-xl font-medium leading-relaxed mb-6">
+                          {flashcardsFiltrados[currentCardIndex]?.pergunta || 'Pergunta não disponível'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">Clique para ver a resposta</p>
+                      </div>
+                    </CardContent>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="min-h-[220px] flex items-center justify-center p-6">
-                    <div className="text-center">
-                      <p className="text-lg leading-relaxed mb-4">
-                        {isFlipped 
-                          ? (flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível')
-                          : (flashcardsFiltrados[currentCardIndex]?.pergunta || 'Pergunta não disponível')}
-                      </p>
-                      {isFlipped && flashcardsFiltrados[currentCardIndex]?.exemplo && (
-                        <div className="mt-4 p-3 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground font-medium">Exemplo:</p>
-                          <p className="text-sm mt-1">{flashcardsFiltrados[currentCardIndex]?.exemplo}</p>
-                        </div>
-                      )}
-                      {!isFlipped && (
-                        <p className="text-sm text-muted-foreground mt-2">Toque para ver a resposta</p>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
 
+                  {/* Verso do Card */}
+                  <div className={`backface-hidden absolute inset-0 rotate-y-180 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <Badge variant="default" className="bg-primary">
+                          Resposta
+                        </Badge>
+                        <Badge variant="secondary" className="bg-primary/10 text-primary">
+                          {flashcardsFiltrados[currentCardIndex]?.tema}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex items-center justify-center min-h-[320px]">
+                      <div className="text-center px-6">
+                        <p className="text-lg leading-relaxed mb-4">
+                          {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
+                        </p>
+                        {flashcardsFiltrados[currentCardIndex]?.exemplo && (
+                          <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                            <p className="text-sm font-semibold text-primary mb-2">💡 Exemplo</p>
+                            <p className="text-sm">{flashcardsFiltrados[currentCardIndex]?.exemplo}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </div>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* Controles de Navegação */}
+            <div className="flex justify-between items-center mb-6">
+              <Button
+                variant="outline"
+                onClick={cardAnterior}
+                disabled={currentCardIndex === 0}
+                size="lg"
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                Anterior
+              </Button>
+
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary">
+                  {currentCardIndex + 1} / {flashcardsFiltrados.length}
+                </p>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={proximoCard}
+                size="lg"
+                className="flex items-center gap-2"
+              >
+                Próximo
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Botões de Avaliação (somente quando virado) */}
             {isFlipped && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col space-y-4 mt-6"
+                className="grid grid-cols-2 gap-4 mb-6"
               >
-                <div className="flex justify-center space-x-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => gerarDica(
-                      flashcardsFiltrados[currentCardIndex]?.pergunta || '',
-                      flashcardsFiltrados[currentCardIndex]?.resposta || ''
-                    )}
-                    disabled={showHint}
-                    className="flex items-center space-x-2"
-                  >
-                    <Lightbulb className="h-4 w-4" />
-                    <span>Dica IA</span>
-                  </Button>
-                </div>
-
-                <div className="flex space-x-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleRevisar}
-                    className="flex-1 bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/30"
-                  >
-                    <XCircle className="h-5 w-5 mr-2" />
-                    Preciso Revisar
-                  </Button>
-                  <Button
-                    onClick={handleConhecido}
-                    className="flex-1 bg-primary hover:bg-primary/90"
-                  >
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    Já Conheço
-                  </Button>
-                </div>
-
-                <div className="flex justify-between">
-                  <Button
-                    variant="ghost"
-                    onClick={cardAnterior}
-                    disabled={currentCardIndex === 0}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={proximoCard}
-                  >
-                    {currentCardIndex === flashcardsFiltrados.length - 1 ? 'Finalizar' : 'Próximo'}
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleRevisar}
+                  size="lg"
+                  className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 border-orange-500/30 dark:text-orange-400"
+                >
+                  <XCircle className="h-5 w-5 mr-2" />
+                  Preciso Revisar
+                </Button>
+                <Button
+                  onClick={handleConhecido}
+                  size="lg"
+                  className="bg-green-500 hover:bg-green-600 text-white"
+                >
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Já Conheço
+                </Button>
               </motion.div>
             )}
 
@@ -650,13 +650,14 @@ const FlashcardsModern = () => {
       <style dangerouslySetInnerHTML={{
         __html: `
         .perspective-1000 {
-          perspective: 1000px;
+          perspective: 1200px;
         }
         .preserve-3d {
           transform-style: preserve-3d;
         }
         .backface-hidden {
           backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
         }
         .rotate-y-180 {
           transform: rotateY(180deg);
