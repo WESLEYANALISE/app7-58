@@ -490,7 +490,7 @@ const FlashcardsModern = () => {
                   onClick={virarCard}
                 >
                   {/* Frente do Card */}
-                  <div className="backface-hidden absolute inset-0 bg-card">
+                  <div className="backface-hidden absolute inset-0 bg-card rotate-y-0">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge variant="outline" className="border-primary/30 text-primary">
@@ -661,6 +661,9 @@ const FlashcardsModern = () => {
         }
         .rotate-y-180 {
           transform: rotateY(180deg);
+        }
+        .rotate-y-0 {
+          transform: rotateY(0deg);
         }
       `}} />
     </div>
