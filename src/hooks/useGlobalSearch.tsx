@@ -101,11 +101,12 @@ export const useGlobalSearch = () => {
           searchInTable('06. Romance', searchTerm, 'livro', 'livro', 'sobre'),
           searchInTable('01. LIVROS-APP-NOVO', searchTerm, 'livro', 'livro', 'sobre'),
 
-          // 2. CURSOS PREPARATÓRIOS - Busca APENAS nas tabelas de cursos (curso faculdade)
+          // 2. CURSOS PREPARATÓRIOS - Buscar somente nas tabelas de cursos
+          searchInTable('CURSOS-APP-VIDEO', searchTerm, 'cursos', 'Aula', 'conteudo'),
           searchInTable('CURSO-FACULDADE', searchTerm, 'cursos', 'Assunto', 'conteudo'),
           
-          // 3. VIDEOAULAS - Busca APENAS na tabela de videoaulas (playlists organizadas)
-          searchInTable('CURSOS-APP-VIDEO', searchTerm, 'videoaulas', 'Aula', 'conteudo'),
+          // 3. VIDEOAULAS (YouTube) - Buscar somente na tabela usada pela função Videoaulas
+          searchInTable('VIDEOS', searchTerm, 'videoaulas', 'area', 'link'),
           
           // 4. RESUMOS JURÍDICOS - Busca em resumos e mapas mentais
           searchInTable('RESUMOS-NOVOS', searchTerm, 'resumo', 'Subtema', 'Resumo detalhado'),
