@@ -168,9 +168,11 @@ const VadeMecumUltraFast: React.FC = () => {
               try {
                 const {
                   data
-                } = await supabase.from(table as any).select('id, "Número do Artigo", Artigo, Narração').order('id', {
-                  ascending: true
-                });
+                } = await supabase
+                  .from(table as any)
+                  .select('id, "Número do Artigo", Artigo, Narração')
+                  .order('id', { ascending: true })
+                  .range(0, 5000);
                 if (data) {
                   const transformed = data.map((item: any) => ({
                     id: String(item.id),
@@ -529,9 +531,11 @@ const VadeMecumUltraFast: React.FC = () => {
       const {
         data,
         error
-      } = await supabase.from(tableName as any).select('id, "Número do Artigo", Artigo, Narração').order('id', {
-        ascending: true
-      });
+      } = await supabase
+        .from(tableName as any)
+        .select('id, "Número do Artigo", Artigo, Narração')
+        .order('id', { ascending: true })
+        .range(0, 5000);
       if (error) throw error;
 
       // Transformação otimizada de dados
