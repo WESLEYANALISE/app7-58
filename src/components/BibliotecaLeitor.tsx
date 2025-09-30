@@ -57,14 +57,18 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
       className="fixed inset-0 bg-background z-50 flex flex-col"
     >
       {/* Header */}
-      <div className="flex-shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center justify-between p-4">
+      <div className="flex-shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-sm pointer-events-auto">
+        <div className="flex items-center justify-between p-4 pointer-events-auto">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
-              onClick={onClose}
-              className="shrink-0"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+              className="shrink-0 relative z-50"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -95,12 +99,12 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
       </div>
 
       {/* Conteúdo principal */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {livro.link ? (
           <div className="w-full h-full">
             <iframe 
               src={livro.link} 
-              className="w-full h-full border-0" 
+              className="w-full h-full border-0 pointer-events-auto" 
               title={livro.livro}
               loading="lazy"
               allow="fullscreen"

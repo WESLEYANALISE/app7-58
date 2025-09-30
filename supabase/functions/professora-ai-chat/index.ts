@@ -25,22 +25,24 @@ serve(async (req) => {
     }
 
     // Construir contexto baseado no tipo
-    let systemPrompt = `Você é uma Professora de Direito extremamente experiente e didática, especializada em ensinar Direito Brasileiro.
+    let systemPrompt = `Você é uma Professora de Direito experiente e didática, especializada em ensinar Direito Brasileiro.
 
 INSTRUÇÕES IMPORTANTES:
-- Seja EXPANSIVA e DETALHADA nas explicações - explique conceitos profundamente
+- Seja DIRETA e OBJETIVA nas explicações
 - Use exemplos práticos REAIS do cotidiano jurídico brasileiro
-- Cite legislação específica (artigos, leis, códigos) quando relevante
-- Mencione jurisprudência importante (STF, STJ, tribunais superiores)
-- Organize suas respostas com markdown: use **negrito**, *itálico*, listas, subtítulos
-- Divida respostas longas em seções numeradas
-- Conecte o conteúdo com casos práticos e situações do dia a dia
-- Seja acessível mas mantenha precisão técnica jurídica
+- Cite legislação específica quando relevante
+- Organize com markdown: **negrito**, listas, subtítulos
+- Conecte o conteúdo com casos práticos
 
-${area ? `ÁREA DE ESPECIALIZAÇÃO: ${area}` : ''}
+${area ? `ÁREA: ${area}` : ''}
 ${contextType ? `CONTEXTO: ${contextType}` : ''}
 
-RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
+QUANDO RECEBER ARQUIVO (imagem/PDF):
+1. PRIMEIRO: Dê um resumo objetivo do que identificou (2-3 linhas)
+2. DEPOIS: Pergunte "O que você gostaria que eu fizesse com isso?"
+3. AGUARDE a resposta do usuário antes de fazer análise detalhada
+
+RESPONDA EM PORTUGUÊS BRASILEIRO com formatação markdown.`;
 
     const messages: any[] = [
       { role: 'system', content: systemPrompt }
@@ -61,7 +63,12 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
 
     // Processar arquivo anexado
     if (fileData) {
-      console.log('Processing file:', { mimeType: fileData.mimeType, size: fileData.data?.length });
+      console.log('📎 Processing file:', { 
+        name: fileData.name,
+        mimeType: fileData.mimeType, 
+        size: fileData.data?.length,
+        dataPreview: fileData.data?.substring(0, 50)
+      });
       
       // Se for PDF, extrair texto via edge function
       if (fileData.mimeType === 'application/pdf') {
@@ -85,11 +92,12 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
             const extractedText = extractData.text || '';
             console.log('PDF text extracted, length:', extractedText.length);
             
-            // Limitar texto extraído a ~15k caracteres
-            const truncatedText = extractedText.substring(0, 15000);
+            // Aumentar limite para PDFs grandes - até 50k caracteres
+            const maxLength = 50000;
+            const truncatedText = extractedText.substring(0, maxLength);
             userMessage.content.push({
               type: 'text',
-              text: `[Conteúdo do PDF "${fileData.name}"]\n\n${truncatedText}${extractedText.length > 15000 ? '\n\n[... texto truncado por tamanho]' : ''}`
+              text: `[PDF: "${fileData.name}"]\n${truncatedText}${extractedText.length > maxLength ? '\n[... há mais conteúdo]' : ''}`
             });
           } else {
             console.error('Failed to extract PDF text:', extractResponse.status);
@@ -105,13 +113,21 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
             text: `[Documento PDF anexado: ${fileData.name}]\nErro na extração de texto.`
           });
         }
-      } else {
+      } else if (fileData.mimeType.startsWith('image/')) {
         // Para imagens, enviar como image_url
+        console.log('📷 Sending image to AI');
         userMessage.content.push({
           type: 'image_url',
           image_url: {
             url: `data:${fileData.mimeType};base64,${fileData.data}`
           }
+        });
+      } else {
+        // Outros tipos de arquivo
+        console.log('📄 Unsupported file type, sending as text reference');
+        userMessage.content.push({
+          type: 'text',
+          text: `[Arquivo: "${fileData.name}" - tipo: ${fileData.mimeType}]`
         });
       }
     }
@@ -134,8 +150,8 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
         model: 'google/gemini-2.5-flash',
         messages,
         stream: true,
-        max_tokens: 2000,
-        temperature: 0.2,
+        max_tokens: 4000,
+        temperature: 0.3,
       }),
     });
 
