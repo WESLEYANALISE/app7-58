@@ -116,7 +116,7 @@ const CategoryAccessSection = memo(() => {
         {/* Header Section - Animação Lottie Centralizada com Botões */}
         <div className="text-center mb-2">
           {/* Mensagens Motivacionais Flutuantes */}
-          <div className="relative mb-4">
+          <div className="relative mb-3">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentMessageIndex}
@@ -124,11 +124,11 @@ const CategoryAccessSection = memo(() => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.8 }}
                 transition={{ duration: 0.5 }}
-                className="inline-block bg-white/95 backdrop-blur-sm text-red-800 px-6 py-3 rounded-2xl shadow-lg border-2 border-red-200 font-semibold text-sm relative"
+                className="inline-block bg-white/95 backdrop-blur-sm text-red-800 px-3 py-1.5 rounded-xl shadow-md border border-red-200 font-medium text-xs relative"
               >
                 {motivationalMessages[currentMessageIndex]}
                 {/* Balão de fala - seta apontando para baixo */}
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-white/95"></div>
+                <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white/95"></div>
               </motion.div>
             </AnimatePresence>
           </div>
