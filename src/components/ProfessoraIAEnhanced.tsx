@@ -117,9 +117,22 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         role: 'assistant',
-        content: initialMessage || `Oi! 👋
+        content: initialMessage || `🎓 Olá! Sou sua **Professora de Direito IA Premium**!
 
-${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` : 'Sou sua professora de Direito. Como posso te ajudar?'}`,
+${bookContext && typeof bookContext === 'object' && bookContext?.livro ? `📚 Estou aqui para ajudar com o livro **"${bookContext.livro}"**` : ''}
+${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
+
+**Posso te ajudar de várias formas:**
+
+📄 Analisar documentos (PDFs com imagens, textos jurídicos)
+💡 Explicar conceitos de forma detalhada e prática  
+📝 Gerar flashcards personalizados para estudos
+❓ Criar questões objetivas e discursivas
+📋 Resumir artigos e documentos complexos
+⚖️ Sugerir casos práticos e jurisprudências relevantes
+📤 Exportar conversas em PDF
+
+Como posso te ajudar hoje? 🚀`,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
@@ -167,8 +180,6 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
       let fileData = null;
       
       if (currentFile) {
-        console.log('Processing file:', { name: currentFile.name, type: currentFile.type, size: currentFile.size });
-        
         if (/heic|heif/i.test(currentFile.type)) {
           toast({
             title: 'Formato não suportado',
@@ -179,19 +190,15 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
           return;
         } else if (currentFile.type.startsWith('image/')) {
           try {
-            console.log('Compressing image...');
             const compressed = await compressImage(currentFile);
-            console.log('Image compressed successfully, base64 length:', compressed.data.length);
             fileData = compressed;
           } catch (e) {
-            console.error('Error compressing image, using fallback:', e);
             const buffer = await currentFile.arrayBuffer();
             const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
             fileData = { data: base64, mimeType: currentFile.type, name: currentFile.name };
           }
         } else {
           // PDF ou outros
-          console.log('Processing PDF/document...');
           const buffer = await currentFile.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
           fileData = {
@@ -199,7 +206,6 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
             mimeType: currentFile.type,
             name: currentFile.name
           };
-          console.log('Document processed, base64 length:', base64.length);
         }
       }
 
@@ -209,14 +215,6 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
       }
 
       // Streaming com fetch
-      console.log('Calling edge function with:', {
-        hasFile: !!fileData,
-        fileName: fileData?.name,
-        mimeType: fileData?.mimeType,
-        dataLength: fileData?.data?.length,
-        messageLength: currentInput.length
-      });
-      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/professora-ai-chat`,
         {
@@ -237,8 +235,6 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
           }),
         }
       );
-
-      console.log('Response status:', response.status);
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -261,9 +257,7 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
           setIsLoading(false);
           return;
         }
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response:', { status: response.status, error: errorData });
-        throw new Error(errorData.error || `Erro ${response.status}`);
+        throw new Error(`Erro ${response.status}`);
       }
 
       // Processar stream com buffer (coalescência)
@@ -356,6 +350,19 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
         return newMessages;
       });
 
+      // Adicionar sugestões inteligentes
+      const suggestions = generateSmartSuggestions(assistantContent);
+      if (suggestions.length > 0) {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (lastMessage.role === 'assistant') {
+            lastMessage.suggestions = suggestions;
+          }
+          return newMessages;
+        });
+      }
+
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
       toast({
@@ -375,6 +382,9 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
     
     if (content.toLowerCase().includes('artigo') || content.toLowerCase().includes('código')) {
       suggestions.push('Explique com exemplo prático');
+    }
+    if (content.toLowerCase().includes('jurisprudência')) {
+      suggestions.push('Mostre casos semelhantes');
     }
     if (content.length > 500) {
       suggestions.push('Resuma os pontos principais');
@@ -466,9 +476,20 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
   const clearConversation = () => {
     const welcomeMessage: Message = {
       role: 'assistant',
-      content: `Oi! 👋
+      content: `Olá! Sou a Professora Evelyn, sua assistente de Direito. 🎓
+${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
 
-${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` : 'Sou sua professora de Direito. Como posso te ajudar?'}`,
+**Posso te ajudar de várias formas:**
+
+📄 Analisar documentos (PDFs com imagens, textos jurídicos)
+💡 Explicar conceitos de forma detalhada e prática  
+📝 Gerar flashcards personalizados para estudos
+❓ Criar questões objetivas e discursivas
+📋 Resumir artigos e documentos complexos
+⚖️ Sugerir casos práticos e jurisprudências relevantes
+📤 Exportar conversas em PDF
+
+Como posso te ajudar hoje? 🚀`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -476,7 +497,7 @@ ${areaLabel ? `Estou aqui pra te ajudar com ${areaLabel}. O que você precisa?` 
     setUploadedFile(null);
     toast({
       title: "Conversa limpa",
-      description: "Histórico removido.",
+      description: "Histórico de mensagens foi removido.",
     });
   };
 
@@ -601,7 +622,7 @@ Responda APENAS com JSON válido:
       className="mt-4 p-4 bg-red-900/20 rounded-xl border border-red-800/30"
     >
       <p className="text-xs text-red-300 mb-3 font-medium">⚡ Ações Rápidas:</p>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -621,6 +642,26 @@ Responda APENAS com JSON válido:
         >
           <BookOpen className="w-4 h-4" />
           Explicar
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => sendMessage('Sugira casos práticos relacionados ao tema')}
+          disabled={isLoading}
+          className="text-xs text-red-100 hover:text-white hover:bg-red-800/40 h-auto py-2 flex-col gap-1"
+        >
+          <Scale className="w-4 h-4" />
+          Casos
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => sendMessage('Indique jurisprudências relevantes (se existirem)')}
+          disabled={isLoading}
+          className="text-xs text-red-100 hover:text-white hover:bg-red-800/40 h-auto py-2 flex-col gap-1"
+        >
+          <FileText className="w-4 h-4" />
+          Jurisprudências
         </Button>
         <Button
           variant="ghost"
@@ -911,15 +952,11 @@ Responda APENAS com JSON válido:
                     className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] md:max-w-[75%] rounded-3xl p-5 ${
+                      className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 ${
                         message.role === 'user'
-                          ? 'bg-red-600 text-white rounded-br-md'
-                          : 'bg-red-950/60 text-red-50 border border-red-800/30 rounded-bl-md'
+                          ? 'bg-red-600 text-white'
+                          : 'bg-red-950/80 text-red-50 border border-red-800/50'
                       }`}
-                      style={{
-                        fontSize: message.role === 'user' ? '16px' : '17px',
-                        lineHeight: message.role === 'user' ? '1.5' : '1.7'
-                      }}
                     >
                       {message.file && (
                         <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
@@ -1026,6 +1063,26 @@ Responda APENAS com JSON válido:
                         </div>
                       )}
 
+                      {/* Sugestões */}
+                      {message.suggestions && message.suggestions.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-red-800/30">
+                          <p className="text-xs text-red-300 mb-2">Sugestões:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {message.suggestions.map((suggestion, i) => (
+                              <button
+                                key={i}
+                                onClick={() => {
+                                  setInput(suggestion);
+                                  textareaRef.current?.focus();
+                                }}
+                                className="text-xs bg-red-800/30 hover:bg-red-800/50 text-red-100 px-3 py-1.5 rounded-full transition-colors"
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -1152,9 +1209,8 @@ Responda APENAS com JSON válido:
                       sendMessage();
                     }
                   }}
-                  placeholder="Digite sua mensagem..."
-                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none"
-                  style={{ fontSize: '16px', lineHeight: '1.5' }}
+                  placeholder="Digite sua pergunta jurídica..."
+                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none text-base"
                   disabled={isLoading}
                 />
                 

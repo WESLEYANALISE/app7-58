@@ -14,7 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SubtemaResumo } from '@/hooks/useResumosJuridicos';
 
-type ViewMode = 'menu' | 'areas' | 'temas' | 'subtemas' | 'visualizacao' | 'busca' | 'resumo-detalhado';
+type ViewMode = 'menu' | 'areas' | 'temas' | 'subtemas' | 'visualizacao' | 'busca' | 'resumo-detalhado' | 'analise-aprofundada';
 
 export const ResumosJuridicos = () => {
   const { setCurrentFunction } = useNavigation();
@@ -38,7 +38,7 @@ export const ResumosJuridicos = () => {
     } else if (viewMode === 'busca') {
       setViewMode('areas');
       setSearchTerm('');
-    } else if (viewMode === 'areas' || viewMode === 'resumo-detalhado') {
+    } else if (viewMode === 'areas' || viewMode === 'resumo-detalhado' || viewMode === 'analise-aprofundada') {
       setViewMode('menu');
     } else {
       setCurrentFunction(null);
@@ -74,6 +74,8 @@ export const ResumosJuridicos = () => {
         return 'Resumos Estruturados';
       case 'resumo-detalhado':
         return 'Resumo Detalhado';
+      case 'analise-aprofundada':
+        return 'Análise Aprofundada';
       case 'temas':
         return selectedArea || 'Temas';
       case 'subtemas':
@@ -184,7 +186,7 @@ export const ResumosJuridicos = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                 <Card 
                   className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 hover:border-primary/50"
                   onClick={() => setViewMode('areas')}
@@ -219,10 +221,30 @@ export const ResumosJuridicos = () => {
                       Resumo Detalhado
                     </h3>
                     <p className="text-muted-foreground text-sm mb-3">
-                      Gere resumo detalhado a partir do seu conteúdo ou tópico
+                      Resumo super detalhado e explicativo do seu documento
                     </p>
                     <div className="text-xs text-accent">
-                      🚀 Gerado por IA
+                      🚀 Análise rápida
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 hover:border-secondary/50"
+                  onClick={() => setViewMode('analise-aprofundada')}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className="w-14 h-14 mx-auto mb-4 bg-secondary/10 rounded-full flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                      <span className="text-2xl">⚖️</span>
+                    </div>
+                    <h3 className="text-lg font-bold mb-2 group-hover:text-secondary transition-colors">
+                      Análise Aprofundada
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-3">
+                      Análise completa com legislação, jurisprudência e recomendações
+                    </p>
+                    <div className="text-xs text-secondary">
+                      🔍 Busca em tempo real
                     </div>
                   </CardContent>
                 </Card>
@@ -277,6 +299,18 @@ export const ResumosJuridicos = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <ResumoDetalhado onBack={handleBack} />
+                </motion.div>
+              )}
+
+              {viewMode === 'analise-aprofundada' && (
+                <motion.div
+                  key="analise-aprofundada"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ResumosPersonalizados onBack={handleBack} />
                 </motion.div>
               )}
 

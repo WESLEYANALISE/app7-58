@@ -212,6 +212,8 @@ export const RadarJuridico = () => {
       </div>
 
       <div className="p-4 space-y-6 px-[11px] py-[2px] my-0 mx-0">
+        <RadarStats totalNews={stats.total} readNews={stats.read} favoriteNews={stats.favorites} lastUpdate={lastUpdate} />
+
         <Card className="border-yellow-500/20 bg-gradient-to-r from-yellow-500/5 to-amber-500/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-yellow-400">

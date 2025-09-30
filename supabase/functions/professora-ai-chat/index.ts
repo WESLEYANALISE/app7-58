@@ -25,30 +25,22 @@ serve(async (req) => {
     }
 
     // Construir contexto baseado no tipo
-    let systemPrompt = `Você é uma professora de Direito especializada. Seja DIRETA e OBJETIVA.
+    let systemPrompt = `Você é uma Professora de Direito extremamente experiente e didática, especializada em ensinar Direito Brasileiro.
 
-REGRAS IMPORTANTES:
-- NÃO se apresente nem fale seu nome
-- Responda de forma natural e conversacional
-- Se a pessoa disser "oi", responda "Oi!" de volta
-- Só explique conceitos se a pessoa pedir explicitamente
-- Seja breve, a não ser que peçam detalhes
+INSTRUÇÕES IMPORTANTES:
+- Seja EXPANSIVA e DETALHADA nas explicações - explique conceitos profundamente
+- Use exemplos práticos REAIS do cotidiano jurídico brasileiro
+- Cite legislação específica (artigos, leis, códigos) quando relevante
+- Mencione jurisprudência importante (STF, STJ, tribunais superiores)
+- Organize suas respostas com markdown: use **negrito**, *itálico*, listas, subtítulos
+- Divida respostas longas em seções numeradas
+- Conecte o conteúdo com casos práticos e situações do dia a dia
+- Seja acessível mas mantenha precisão técnica jurídica
 
-ANÁLISE DE ARQUIVOS (CRÍTICO):
-- Se receber uma IMAGEM: descreva TODOS os detalhes visuais, textos, elementos presentes
-- Se receber um DOCUMENTO: extraia e explique TODO o conteúdo, identifique o tipo de documento
-- Após analisar, ofereça gerar resumo, explicar pontos específicos, etc.
+${area ? `ÁREA DE ESPECIALIZAÇÃO: ${area}` : ''}
+${contextType ? `CONTEXTO: ${contextType}` : ''}
 
-QUANDO EXPLICAR:
-- Use exemplos práticos do Direito brasileiro
-- Cite legislação quando relevante (artigos, leis, códigos)
-- Organize com markdown: **negrito**, listas, subtítulos
-- Linguagem clara e precisa
-
-${area ? `CONTEXTO: Área de ${area}` : ''}
-${contextType ? `INFO: ${contextType}` : ''}
-
-RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO.`;
+RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
 
     const messages: any[] = [
       { role: 'system', content: systemPrompt }
@@ -69,12 +61,7 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO.`;
 
     // Processar arquivo anexado
     if (fileData) {
-      console.log('Processing file:', { 
-        mimeType: fileData.mimeType, 
-        hasData: !!fileData.data,
-        dataLength: fileData.data?.length,
-        name: fileData.name 
-      });
+      console.log('Processing file:', { mimeType: fileData.mimeType, size: fileData.data?.length });
       
       // Se for PDF, extrair texto via edge function
       if (fileData.mimeType === 'application/pdf') {
@@ -118,25 +105,13 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO.`;
             text: `[Documento PDF anexado: ${fileData.name}]\nErro na extração de texto.`
           });
         }
-      } else if (fileData.mimeType?.startsWith('image/')) {
+      } else {
         // Para imagens, enviar como image_url
-        console.log('Sending image to AI');
-        if (!fileData.data) {
-          console.error('Image data is missing');
-          throw new Error('Dados da imagem não disponíveis');
-        }
         userMessage.content.push({
           type: 'image_url',
           image_url: {
             url: `data:${fileData.mimeType};base64,${fileData.data}`
           }
-        });
-      } else {
-        // Outros tipos de arquivo
-        console.log('Unsupported file type, adding as text reference');
-        userMessage.content.push({
-          type: 'text',
-          text: `[Arquivo anexado: ${fileData.name}]\nTipo: ${fileData.mimeType}`
         });
       }
     }
@@ -159,8 +134,8 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO.`;
         model: 'google/gemini-2.5-flash',
         messages,
         stream: true,
-        max_tokens: 3000,
-        temperature: 0.3,
+        max_tokens: 2000,
+        temperature: 0.2,
       }),
     });
 
@@ -198,15 +173,9 @@ RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO.`;
 
   } catch (error) {
     console.error('Erro no chat da professora:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    
     return new Response(
       JSON.stringify({ 
-        error: errorMessage
+        error: error instanceof Error ? error.message : 'Erro desconhecido' 
       }),
       {
         status: 500,

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Play, Pause, Search, Home, Clock, List, Check, Heart, Headphones, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -59,9 +59,6 @@ export const Audioaulas = () => {
       setSelectedTema(null);
     } else if (selectedArea) {
       setSelectedArea(null);
-    } else {
-      // Voltar para a tela anterior do app
-      window.history.back();
     }
   };
 
@@ -77,8 +74,8 @@ export const Audioaulas = () => {
     return colors[index % colors.length];
   };
 
-  // Filtrar áudios baseado na busca e aba ativa - otimizado com useMemo
-  const getFilteredAudios = useMemo(() => {
+  // Filtrar áudios baseado na busca e aba ativa
+  const getFilteredAudios = () => {
     let filtered = audioaulas;
 
     // Filtro de busca
@@ -113,9 +110,9 @@ export const Audioaulas = () => {
     }
 
     return filtered;
-  }, [audioaulas, searchQuery, activeTab, isFavorite, listened, completed]);
+  };
 
-  const filteredAudios = getFilteredAudios;
+  const filteredAudios = getFilteredAudios();
 
   // Se está mostrando o player completo
   if (showPlayerScreen && selectedArea && selectedTema) {
@@ -252,7 +249,7 @@ export const Audioaulas = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleBack}
+                onClick={() => window.history.back()}
                 className="p-2 hover:bg-gray-800 text-white"
               >
                 <ArrowLeft className="h-5 w-5" />
