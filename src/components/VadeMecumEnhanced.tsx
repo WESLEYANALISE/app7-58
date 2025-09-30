@@ -335,6 +335,7 @@ export const VadeMecumEnhanced: React.FC = () => {
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => handleAIActionWrapper('explicar')}
                 disabled={isLoading || generatingAI}
@@ -994,6 +995,16 @@ export const VadeMecumEnhanced: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Professora IA Floating Button */}
+      <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      
+      {/* Professora IA Chat */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        area={selectedCode?.fullName}
+      />
     </div>
   );
 };
