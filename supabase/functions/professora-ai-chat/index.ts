@@ -25,24 +25,22 @@ serve(async (req) => {
     }
 
     // Construir contexto baseado no tipo
-    let systemPrompt = `Você é uma Professora de Direito experiente e didática, especializada em ensinar Direito Brasileiro.
+    let systemPrompt = `Você é uma Professora de Direito extremamente experiente e didática, especializada em ensinar Direito Brasileiro.
 
 INSTRUÇÕES IMPORTANTES:
-- Seja DIRETA e OBJETIVA nas explicações
+- Seja EXPANSIVA e DETALHADA nas explicações - explique conceitos profundamente
 - Use exemplos práticos REAIS do cotidiano jurídico brasileiro
-- Cite legislação específica quando relevante
-- Organize com markdown: **negrito**, listas, subtítulos
-- Conecte o conteúdo com casos práticos
+- Cite legislação específica (artigos, leis, códigos) quando relevante
+- Mencione jurisprudência importante (STF, STJ, tribunais superiores)
+- Organize suas respostas com markdown: use **negrito**, *itálico*, listas, subtítulos
+- Divida respostas longas em seções numeradas
+- Conecte o conteúdo com casos práticos e situações do dia a dia
+- Seja acessível mas mantenha precisão técnica jurídica
 
-${area ? `ÁREA: ${area}` : ''}
+${area ? `ÁREA DE ESPECIALIZAÇÃO: ${area}` : ''}
 ${contextType ? `CONTEXTO: ${contextType}` : ''}
 
-QUANDO RECEBER ARQUIVO (imagem/PDF):
-1. PRIMEIRO: Dê um resumo objetivo do que identificou (2-3 linhas)
-2. DEPOIS: Pergunte "O que você gostaria que eu fizesse com isso?"
-3. AGUARDE a resposta do usuário antes de fazer análise detalhada
-
-RESPONDA EM PORTUGUÊS BRASILEIRO com formatação markdown.`;
+RESPONDA SEMPRE EM PORTUGUÊS BRASILEIRO com formatação markdown rica.`;
 
     const messages: any[] = [
       { role: 'system', content: systemPrompt }
@@ -63,12 +61,7 @@ RESPONDA EM PORTUGUÊS BRASILEIRO com formatação markdown.`;
 
     // Processar arquivo anexado
     if (fileData) {
-      console.log('📎 Processing file:', { 
-        name: fileData.name,
-        mimeType: fileData.mimeType, 
-        size: fileData.data?.length,
-        dataPreview: fileData.data?.substring(0, 50)
-      });
+      console.log('Processing file:', { mimeType: fileData.mimeType, size: fileData.data?.length });
       
       // Se for PDF, extrair texto via edge function
       if (fileData.mimeType === 'application/pdf') {
@@ -97,7 +90,7 @@ RESPONDA EM PORTUGUÊS BRASILEIRO com formatação markdown.`;
             const truncatedText = extractedText.substring(0, maxLength);
             userMessage.content.push({
               type: 'text',
-              text: `[PDF: "${fileData.name}"]\n${truncatedText}${extractedText.length > maxLength ? '\n[... há mais conteúdo]' : ''}`
+              text: `[Conteúdo do PDF "${fileData.name}" - ${extractedText.length} caracteres]\n\n${truncatedText}${extractedText.length > maxLength ? '\n\n[... documento possui mais conteúdo, peça para continuar se necessário]' : ''}`
             });
           } else {
             console.error('Failed to extract PDF text:', extractResponse.status);
@@ -113,21 +106,13 @@ RESPONDA EM PORTUGUÊS BRASILEIRO com formatação markdown.`;
             text: `[Documento PDF anexado: ${fileData.name}]\nErro na extração de texto.`
           });
         }
-      } else if (fileData.mimeType.startsWith('image/')) {
+      } else {
         // Para imagens, enviar como image_url
-        console.log('📷 Sending image to AI');
         userMessage.content.push({
           type: 'image_url',
           image_url: {
             url: `data:${fileData.mimeType};base64,${fileData.data}`
           }
-        });
-      } else {
-        // Outros tipos de arquivo
-        console.log('📄 Unsupported file type, sending as text reference');
-        userMessage.content.push({
-          type: 'text',
-          text: `[Arquivo: "${fileData.name}" - tipo: ${fileData.mimeType}]`
         });
       }
     }

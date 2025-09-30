@@ -117,21 +117,22 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         role: 'assistant',
-        content: initialMessage || `🎓 Olá! Sou sua **Professora de Direito IA**!
+        content: initialMessage || `🎓 Olá! Sou sua **Professora de Direito IA Premium**!
 
 ${bookContext && typeof bookContext === 'object' && bookContext?.livro ? `📚 Estou aqui para ajudar com o livro **"${bookContext.livro}"**` : ''}
 ${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
 
-**Posso ajudar com:**
+**Posso te ajudar de várias formas:**
 
-📄 Analisar documentos (PDFs, imagens, textos jurídicos)
-💡 Explicar conceitos de forma prática  
-📝 Gerar flashcards para estudos
-❓ Criar questões objetivas
-📋 Resumir artigos complexos
-⚖️ Sugerir casos práticos relevantes
+📄 Analisar documentos (PDFs com imagens, textos jurídicos)
+💡 Explicar conceitos de forma detalhada e prática  
+📝 Gerar flashcards personalizados para estudos
+❓ Criar questões objetivas e discursivas
+📋 Resumir artigos e documentos complexos
+⚖️ Sugerir casos práticos e jurisprudências relevantes
+📤 Exportar conversas em PDF
 
-Como posso ajudar? 🚀`,
+Como posso te ajudar hoje? 🚀`,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
@@ -179,12 +180,6 @@ Como posso ajudar? 🚀`,
       let fileData = null;
       
       if (currentFile) {
-        console.log('📎 Processing file upload:', { 
-          name: currentFile.name, 
-          type: currentFile.type, 
-          size: currentFile.size 
-        });
-
         if (/heic|heif/i.test(currentFile.type)) {
           toast({
             title: 'Formato não suportado',
@@ -193,32 +188,17 @@ Como posso ajudar? 🚀`,
           });
           setIsLoading(false);
           return;
-        } 
-        
-        if (currentFile.type.startsWith('image/')) {
-          console.log('🖼️ Processing image...');
+        } else if (currentFile.type.startsWith('image/')) {
           try {
             const compressed = await compressImage(currentFile);
-            console.log('✅ Image compressed:', compressed.name);
             fileData = compressed;
           } catch (e) {
-            console.log('⚠️ Compression failed, using raw image');
             const buffer = await currentFile.arrayBuffer();
             const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
             fileData = { data: base64, mimeType: currentFile.type, name: currentFile.name };
           }
-        } else if (currentFile.type === 'application/pdf') {
-          console.log('📄 Processing PDF...');
-          const buffer = await currentFile.arrayBuffer();
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-          fileData = {
-            data: base64,
-            mimeType: currentFile.type,
-            name: currentFile.name
-          };
-          console.log('✅ PDF processed, size:', base64.length);
         } else {
-          console.log('📎 Processing other file type...');
+          // PDF ou outros
           const buffer = await currentFile.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
           fileData = {
@@ -227,12 +207,6 @@ Como posso ajudar? 🚀`,
             name: currentFile.name
           };
         }
-        
-        console.log('✅ File ready to send:', { 
-          name: fileData.name, 
-          mimeType: fileData.mimeType,
-          dataSize: fileData.data.length 
-        });
       }
 
       let contextType = '';
@@ -502,18 +476,20 @@ Como posso ajudar? 🚀`,
   const clearConversation = () => {
     const welcomeMessage: Message = {
       role: 'assistant',
-      content: `Olá! Sou sua Professora de Direito IA. 🎓
+      content: `Olá! Sou a Professora Evelyn, sua assistente de Direito. 🎓
 ${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
 
-**Posso ajudar com:**
+**Posso te ajudar de várias formas:**
 
-📄 Analisar documentos (PDFs, imagens)
-💡 Explicar conceitos de forma prática  
-📝 Gerar flashcards para estudos
-❓ Criar questões objetivas
-📋 Resumir artigos complexos
+📄 Analisar documentos (PDFs com imagens, textos jurídicos)
+💡 Explicar conceitos de forma detalhada e prática  
+📝 Gerar flashcards personalizados para estudos
+❓ Criar questões objetivas e discursivas
+📋 Resumir artigos e documentos complexos
+⚖️ Sugerir casos práticos e jurisprudências relevantes
+📤 Exportar conversas em PDF
 
-Como posso ajudar? 🚀`,
+Como posso te ajudar hoje? 🚀`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -932,62 +908,67 @@ Responda APENAS com JSON válido:
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-background flex flex-col"
+          className="fixed inset-0 z-50 bg-gradient-to-br from-red-950 via-red-900 to-black flex flex-col"
         >
-          {/* Header compacto tipo WhatsApp */}
-          <div className="flex items-center gap-3 p-3 border-b bg-card backdrop-blur-sm shrink-0">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose}
-              className="h-9 w-9"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-            <div className="flex-1 min-w-0">
-              <h2 className="font-semibold text-base">Professora IA</h2>
-              {areaLabel && <p className="text-xs text-muted-foreground truncate">{areaLabel}</p>}
+          {/* Header */}
+          <div className="p-4 border-b border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="text-red-200 hover:text-white hover:bg-red-800/50"
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Professora Evelyn</h2>
+                  <p className="text-sm text-red-200">Assistente IA de Direito{areaLabel ? ` • ${areaLabel}` : ''}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearConversation}
+                className="text-red-200 hover:text-white hover:bg-red-800/50 gap-2"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Limpar
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={clearConversation}
-              className="h-9 w-9"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
           </div>
 
-          {/* Messages compactas */}
-          <ScrollArea ref={scrollAreaRef} className="flex-1 px-2 py-2">
-            <AnimatePresence mode="popLayout">
-              {messages.map((message, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className={`mb-2 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 shadow-sm text-sm ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-br-none'
-                        : 'bg-card border rounded-bl-none'
-                    }`}
+          {/* Messages */}
+          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+            <div className="max-w-5xl mx-auto">
+              <AnimatePresence mode="popLayout">
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    {message.file && (
-                      <div className="mb-1.5 flex items-center gap-1.5 text-xs opacity-70">
-                        <FileText className="w-3.5 h-3.5" />
-                        {message.file.name}
-                      </div>
-                    )}
-                    
-                    <MarkdownRenderer content={message.content} />
+                    <div
+                      className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 ${
+                        message.role === 'user'
+                          ? 'bg-red-600 text-white'
+                          : 'bg-red-950/80 text-red-50 border border-red-800/50'
+                      }`}
+                    >
+                      {message.file && (
+                        <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
+                          <FileText className="w-4 h-4" />
+                          {message.file.name}
+                        </div>
+                      )}
+                      
+                      <MarkdownRenderer content={message.content} />
 
-                    {/* Quick Actions após primeira mensagem */}
-                    {index === 0 && showQuickActions && <QuickActions />}
+                      {/* Quick Actions após primeira mensagem */}
+                      {index === 0 && showQuickActions && <QuickActions />}
 
                       {/* Flashcards gerados */}
                       {message.flashcards && message.flashcards.length > 0 && (
@@ -1084,9 +1065,9 @@ Responda APENAS com JSON válido:
 
                       {/* Sugestões */}
                       {message.suggestions && message.suggestions.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-border/50">
-                          <p className="text-xs opacity-60 mb-1.5">💡 Sugestões:</p>
-                          <div className="flex flex-wrap gap-1.5">
+                        <div className="mt-3 pt-3 border-t border-red-800/30">
+                          <p className="text-xs text-red-300 mb-2">Sugestões:</p>
+                          <div className="flex flex-wrap gap-2">
                             {message.suggestions.map((suggestion, i) => (
                               <button
                                 key={i}
@@ -1094,7 +1075,7 @@ Responda APENAS com JSON válido:
                                   setInput(suggestion);
                                   textareaRef.current?.focus();
                                 }}
-                                className="text-xs bg-accent hover:bg-accent/80 px-2.5 py-1 rounded-full transition-colors"
+                                className="text-xs bg-red-800/30 hover:bg-red-800/50 text-red-100 px-3 py-1.5 rounded-full transition-colors"
                               >
                                 {suggestion}
                               </button>
@@ -1111,36 +1092,39 @@ Responda APENAS com JSON válido:
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex justify-start mb-2"
+                  className="flex justify-start"
                 >
-                  <div className="bg-card border rounded-lg px-3 py-2">
-                    <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
+                  <div className="bg-red-950/80 border border-red-800/50 rounded-2xl p-4">
+                    <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
                   </div>
                 </motion.div>
               )}
               
               <div ref={messagesEndRef} />
+            </div>
           </ScrollArea>
 
-          {/* Input compacto tipo WhatsApp */}
-          <div className="border-t p-2 bg-card backdrop-blur-sm shrink-0">
-            {uploadedFile && (
-              <div className="mb-2 flex items-center gap-2 bg-accent/50 p-2 rounded-lg mx-1">
-                <FileText className="w-4 h-4 shrink-0" />
-                <span className="text-xs flex-1 truncate">{uploadedFile.name}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setUploadedFile(null)}
-                  className="h-6 w-6"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-            
-            <div className="flex items-end gap-1.5">
-              <div className="flex gap-1">
+          {/* Input Area - Botões acima do textarea */}
+          <div className="p-4 border-t border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
+            <div className="max-w-5xl mx-auto space-y-3">
+              {uploadedFile && (
+                <div className="flex items-center gap-2 bg-red-900/30 p-3 rounded-lg">
+                  <FileText className="w-5 h-5 text-red-300" />
+                  <span className="text-sm text-red-100 flex-1">{uploadedFile.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUploadedFile(null)}
+                    className="text-red-300 hover:text-white hover:bg-red-800/50"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
+              {/* Botões de anexo - ACIMA do textarea */}
+              <div className="flex gap-3">
+                {/* Input PDF separado */}
                 <input
                   type="file"
                   ref={pdfInputRef}
@@ -1148,17 +1132,8 @@ Responda APENAS com JSON válido:
                   accept=".pdf,application/pdf"
                   className="hidden"
                 />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => pdfInputRef.current?.click()}
-                  disabled={isLoading}
-                  title="PDF"
-                  className="h-9 w-9"
-                >
-                  <FileUp className="h-4 w-4" />
-                </Button>
-
+                
+                {/* Input Imagem separado com capture */}
                 <input
                   type="file"
                   ref={imageInputRef}
@@ -1167,47 +1142,109 @@ Responda APENAS com JSON válido:
                   capture="environment"
                   className="hidden"
                 />
+                
                 <Button
                   variant="outline"
-                  size="icon"
-                  onClick={() => imageInputRef.current?.click()}
+                  size="lg"
+                  onClick={() => pdfInputRef.current?.click()}
                   disabled={isLoading}
-                  title="Imagem"
-                  className="h-9 w-9"
+                  className="flex-1 bg-red-900/30 border-red-700 hover:bg-red-800/50 text-white h-14 flex items-center justify-center gap-3"
                 >
-                  <Camera className="h-4 w-4" />
+                  <FileUp className="w-5 h-5" />
+                  <span className="font-medium">Documento</span>
+                </Button>
+                
+                <div className="flex-1 relative">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setShowImageMenu(!showImageMenu)}
+                    disabled={isLoading}
+                    className="w-full bg-red-900/30 border-red-700 hover:bg-red-800/50 text-white h-14 flex items-center justify-center gap-3"
+                  >
+                    <Camera className="w-5 h-5" />
+                    <span className="font-medium">Imagem</span>
+                  </Button>
+                  
+                  {showImageMenu && (
+                    <div className="absolute bottom-16 left-0 right-0 bg-red-900/95 backdrop-blur-sm border border-red-700 rounded-lg shadow-xl overflow-hidden">
+                      <button
+                        onClick={() => {
+                          imageInputRef.current?.click();
+                          setShowImageMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left text-white hover:bg-red-800/50 transition-colors flex items-center gap-3"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Câmera</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'image/*';
+                          input.onchange = (e) => handleImageUpload(e as any);
+                          input.click();
+                          setShowImageMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left text-white hover:bg-red-800/50 transition-colors flex items-center gap-3 border-t border-red-800"
+                      >
+                        <FileUp className="w-4 h-4" />
+                        <span>Enviar Imagem</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Textarea + Botão de enviar */}
+              <div className="flex gap-2 items-end">
+                <Textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  placeholder="Digite sua pergunta jurídica..."
+                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none text-base"
+                  disabled={isLoading}
+                />
+                
+                <Button
+                  onClick={() => sendMessage()}
+                  disabled={isLoading || (!input.trim() && !uploadedFile)}
+                  size="lg"
+                  className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6 h-[60px]"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <Send className="w-6 h-6" />
+                  )}
                 </Button>
               </div>
-
-              <Textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                placeholder="Mensagem..."
-                disabled={isLoading}
-                className="flex-1 min-h-[36px] max-h-24 resize-none text-sm py-2"
-              />
-
-              <Button
-                onClick={() => sendMessage()}
-                disabled={isLoading || (!input.trim() && !uploadedFile)}
-                size="icon"
-                className="h-9 w-9"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
+              
+              <p className="text-xs text-red-300/70 text-center">
+                {messages.length - 1} mensagens • Contexto inteligente com histórico completo
+              </p>
             </div>
           </div>
+
+          <style>{`
+            .preserve-3d {
+              transform-style: preserve-3d;
+            }
+            .backface-hidden {
+              backface-visibility: hidden;
+            }
+            .rotate-y-180 {
+              transform: rotateY(180deg);
+            }
+          `}</style>
         </motion.div>
       )}
     </AnimatePresence>
