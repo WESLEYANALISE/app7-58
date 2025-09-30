@@ -70,19 +70,15 @@ export const StandardBibliotecaLeitor = ({
     }} exit={{
       opacity: 0
     }} className="fixed inset-0 bg-background z-50 flex flex-col">
-         {/* Header */}
-         <div className="flex-shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-sm pointer-events-auto">
-           <div className="flex items-center justify-between p-4 pointer-events-auto">
+        {/* Header */}
+        <div className="flex-shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+          <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClose();
-                }} 
-                className="shrink-0 relative z-50"
+                onClick={onClose} 
+                className="shrink-0"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -104,9 +100,9 @@ export const StandardBibliotecaLeitor = ({
         </div>
 
         {/* Conteúdo principal */}
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden">
           {livro.link ? <div className="w-full h-full">
-              <iframe src={livro.link} className="w-full h-full border-0 pointer-events-auto" title={getTitulo()} loading="lazy" allow="fullscreen" />
+              <iframe src={livro.link} className="w-full h-full border-0" title={getTitulo()} loading="lazy" allow="fullscreen" />
             </div> : <div className="flex items-center justify-center h-full p-4 sm:p-8">
               <div className="text-center max-w-4xl w-full">
                 {/* 1. Capa do livro centralizada e maior */}

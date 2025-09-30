@@ -285,7 +285,7 @@ export const useVadeMecumInstant = () => {
       const articleContent = article.Artigo?.toLowerCase() || '';
       
       return articleNumber.includes(searchLower) || articleContent.includes(searchLower);
-    }); // Sem limite - permitir busca em todos os artigos
+    }).slice(0, 50); // Limitar resultados para performance
   }, [articles, searchTerm]);
 
   // Buscar artigos com cache instantâneo e carregamento otimizado

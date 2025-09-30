@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigation } from '@/context/NavigationContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { ProfessoraIAFloatingButton } from '@/components/ProfessoraIAFloatingButton';
+import { ProfessoraIA } from '@/components/ProfessoraIA';
 import { VadeMecumFlashcardsSession } from '@/components/VadeMecumFlashcardsSession';
 import ReactMarkdown from 'react-markdown';
 import { copyToClipboard } from '@/utils/clipboardUtils';
@@ -68,6 +70,8 @@ const VadeMecumUltraFast: React.FC = () => {
   const [narrateLoading, setNarrateLoading] = useState(false);
   const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
 
+  // Estado para Professora IA
+  const [showProfessora, setShowProfessora] = useState(false);
 
   // Estados para Flashcards
   const [generatedFlashcards, setGeneratedFlashcards] = useState<any[]>([]);
@@ -164,11 +168,9 @@ const VadeMecumUltraFast: React.FC = () => {
               try {
                 const {
                   data
-                } = await supabase
-                  .from(table as any)
-                  .select('id, "Número do Artigo", Artigo, Narração')
-                  .order('id', { ascending: true })
-                  .range(0, 5000);
+                } = await supabase.from(table as any).select('id, "Número do Artigo", Artigo, Narração').order('id', {
+                  ascending: true
+                });
                 if (data) {
                   const transformed = data.map((item: any) => ({
                     id: String(item.id),
@@ -476,61 +478,17 @@ const VadeMecumUltraFast: React.FC = () => {
     overscan: 5, // Renderiza 5 itens extras acima/abaixo
   });
 
-  // Ao alterar a busca, garanta que o primeiro resultado fique visível
-  useEffect(() => {
-    if (!parentRef.current) return;
-    parentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    try {
-      virtualizer.scrollToIndex(0, { align: 'start' });
-    } catch {/* ignore */}
-  }, [searchTerm]);
-
   // Carregar artigos com cache instantâneo e otimização extrema
   const loadArticles = useCallback(async (code: VadeMecumLegalCode) => {
     const cacheKey = `articles-${code.id}`;
 
+    // Verifica cache primeiro - carregamento instantâneo
     if (articlesCache.has(cacheKey)) {
       const cachedData = articlesCache.get(cacheKey)!;
       setArticles(cachedData);
       setSelectedCode(code);
       setView('articles');
       setSearchTerm('');
-
-      // Atualização em segundo plano para garantir dataset completo (evita caches antigos com 1000 linhas)
-      if (cachedData.length < 2000) {
-        const tableMap: Record<string, string> = {
-          'cc': 'CC', 'cdc': 'CDC', 'cf88': 'CF88', 'clt': 'CLT', 'cp': 'CP', 'cpc': 'CPC', 'cpp': 'CPP', 'ctn': 'CTN', 'ctb': 'CTB', 'ce': 'CE',
-          'estatuto-oab': 'ESTATUTO - OAB', 'estatuto-eca': 'ESTATUTO - ECA', 'estatuto-idoso': 'ESTATUTO - IDOSO', 'estatuto-pcd': 'ESTATUTO - PESSOA COM DEFICIENCIA',
-          'estatuto-igualdade-racial': 'ESTATUTO - IGUALDADE RACIAL', 'estatuto-cidade': 'ESTATUTO - CIDADE', 'estatuto-desarmamento': 'ESTATUTO - DESARMAMENTO', 'estatuto-torcedor': 'ESTATUTO - TORCEDOR'
-        };
-        const tableName = tableMap[code.id];
-        if (tableName) {
-          (async () => {
-            try {
-              const { data } = await supabase
-                .from(tableName as any)
-                .select('id, "Número do Artigo", Artigo, Narração')
-                .order('id', { ascending: true })
-                .range(0, 5000);
-              if (data && data.length > cachedData.length) {
-                const transformed = data.map((item: any) => ({
-                  id: String(item.id),
-                  numero: item["Número do Artigo"] || String(item.id),
-                  conteudo: item.Artigo || '',
-                  codigo_id: code.id,
-                  naracao_url: item["Narração"] || null,
-                  "Número do Artigo": item["Número do Artigo"],
-                  "Narração": item["Narração"],
-                  "Artigo": item.Artigo
-                }));
-                articlesCache.set(cacheKey, transformed);
-                // Atualiza somente se o usuário ainda estiver no mesmo código
-                setArticles(prev => (selectedCode?.id === code.id ? transformed : prev));
-              }
-            } catch {/* ignore background refresh errors */}
-          })();
-        }
-      }
       return;
     }
 
@@ -571,11 +529,9 @@ const VadeMecumUltraFast: React.FC = () => {
       const {
         data,
         error
-      } = await supabase
-        .from(tableName as any)
-        .select('id, "Número do Artigo", Artigo, Narração')
-        .order('id', { ascending: true })
-        .range(0, 5000);
+      } = await supabase.from(tableName as any).select('id, "Número do Artigo", Artigo, Narração').order('id', {
+        ascending: true
+      });
       if (error) throw error;
 
       // Transformação otimizada de dados
@@ -1265,10 +1221,33 @@ const VadeMecumUltraFast: React.FC = () => {
               </Button>
             </div>
             
+            {/* Professora IA */}
+            <div className="pt-6 border-t border-muted bg-gradient-to-r from-primary/5 to-accent-legal/5 rounded-lg p-6">
+              <div className="text-center">
+                <h4 className="text-lg font-semibold mb-3 text-primary flex items-center justify-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  Precisa de mais esclarecimentos?
+                </h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  A Professora IA está disponível para tirar todas as suas dúvidas sobre este artigo
+                </p>
+                <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+                <p className="text-xs text-muted-foreground mt-3">
+                  💡 Clique para abrir uma conversa personalizada sobre este tema
+                </p>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Professora IA Modal */}
+      <ProfessoraIA isOpen={showProfessora} onClose={() => setShowProfessora(false)} video={{
+      title: generatedModal.articleNumber ? `Art. ${generatedModal.articleNumber}` : "Consulta Jurídica",
+      area: selectedCode?.fullName || "Vade Mecum",
+      assunto: generatedModal.content ? generatedModal.type === 'explicar' ? 'Explicação do Artigo' : 'Exemplo Prático' : 'Consulta Geral',
+      conteudo: generatedModal.content || 'Consulta sobre artigos do Vade Mecum'
+    }} />
       
       {/* Botões Flutuantes */}
       {view === 'articles' && <>
@@ -1313,6 +1292,18 @@ const VadeMecumUltraFast: React.FC = () => {
         {Object.entries(activeLoading).map(([key, active]) => active ? <ProgressIndicator key={key} progress={loadingProgress[key] || 0} label={key.includes('explain') ? 'Gerando explicação...' : 'Gerando exemplo...'} /> : null)}
       </div>
 
+      {/* Professora IA Button - aparece por cima de tudo */}
+      <div className="fixed bottom-20 right-6 z-50">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      </div>
+
+      {/* Modal Professora IA */}
+      <ProfessoraIA isOpen={showProfessora} onClose={() => setShowProfessora(false)} video={{
+      title: generatedModal.articleNumber ? `Art. ${generatedModal.articleNumber}` : "Consulta Jurídica",
+      area: selectedCode?.fullName || "Vade Mecum",
+      assunto: generatedModal.content ? generatedModal.type === 'explicar' ? 'Explicação do Artigo' : 'Exemplo Prático' : 'Consulta Geral',
+      conteudo: generatedModal.content || 'Consulta sobre artigos do Vade Mecum'
+    }} />
 
       {/* Flashcards Session */}
       {showFlashcardsSession && generatedFlashcards.length > 0 && <VadeMecumFlashcardsSession flashcards={generatedFlashcards} articleNumber="" codeName={selectedCode?.name || 'Código Legal'} onClose={() => {
