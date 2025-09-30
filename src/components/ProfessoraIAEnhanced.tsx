@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,12 +7,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   Send, Paperclip, Download, Copy, Sparkles, 
   FileText, HelpCircle, BookOpen, Scale, Loader2,
-  X, Image as ImageIcon, Check, Camera, FileUp, Zap
+  X, Image as ImageIcon, Check, Camera, FileUp, Zap, ChevronLeft, ChevronRight, RotateCcw
 } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { copyToClipboard } from '@/utils/clipboardUtils';
 import { useProfessoraAIPDFExport } from '@/hooks/useProfessoraAIPDFExport';
+import { Card, CardContent } from '@/components/ui/card';
+
+interface Flashcard {
+  pergunta: string;
+  resposta: string;
+  exemplo?: string;
+}
+
+interface Questao {
+  enunciado: string;
+  alternativas: string[];
+  resposta_correta: string;
+  explicacao: string;
+}
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,6 +34,8 @@ interface Message {
   timestamp: Date;
   file?: { name: string; type: string };
   suggestions?: string[];
+  flashcards?: Flashcard[];
+  questoes?: Questao[];
 }
 
 interface ProfessoraIAEnhancedProps {
@@ -43,6 +58,13 @@ export const ProfessoraIAEnhanced: React.FC<ProfessoraIAEnhancedProps> = ({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [viewingFlashcards, setViewingFlashcards] = useState<Flashcard[] | null>(null);
+  const [viewingQuestoes, setViewingQuestoes] = useState<Questao[] | null>(null);
+  const [currentFlashcardIndex, setCurrentFlashcardIndex] = useState(0);
+  const [isFlashcardFlipped, setIsFlashcardFlipped] = useState(false);
+  const [currentQuestaoIndex, setCurrentQuestaoIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showQuestaoExplanation, setShowQuestaoExplanation] = useState(false);
   
   const { toast } = useToast();
   const { exporting, exportConversationToPDF } = useProfessoraAIPDFExport();
@@ -200,7 +222,7 @@ Como posso te ajudar hoje? 🚀`,
           body: JSON.stringify({
             message: currentInput || 'Analise e explique',
             fileData,
-            conversationHistory: messages.slice(-6).map(m => ({
+            conversationHistory: messages.slice(-20).map(m => ({
               role: m.role,
               content: m.content
             })),
@@ -457,11 +479,21 @@ Responda APENAS com JSON válido neste formato:
       const jsonMatch = data.response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
+        
+        // Adicionar flashcards à última mensagem do assistente
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (lastMessage.role === 'assistant') {
+            lastMessage.flashcards = parsed.flashcards;
+          }
+          return newMessages;
+        });
+
         toast({
           title: "✨ Flashcards Gerados!",
-          description: `${parsed.flashcards.length} flashcards criados com sucesso`,
+          description: `${parsed.flashcards.length} flashcards criados. Role para baixo para visualizar.`,
         });
-        console.log('Flashcards:', parsed.flashcards);
       }
     } catch (error) {
       toast({
@@ -504,11 +536,21 @@ Responda APENAS com JSON válido:
       const jsonMatch = data.response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
+        
+        // Adicionar questões à última mensagem do assistente
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (lastMessage.role === 'assistant') {
+            lastMessage.questoes = parsed.questoes;
+          }
+          return newMessages;
+        });
+
         toast({
           title: "✨ Questões Geradas!",
-          description: `${parsed.questoes.length} questões criadas com sucesso`,
+          description: `${parsed.questoes.length} questões criadas. Role para baixo para responder.`,
         });
-        console.log('Questões:', parsed.questoes);
       }
     } catch (error) {
       toast({
@@ -620,34 +662,222 @@ Responda APENAS com JSON válido:
     </motion.div>
   );
 
+  // Visualizar flashcards
+  const FlashcardViewer = ({ flashcards }: { flashcards: Flashcard[] }) => (
+    <Card className="mt-4 bg-red-900/20 border-red-800/50">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-red-100">
+            Flashcard {currentFlashcardIndex + 1} de {flashcards.length}
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCurrentFlashcardIndex(0);
+              setIsFlashcardFlipped(false);
+            }}
+            className="text-red-300 hover:text-white"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <motion.div
+          className="relative min-h-[200px] cursor-pointer preserve-3d"
+          onClick={() => setIsFlashcardFlipped(!isFlashcardFlipped)}
+          animate={{ rotateY: isFlashcardFlipped ? 180 : 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className={`absolute inset-0 backface-hidden ${!isFlashcardFlipped ? '' : 'opacity-0'}`}>
+            <div className="bg-red-800/30 border border-red-700/50 rounded-xl p-6 h-full flex flex-col justify-center">
+              <p className="text-sm text-red-300 mb-2">Pergunta:</p>
+              <p className="text-lg text-white">{flashcards[currentFlashcardIndex].pergunta}</p>
+            </div>
+          </div>
+          <div className={`absolute inset-0 backface-hidden ${isFlashcardFlipped ? 'rotate-y-180' : 'opacity-0'}`}>
+            <div className="bg-green-900/30 border border-green-700/50 rounded-xl p-6 h-full flex flex-col justify-center">
+              <p className="text-sm text-green-300 mb-2">Resposta:</p>
+              <p className="text-base text-white mb-3">{flashcards[currentFlashcardIndex].resposta}</p>
+              {flashcards[currentFlashcardIndex].exemplo && (
+                <>
+                  <p className="text-sm text-green-300 mb-2">Exemplo:</p>
+                  <p className="text-sm text-white/80">{flashcards[currentFlashcardIndex].exemplo}</p>
+                </>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="flex justify-between mt-4">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (currentFlashcardIndex > 0) {
+                setCurrentFlashcardIndex(prev => prev - 1);
+                setIsFlashcardFlipped(false);
+              }
+            }}
+            disabled={currentFlashcardIndex === 0}
+            className="text-red-300 hover:text-white"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Anterior
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (currentFlashcardIndex < flashcards.length - 1) {
+                setCurrentFlashcardIndex(prev => prev + 1);
+                setIsFlashcardFlipped(false);
+              }
+            }}
+            disabled={currentFlashcardIndex === flashcards.length - 1}
+            className="text-red-300 hover:text-white"
+          >
+            Próximo
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Visualizar questões
+  const QuestaoViewer = ({ questoes }: { questoes: Questao[] }) => {
+    const questao = questoes[currentQuestaoIndex];
+    
+    return (
+      <Card className="mt-4 bg-red-900/20 border-red-800/50">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-red-100">
+              Questão {currentQuestaoIndex + 1} de {questoes.length}
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setCurrentQuestaoIndex(0);
+                setSelectedAnswer(null);
+                setShowQuestaoExplanation(false);
+              }}
+              className="text-red-300 hover:text-white"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-white mb-4">{questao.enunciado}</p>
+            <div className="space-y-2">
+              {questao.alternativas.map((alt, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setSelectedAnswer(alt[0]);
+                    setShowQuestaoExplanation(true);
+                  }}
+                  disabled={selectedAnswer !== null}
+                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                    selectedAnswer === null
+                      ? 'border-red-700/50 bg-red-900/20 hover:bg-red-900/40 text-white'
+                      : selectedAnswer === alt[0] && alt[0] === questao.resposta_correta
+                      ? 'border-green-500 bg-green-900/30 text-green-100'
+                      : selectedAnswer === alt[0]
+                      ? 'border-red-500 bg-red-900/40 text-red-100'
+                      : alt[0] === questao.resposta_correta
+                      ? 'border-green-500 bg-green-900/20 text-green-100'
+                      : 'border-red-700/30 bg-red-900/10 text-white/70'
+                  }`}
+                >
+                  {alt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {showQuestaoExplanation && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 bg-blue-900/20 border border-blue-700/50 rounded-lg"
+            >
+              <p className="text-sm text-blue-300 mb-2">Explicação:</p>
+              <p className="text-sm text-white">{questao.explicacao}</p>
+            </motion.div>
+          )}
+
+          <div className="flex justify-between mt-4">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                if (currentQuestaoIndex > 0) {
+                  setCurrentQuestaoIndex(prev => prev - 1);
+                  setSelectedAnswer(null);
+                  setShowQuestaoExplanation(false);
+                }
+              }}
+              disabled={currentQuestaoIndex === 0}
+              className="text-red-300 hover:text-white"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Anterior
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                if (currentQuestaoIndex < questoes.length - 1) {
+                  setCurrentQuestaoIndex(prev => prev + 1);
+                  setSelectedAnswer(null);
+                  setShowQuestaoExplanation(false);
+                }
+              }}
+              disabled={currentQuestaoIndex === questoes.length - 1}
+              className="text-red-300 hover:text-white"
+            >
+              Próxima
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent 
-            className="max-w-4xl h-[90vh] p-0 flex flex-col bg-gradient-to-br from-red-950 via-red-900 to-black border-red-800"
-          >
-            {/* Header */}
-            <DialogHeader className="p-4 border-b border-red-800 shrink-0">
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-white text-xl flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-red-400" />
-                  Professora IA Premium
-                  {areaLabel && <span className="text-sm text-red-300">• {areaLabel}</span>}
-                </DialogTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                  className="text-red-100 hover:text-white hover:bg-red-800/50"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </DialogHeader>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-gradient-to-br from-red-950 via-red-900 to-black flex flex-col"
+        >
+          {/* Header */}
+          <div className="p-4 border-b border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <h1 className="text-white text-xl md:text-2xl flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-red-400" />
+                Professora IA Premium
+                {areaLabel && <span className="text-sm md:text-base text-red-300">• {areaLabel}</span>}
+              </h1>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="text-red-100 hover:text-white hover:bg-red-800/50"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
 
-            {/* Messages */}
-            <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+          {/* Messages */}
+          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+            <div className="max-w-5xl mx-auto">
               <AnimatePresence mode="popLayout">
                 {messages.map((message, index) => (
                   <motion.div
@@ -658,7 +888,7 @@ Responda APENAS com JSON válido:
                     className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl p-4 ${
+                      className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 ${
                         message.role === 'user'
                           ? 'bg-red-600 text-white'
                           : 'bg-red-950/80 text-red-50 border border-red-800/50'
@@ -675,6 +905,16 @@ Responda APENAS com JSON válido:
 
                       {/* Quick Actions após primeira mensagem */}
                       {index === 0 && showQuickActions && <QuickActions />}
+
+                      {/* Flashcards gerados */}
+                      {message.flashcards && message.flashcards.length > 0 && (
+                        <FlashcardViewer flashcards={message.flashcards} />
+                      )}
+
+                      {/* Questões geradas */}
+                      {message.questoes && message.questoes.length > 0 && (
+                        <QuestaoViewer questoes={message.questoes} />
+                      )}
 
                       {message.role === 'assistant' && message.content && index > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2 pt-3 border-t border-red-800/30">
@@ -708,7 +948,7 @@ Responda APENAS com JSON válido:
                             Exportar PDF
                           </Button>
                           
-                          {message.content.length > 200 && (
+                          {message.content.length > 200 && !message.flashcards && !message.questoes && (
                             <>
                               <Button
                                 variant="ghost"
@@ -718,7 +958,7 @@ Responda APENAS com JSON válido:
                                 className="text-xs text-red-200 hover:text-white hover:bg-red-800/30"
                               >
                                 <Sparkles className="w-3 h-3 mr-1" />
-                                Flashcards
+                                Gerar Flashcards
                               </Button>
                               
                               <Button
@@ -729,7 +969,7 @@ Responda APENAS com JSON válido:
                                 className="text-xs text-red-200 hover:text-white hover:bg-red-800/30"
                               >
                                 <HelpCircle className="w-3 h-3 mr-1" />
-                                Questões
+                                Gerar Questões
                               </Button>
 
                               <Button
@@ -796,27 +1036,29 @@ Responda APENAS com JSON válido:
               )}
               
               <div ref={messagesEndRef} />
-            </ScrollArea>
+            </div>
+          </ScrollArea>
 
-            {/* Input Area */}
-            <div className="p-4 border-t border-red-800 shrink-0 bg-red-950/50">
+          {/* Input Area - Destaque nos botões */}
+          <div className="p-4 border-t border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
+            <div className="max-w-5xl mx-auto">
               {uploadedFile && (
-                <div className="mb-2 flex items-center gap-2 bg-red-900/30 p-2 rounded">
-                  <FileText className="w-4 h-4 text-red-300" />
-                  <span className="text-sm text-red-100">{uploadedFile.name}</span>
+                <div className="mb-3 flex items-center gap-2 bg-red-900/30 p-3 rounded-lg">
+                  <FileText className="w-5 h-5 text-red-300" />
+                  <span className="text-sm text-red-100 flex-1">{uploadedFile.name}</span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setUploadedFile(null)}
-                    className="ml-auto text-red-300 hover:text-white"
+                    className="text-red-300 hover:text-white hover:bg-red-800/50"
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
               )}
               
-              <div className="flex gap-2">
-                {/* Input PDF separado */}
+              <div className="flex gap-2 items-end">
+                {/* Input PDF separado - DESTAQUE */}
                 <input
                   type="file"
                   ref={pdfInputRef}
@@ -825,7 +1067,7 @@ Responda APENAS com JSON válido:
                   className="hidden"
                 />
                 
-                {/* Input Imagem separado com capture */}
+                {/* Input Imagem separado com capture - DESTAQUE */}
                 <input
                   type="file"
                   ref={imageInputRef}
@@ -836,25 +1078,25 @@ Responda APENAS com JSON válido:
                 />
                 
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="default"
+                  size="lg"
                   onClick={() => pdfInputRef.current?.click()}
                   disabled={isLoading}
                   title="Anexar PDF"
-                  className="text-red-100 hover:text-white hover:bg-red-800/50"
+                  className="bg-red-700 hover:bg-red-600 text-white shadow-lg px-4"
                 >
-                  <FileUp className="w-5 h-5" />
+                  <FileUp className="w-6 h-6" />
                 </Button>
                 
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="default"
+                  size="lg"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={isLoading}
                   title="Anexar Imagem / Tirar Foto"
-                  className="text-red-100 hover:text-white hover:bg-red-800/50"
+                  className="bg-red-700 hover:bg-red-600 text-white shadow-lg px-4"
                 >
-                  <Camera className="w-5 h-5" />
+                  <Camera className="w-6 h-6" />
                 </Button>
                 
                 <Textarea
@@ -867,30 +1109,43 @@ Responda APENAS com JSON válido:
                       sendMessage();
                     }
                   }}
-                  placeholder="Digite sua pergunta jurídica..."
-                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/50 resize-none"
+                  placeholder="Digite sua pergunta jurídica ou anexe documentos..."
+                  className="flex-1 min-h-[60px] max-h-[120px] bg-red-900/30 border-red-800 text-white placeholder:text-red-300/60 resize-none text-base"
                   disabled={isLoading}
                 />
                 
                 <Button
                   onClick={() => sendMessage()}
                   disabled={isLoading || (!input.trim() && !uploadedFile)}
-                  className="bg-red-600 hover:bg-red-700 text-white self-end"
+                  size="lg"
+                  className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
-                    <Send className="w-5 h-5" />
+                    <Send className="w-6 h-6" />
                   )}
                 </Button>
               </div>
               
               <p className="text-xs text-red-300/70 mt-2 text-center">
-                {messages.length - 1} mensagens • Ultra-rápida com IA Premium
+                {messages.length - 1} mensagens • Contexto inteligente com histórico completo
               </p>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+
+          <style>{`
+            .preserve-3d {
+              transform-style: preserve-3d;
+            }
+            .backface-hidden {
+              backface-visibility: hidden;
+            }
+            .rotate-y-180 {
+              transform: rotateY(180deg);
+            }
+          `}</style>
+        </motion.div>
       )}
     </AnimatePresence>
   );
