@@ -41,12 +41,11 @@ export const BibliotecaLeitor = ({ livro, onClose }: BibliotecaLeitorProps) => {
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onClose}
-              className="flex items-center gap-2"
+              className="shrink-0"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
+              <ArrowLeft className="h-5 w-5" />
             </Button>
           </div>
 

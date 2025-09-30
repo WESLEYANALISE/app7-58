@@ -51,10 +51,14 @@ export const StandardBibliotecaLeitor = ({
         {/* Header */}
         <div className="flex-shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-sm">
           <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={onClose} className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar
+          <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onClose} 
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
               </Button>
             </div>
 

@@ -123,7 +123,7 @@ export const AmbientSoundPlayer = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-background rounded-2xl shadow-2xl border border-border overflow-hidden"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-md max-h-[85vh] bg-background rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col"
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-green-700 to-green-500 p-4 flex items-center justify-between">
@@ -209,7 +209,7 @@ export const AmbientSoundPlayer = () => {
               )}
 
               {/* Lista de Sons */}
-              <ScrollArea className="h-[300px]">
+              <ScrollArea className="flex-1 min-h-0">
                 <div className="p-4 space-y-2">
                   {sounds.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
