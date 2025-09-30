@@ -360,13 +360,12 @@ const FlashcardsModern = () => {
 
             {/* Card com Flip 3D */}
             <div className="perspective-1000 mb-6">
-              <motion.div key={currentCardIndex} animate={{
-            rotateY: isFlipped ? 180 : 0
-          }} transition={{
-            duration: 0.6,
-            type: "spring",
-            stiffness: 100
-          }} className="preserve-3d w-full relative min-h-[300px] max-h-[80vh]">
+              <motion.div
+                key={currentCardIndex}
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+                className="preserve-3d w-full relative min-h-[360px] h-[calc(100dvh-280px)] max-h-[calc(100dvh-280px)]"
+              >
                 {/* Frente do Card */}
                 <div className="backface-hidden absolute inset-0">
                   <Card className="h-full cursor-pointer shadow-xl border-2 border-primary/30 flex flex-col" onClick={virarCard}>
@@ -380,13 +379,13 @@ const FlashcardsModern = () => {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex items-center justify-center overflow-y-auto py-8">
-                      <div className="text-center px-6 w-full">
+                    <CardContent className="flex-1 overflow-y-auto p-6">
+                      <div className="text-center px-2 w-full">
                         <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary opacity-20" />
-                        <p className="text-xl font-medium leading-relaxed mb-6 text-foreground">
+                        <p className="text-lg md:text-xl font-medium leading-relaxed mb-6 text-foreground break-words">
                           {flashcardsFiltrados[currentCardIndex]?.pergunta || 'Pergunta não disponível'}
                         </p>
-                        <p className="text-sm text-muted-foreground">Clique para ver a resposta</p>
+                        <p className="text-xs text-muted-foreground">Toque para ver a resposta</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -397,23 +396,23 @@ const FlashcardsModern = () => {
                   <Card className="h-full cursor-pointer shadow-xl border-2 border-primary/30 flex flex-col" onClick={virarCard}>
                     <CardHeader className="pb-2 flex-shrink-0">
                       <div className="flex justify-between items-center">
-                        <Badge variant="default" className="bg-primary">
-                          Resposta
-                        </Badge>
+                        <Badge variant="default" className="bg-primary">Resposta</Badge>
                         <Badge variant="secondary" className="bg-primary/10 text-primary">
                           {flashcardsFiltrados[currentCardIndex]?.tema}
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex items-center justify-center overflow-y-auto py-8">
-                      <div className="text-center px-6 w-full">
-                        <p className="text-base leading-relaxed mb-4 text-foreground whitespace-pre-wrap">
+                    <CardContent className="flex-1 overflow-y-auto p-6">
+                      <div className="px-2 w-full">
+                        <p className="text-base leading-relaxed mb-4 text-foreground whitespace-pre-wrap break-words">
                           {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
                         </p>
-                        {flashcardsFiltrados[currentCardIndex]?.exemplo && <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                        {flashcardsFiltrados[currentCardIndex]?.exemplo && (
+                          <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
                             <p className="text-sm font-semibold text-primary mb-2">💡 Exemplo</p>
-                            <p className="text-sm text-foreground">{flashcardsFiltrados[currentCardIndex]?.exemplo}</p>
-                          </div>}
+                            <p className="text-sm text-foreground break-words">{flashcardsFiltrados[currentCardIndex]?.exemplo}</p>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -422,7 +421,7 @@ const FlashcardsModern = () => {
             </div>
 
             {/* Controles de Navegação */}
-            <div className="flex justify-between items-center mb-6 px-[4px] py-[53px]">
+            <div className="flex justify-between items-center mb-4 px-2 py-3">
               <Button variant="outline" onClick={cardAnterior} disabled={currentCardIndex === 0} size="lg" className="flex items-center gap-2">
                 <ChevronLeft className="h-5 w-5" />
                 Anterior
