@@ -12,9 +12,9 @@ export const optimizeCourseImage = (url: string): string => {
     return imageCache.get(url)!;
   }
 
-  // Para imagens do Supabase, adiciona parâmetros de otimização
+  // Para imagens do Supabase, adiciona parâmetros agressivos de otimização
   if (url.includes('supabase')) {
-    const optimizedUrl = `${url}?width=400&quality=80`;
+    const optimizedUrl = `${url}?width=600&height=400&quality=85&format=webp`;
     imageCache.set(url, optimizedUrl);
     return optimizedUrl;
   }
@@ -23,17 +23,36 @@ export const optimizeCourseImage = (url: string): string => {
   return url;
 };
 
-// Preload de imagens críticas
-export const preloadCourseImages = (urls: string[]) => {
-  urls.forEach(url => {
+// Preload de imagens críticas com prioridade
+export const preloadCourseImages = (urls: string[], priority: 'high' | 'low' = 'high') => {
+  const loadImage = (url: string) => {
     if (url && !imageCache.has(url)) {
       const img = new Image();
-      img.src = optimizeCourseImage(url);
+      const optimizedUrl = optimizeCourseImage(url);
+      
+      // Define prioridade de carregamento
+      if (priority === 'high') {
+        img.loading = 'eager';
+      }
+      
+      img.src = optimizedUrl;
       img.onload = () => {
-        imageCache.set(url, url);
+        imageCache.set(url, optimizedUrl);
       };
     }
-  });
+  };
+
+  if (priority === 'high') {
+    // Carrega imediatamente para alta prioridade
+    urls.forEach(loadImage);
+  } else {
+    // Carrega com requestIdleCallback para baixa prioridade
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => urls.forEach(loadImage));
+    } else {
+      setTimeout(() => urls.forEach(loadImage), 100);
+    }
+  }
 };
 
 // Cache para dados de progresso
