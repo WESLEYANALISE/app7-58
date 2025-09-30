@@ -114,14 +114,14 @@ export const FooterMenu = ({
                    {/* Icon container */}
                   <div className={`${getIconStyles(item, isActive)} ${isProfessoraIA ? 'rounded-full' : ''}`}>
                     {isProfessoraIA ? (
-                      <div className="w-8 h-8 overflow-hidden rounded-full">
+                      <div className="w-14 h-14 overflow-hidden rounded-full">
                         <iframe
                           src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie"
                           style={{ 
                             width: '100%', 
                             height: '100%', 
                             border: 'none',
-                            transform: 'scale(1.2)'
+                            transform: 'scale(1.4)'
                           }}
                           title="Professora IA Animation"
                         />
@@ -166,7 +166,7 @@ export const FooterMenu = ({
               return <div key={item.id} className="flex justify-center">
                     <button onClick={() => handleItemClick(item)} className={`
                         relative flex flex-col items-center justify-center
-                        ${isProfessoraIA ? 'w-14 h-14 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white shadow-2xl shadow-red-500/50 hover:shadow-red-500/70 scale-110 border-2 border-red-400/50' : 'w-16 h-16 rounded-2xl'}
+                        ${isProfessoraIA ? 'w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white shadow-2xl shadow-red-500/50 hover:shadow-red-500/70 scale-110 border-2 border-red-400/50' : 'w-16 h-16 rounded-2xl'}
                         transition-all duration-300 transform
                         ${!isProfessoraIA && (isActive ? 'bg-gradient-to-br from-white/20 to-white/10 text-white shadow-lg scale-105 border border-white/20' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:scale-105')}
                         active:scale-95
@@ -174,16 +174,16 @@ export const FooterMenu = ({
                       `} style={{
                   animationDelay: `${index * 100}ms`
                 }}>
-                      {/* Icon with consistent sizing - smaller for circular button */}
+                      {/* Icon with consistent sizing - larger for circular button */}
                       {isProfessoraIA ? (
-                        <div className="w-7 h-7 overflow-hidden rounded-full">
+                        <div className="w-16 h-16 overflow-hidden rounded-full">
                           <iframe
                             src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie"
                             style={{ 
                               width: '100%', 
                               height: '100%', 
                               border: 'none',
-                              transform: 'scale(1.2)'
+                              transform: 'scale(1.5)'
                             }}
                             title="Professora IA Animation"
                           />
