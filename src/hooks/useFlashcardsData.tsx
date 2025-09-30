@@ -54,15 +54,34 @@ export const useFlashcardsData = () => {
       try {
         console.log('Iniciando carregamento de flashcards...');
         
-        // Carregar todos os flashcards sem limite
-        // Usando order para manter consistência
-        const { data, error } = await (supabase as any)
-          .from('FLASH-CARDS-FINAL')
-          .select('id, area, tema, pergunta, resposta, exemplo')
-          .order('area', { ascending: true })
-          .order('tema', { ascending: true });
+        // Carregar todos os flashcards - Supabase tem limite de 1000 por padrão
+        // Vamos buscar em lotes para garantir que pegamos todos os 8000+
+        let allFlashcards: any[] = [];
+        let from = 0;
+        const batchSize = 1000;
+        let hasMore = true;
 
-        if (error) throw error;
+        while (hasMore) {
+          const { data: batchData, error: batchError } = await (supabase as any)
+            .from('FLASH-CARDS-FINAL')
+            .select('id, area, tema, pergunta, resposta, exemplo')
+            .order('area', { ascending: true })
+            .order('tema', { ascending: true })
+            .range(from, from + batchSize - 1);
+
+          if (batchError) throw batchError;
+          
+          if (batchData && batchData.length > 0) {
+            allFlashcards = [...allFlashcards, ...batchData];
+            console.log(`📥 Carregados ${batchData.length} flashcards (${from} a ${from + batchData.length - 1})`);
+            from += batchSize;
+            hasMore = batchData.length === batchSize;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        const data = allFlashcards;
         
         console.log(`✅ ${data?.length || 0} flashcards carregados com sucesso`);
         
