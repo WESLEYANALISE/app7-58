@@ -19,9 +19,9 @@ serve(async (req) => {
       throw new Error('Conteúdo do artigo e userId são obrigatórios');
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY não configurada');
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY não configurada');
     }
 
     // Criar cliente Supabase
@@ -62,37 +62,38 @@ serve(async (req) => {
         }
       `;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+      const aiResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${lovableApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2500,
-          }
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: 'Você é uma IA jurídica. Gere flashcards claros, objetivos e corretos. Responda APENAS com JSON válido.' },
+            { role: 'user', content: prompt }
+          ]
         })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API error response:', errorText);
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      if (!aiResp.ok) {
+        const errorText = await aiResp.text();
+        if (aiResp.status === 429) {
+          throw new Error('Limite de taxa excedido. Tente novamente em instantes.');
+        }
+        if (aiResp.status === 402) {
+          throw new Error('Créditos de IA esgotados. Adicione saldo ao workspace.');
+        }
+        console.error('AI gateway error response:', errorText);
+        throw new Error(`AI gateway error: ${aiResp.status}`);
       }
 
-      const data = await response.json();
-      console.log('Gemini API response:', JSON.stringify(data));
-      
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        console.error('Invalid response structure:', data);
-        throw new Error('Resposta inválida da API Gemini');
+      const aiJson = await aiResp.json();
+      const generatedText = aiJson?.choices?.[0]?.message?.content as string | undefined;
+      if (!generatedText) {
+        throw new Error('Resposta vazia do modelo');
       }
-
-      const generatedText = data.candidates[0].content.parts[0].text;
       
       // Extrair JSON do texto gerado
       const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
@@ -153,37 +154,38 @@ serve(async (req) => {
         }
       `;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+      const aiResp2 = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${lovableApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1000,
-          }
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: 'Você é uma IA jurídica. Gere questão objetiva com 4 alternativas e resposta. Responda APENAS com JSON válido.' },
+            { role: 'user', content: prompt }
+          ]
         })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API error response:', errorText);
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      if (!aiResp2.ok) {
+        const errorText = await aiResp2.text();
+        if (aiResp2.status === 429) {
+          throw new Error('Limite de taxa excedido. Tente novamente em instantes.');
+        }
+        if (aiResp2.status === 402) {
+          throw new Error('Créditos de IA esgotados. Adicione saldo ao workspace.');
+        }
+        console.error('AI gateway error response:', errorText);
+        throw new Error(`AI gateway error: ${aiResp2.status}`);
       }
 
-      const data = await response.json();
-      console.log('Gemini API response:', JSON.stringify(data));
-      
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        console.error('Invalid response structure:', data);
-        throw new Error('Resposta inválida da API Gemini');
+      const aiJson2 = await aiResp2.json();
+      const generatedText = aiJson2?.choices?.[0]?.message?.content as string | undefined;
+      if (!generatedText) {
+        throw new Error('Resposta vazia do modelo');
       }
-
-      const generatedText = data.candidates[0].content.parts[0].text;
       
       // Extrair JSON do texto gerado
       const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
