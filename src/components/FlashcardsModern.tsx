@@ -399,8 +399,8 @@ const FlashcardsModern = () => {
             </div>
 
             {/* Card Container - Responsivo */}
-            <div className="flex-1 flex items-center justify-center px-4 py-4 overflow-hidden">
-              <div className="w-full max-w-md h-full max-h-[600px] perspective-1000">
+            <div className="flex-1 flex items-center justify-center px-4 py-2 overflow-hidden">
+              <div className="w-full max-w-md h-full max-h-[480px] perspective-1000">
                 <motion.div
                   key={currentCardIndex}
                   animate={{ rotateY: isFlipped ? 180 : 0 }}
@@ -413,7 +413,7 @@ const FlashcardsModern = () => {
                       className="h-full cursor-pointer border-2 border-primary/30 bg-background/95 backdrop-blur flex flex-col"
                       onClick={virarCard}
                     >
-                      <CardHeader className="flex-shrink-0 pb-3 pt-4 px-4">
+                      <CardHeader className="flex-shrink-0 pb-2 pt-3 px-4">
                         <div className="flex justify-between items-center gap-2">
                           <Badge variant="outline" className="border-primary/40 text-primary text-xs truncate max-w-[45%]">
                             {flashcardsFiltrados[currentCardIndex]?.area}
@@ -424,14 +424,14 @@ const FlashcardsModern = () => {
                         </div>
                       </CardHeader>
                       
-                      <CardContent className="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto">
-                        <BookOpen className="h-10 w-10 mb-6 text-primary/30" />
-                        <p className="text-lg sm:text-xl font-medium text-center leading-relaxed text-foreground break-words">
+                      <CardContent className="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto">
+                        <BookOpen className="h-8 w-8 mb-4 text-primary/30" />
+                        <p className="text-base sm:text-lg font-medium text-center leading-relaxed text-foreground break-words">
                           {flashcardsFiltrados[currentCardIndex]?.pergunta || 'Pergunta não disponível'}
                         </p>
                       </CardContent>
 
-                      <div className="flex-shrink-0 pb-4 px-4">
+                      <div className="flex-shrink-0 pb-3 px-4">
                         <p className="text-xs text-center text-muted-foreground">Toque para ver a resposta</p>
                       </div>
                     </Card>
@@ -443,7 +443,7 @@ const FlashcardsModern = () => {
                       className="h-full cursor-pointer border-2 border-primary/30 bg-background/95 backdrop-blur flex flex-col"
                       onClick={virarCard}
                     >
-                      <CardHeader className="flex-shrink-0 pb-3 pt-4 px-4">
+                      <CardHeader className="flex-shrink-0 pb-2 pt-3 px-4">
                         <div className="flex justify-between items-center">
                           <Badge className="bg-primary text-primary-foreground text-xs">Resposta</Badge>
                           <Badge variant="secondary" className="bg-primary/10 text-primary text-xs truncate max-w-[60%]">
@@ -452,14 +452,14 @@ const FlashcardsModern = () => {
                         </div>
                       </CardHeader>
                       
-                      <CardContent className="flex-1 overflow-y-auto p-6">
-                        <p className="text-sm sm:text-base leading-relaxed text-foreground whitespace-pre-wrap break-words mb-4">
+                      <CardContent className="flex-1 overflow-y-auto p-4">
+                        <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words mb-3">
                           {flashcardsFiltrados[currentCardIndex]?.resposta || 'Resposta não disponível'}
                         </p>
                         
                         {flashcardsFiltrados[currentCardIndex]?.exemplo && (
-                          <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                            <p className="text-xs font-semibold text-primary mb-1.5">💡 Exemplo</p>
+                          <div className="mt-3 p-2.5 bg-primary/5 rounded-lg border border-primary/20">
+                            <p className="text-xs font-semibold text-primary mb-1">💡 Exemplo</p>
                             <p className="text-xs leading-relaxed text-foreground break-words">
                               {flashcardsFiltrados[currentCardIndex]?.exemplo}
                             </p>
