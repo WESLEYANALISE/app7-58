@@ -77,8 +77,12 @@ export const StandardBibliotecaLeitor = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={onClose} 
-                className="shrink-0"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }} 
+                className="shrink-0 relative z-50"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>

@@ -41,8 +41,12 @@ export const BookReaderPage = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={() => navigate(-1)}
-              className="shrink-0"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate(-1);
+              }}
+              className="shrink-0 relative z-50"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
