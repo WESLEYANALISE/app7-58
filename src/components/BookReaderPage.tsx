@@ -69,8 +69,10 @@ export const BookReaderPage = () => {
         />
       </div>
 
-      {/* Floating Professor Button */}
-      <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      {/* Floating Professor Button - posicionado corretamente */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      </div>
       
       {/* Professor AI Chat */}
       <ProfessoraIAEnhanced

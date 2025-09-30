@@ -701,25 +701,30 @@ export const VadeMecumEnhanced: React.FC = () => {
         </div>
       </div>
 
-      {/* Botão de scroll to top */}
+      {/* Botões flutuantes - Scroll to top e Professora IA */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-20 right-6 z-40"
+            className="fixed bottom-6 right-24 z-40"
           >
             <Button
               onClick={scrollToTop}
-              size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-10 h-10 p-0 shadow-lg"
+              size="icon"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-14 h-14 p-0 shadow-lg"
             >
-              <ArrowUp className="h-5 w-5" />
+              <ArrowUp className="h-6 w-6" />
             </Button>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Professora IA Floating Button - alinhado com scroll top */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      </div>
 
       {/* Professora IA Floating Button */}
       <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
