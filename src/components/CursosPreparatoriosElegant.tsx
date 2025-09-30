@@ -19,9 +19,9 @@ import { OptimizedImage } from '@/components/OptimizedImage';
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
 }
-export const CursosPreparatoriosElegant = ({
+export function CursosPreparatoriosElegant({
   onBack
-}: CursosPreparatoriosElegantProps) => {
+}: CursosPreparatoriosElegantProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState<'areas' | 'modules' | 'lessons' | 'player'>('areas');
   const [selectedArea, setSelectedArea] = useState<any>(null);
@@ -761,3 +761,5 @@ export const CursosPreparatoriosElegant = ({
       </motion.div>
     </div>;
 };
+
+export default CursosPreparatoriosElegant;
