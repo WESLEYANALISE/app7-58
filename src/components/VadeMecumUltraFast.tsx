@@ -268,10 +268,19 @@ const VadeMecumUltraFast: React.FC = () => {
   // Estatutos com gradientes modernos
   const statuteCodes = useMemo<VadeMecumLegalCode[]>(() => [
     { 
-      id: 'eca', 
+      id: 'estatuto-oab', 
+      name: 'Estatuto da OAB', 
+      fullName: 'Estatuto da Advocacia e da OAB', 
+      description: 'Lei nº 8.906/1994', 
+      icon: 'Scale', 
+      color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
+      textColor: 'text-amber-100'
+    },
+    { 
+      id: 'estatuto-eca', 
       name: 'ECA', 
       fullName: 'Estatuto da Criança e do Adolescente', 
-      description: 'Proteção de crianças e adolescentes', 
+      description: 'Lei nº 8.069/1990', 
       icon: 'Baby', 
       color: 'bg-gradient-to-br from-pink-500/20 to-pink-700/30 border border-pink-500/20 backdrop-blur-sm',
       textColor: 'text-pink-100'
@@ -280,10 +289,55 @@ const VadeMecumUltraFast: React.FC = () => {
       id: 'estatuto-idoso', 
       name: 'Estatuto do Idoso', 
       fullName: 'Estatuto da Pessoa Idosa', 
-      description: 'Direitos e proteção dos idosos', 
+      description: 'Lei nº 10.741/2003', 
       icon: 'Users', 
       color: 'bg-gradient-to-br from-violet-500/20 to-violet-700/30 border border-violet-500/20 backdrop-blur-sm',
       textColor: 'text-violet-100'
+    },
+    { 
+      id: 'estatuto-pcd', 
+      name: 'Estatuto da Pessoa com Deficiência', 
+      fullName: 'Estatuto da Pessoa com Deficiência', 
+      description: 'Lei nº 13.146/2015', 
+      icon: 'Shield', 
+      color: 'bg-gradient-to-br from-indigo-500/20 to-indigo-700/30 border border-indigo-500/20 backdrop-blur-sm',
+      textColor: 'text-indigo-100'
+    },
+    { 
+      id: 'estatuto-igualdade-racial', 
+      name: 'Estatuto da Igualdade Racial', 
+      fullName: 'Estatuto da Igualdade Racial', 
+      description: 'Lei nº 12.288/2010', 
+      icon: 'Handshake', 
+      color: 'bg-gradient-to-br from-orange-500/20 to-orange-700/30 border border-orange-500/20 backdrop-blur-sm',
+      textColor: 'text-orange-100'
+    },
+    { 
+      id: 'estatuto-cidade', 
+      name: 'Estatuto da Cidade', 
+      fullName: 'Estatuto da Cidade', 
+      description: 'Lei nº 10.257/2001', 
+      icon: 'Building', 
+      color: 'bg-gradient-to-br from-slate-500/20 to-slate-700/30 border border-slate-500/20 backdrop-blur-sm',
+      textColor: 'text-slate-100'
+    },
+    { 
+      id: 'estatuto-desarmamento', 
+      name: 'Estatuto do Desarmamento', 
+      fullName: 'Estatuto do Desarmamento', 
+      description: 'Lei nº 10.826/2003', 
+      icon: 'Shield', 
+      color: 'bg-gradient-to-br from-red-500/20 to-red-700/30 border border-red-500/20 backdrop-blur-sm',
+      textColor: 'text-red-100'
+    },
+    { 
+      id: 'estatuto-torcedor', 
+      name: 'Estatuto do Torcedor', 
+      fullName: 'Estatuto de Defesa do Torcedor', 
+      description: 'Lei nº 10.671/2003', 
+      icon: 'Users', 
+      color: 'bg-gradient-to-br from-green-500/20 to-green-700/30 border border-green-500/20 backdrop-blur-sm',
+      textColor: 'text-green-100'
     }
   ], []);
 
@@ -481,8 +535,14 @@ const VadeMecumUltraFast: React.FC = () => {
         'ctn': 'CTN',
         'ctb': 'CTB',
         'ce': 'CE',
-        'eca': 'ECA',
-        'estatuto_idoso': 'ESTATUTO - IDOSO'
+        'estatuto-oab': 'ESTATUTO - OAB',
+        'estatuto-eca': 'ESTATUTO - ECA',
+        'estatuto-idoso': 'ESTATUTO - IDOSO',
+        'estatuto-pcd': 'ESTATUTO - PESSOA COM DEFICIENCIA',
+        'estatuto-igualdade-racial': 'ESTATUTO - IGUALDADE RACIAL',
+        'estatuto-cidade': 'ESTATUTO - CIDADE',
+        'estatuto-desarmamento': 'ESTATUTO - DESARMAMENTO',
+        'estatuto-torcedor': 'ESTATUTO - TORCEDOR'
       };
       
       const tableName = tableMap[code.id];
