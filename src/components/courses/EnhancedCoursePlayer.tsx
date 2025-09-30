@@ -49,7 +49,17 @@ export const EnhancedCoursePlayer = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showControls, setShowControls] = useState(true);
 
-  // Detectar YouTube
+  // Detectar YouTube e validar videoUrl
+  if (!videoUrl) {
+    return (
+      <Card className="overflow-hidden border-destructive/50 bg-gradient-to-br from-card to-card/50">
+        <CardContent className="p-8 text-center">
+          <p className="text-destructive">URL do vídeo não disponível</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
 
   // Restaurar progresso ao carregar
@@ -169,7 +179,7 @@ export const EnhancedCoursePlayer = ({
     toast.success(`Marcador adicionado em ${formatTime(currentTime)}`);
   };
 
-  if (isYouTube) {
+  if (isYouTube && videoUrl) {
     const videoIdMatch = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
     const youtubeId = videoIdMatch ? videoIdMatch[1] : '';
 

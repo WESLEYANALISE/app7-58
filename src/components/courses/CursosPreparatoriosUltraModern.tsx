@@ -219,7 +219,7 @@ export const CursosPreparatoriosUltraModern = ({ onBack }: CursosPreparatoriosUl
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedArea.modulos.map((modulo: any, index: number) => (
-                <CourseAnimations key={modulo.id} variant="slideLeft" delay={index * 0.1}>
+                <CourseAnimations key={`modulo-${modulo.nome}-${index}`} variant="slideLeft" delay={index * 0.1}>
                   <Card 
                     className="cursor-pointer hover:shadow-lg transition-all border-primary/20 bg-gradient-to-br from-card to-card/50"
                     onClick={() => handleModuleSelect(modulo)}
@@ -288,8 +288,14 @@ export const CursosPreparatoriosUltraModern = ({ onBack }: CursosPreparatoriosUl
             <div className={layoutMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
               {selectedModule.aulas.map((aula: any, index: number) => (
                 <motion.div
-                  key={aula.id}
-                  {...staggerChildren(index)}
+                  key={`aula-${aula.id}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: index * 0.1,
+                    duration: 0.4,
+                    ease: [0.25, 0.1, 0.25, 1]
+                  }}
                 >
                   <Card 
                     className="cursor-pointer hover:shadow-lg transition-all border-primary/20 bg-gradient-to-br from-card to-card/50"
