@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { ArrowLeft, Play, Pause, Search, BarChart3, Download, BookOpen, Clock, CheckCircle, PlayCircle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,9 @@ import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
 import professoraAvatar from '@/assets/professora-avatar.png';
 import { ProfessoraChat } from '@/components/ProfessoraChat';
+import { motion } from 'framer-motion';
+import { optimizeCourseImage, preloadCourseImages } from '@/utils/courseOptimization';
+import { useCursosCoversPreloader } from '@/hooks/useCoverPreloader';
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
 }
@@ -43,6 +46,43 @@ export const CursosPreparatoriosElegant = ({
     calcularProgressoModulo,
     calcularProgressoArea
   } = useProgressoUsuario();
+
+  // Preload course covers for ultra-fast loading
+  useCursosCoversPreloader(areas);
+
+  // Memoize optimized image URLs
+  const optimizedAreas = useMemo(() => {
+    return areas.map(area => ({
+      ...area,
+      capa: optimizeCourseImage(area.capa),
+      modulos: area.modulos.map(module => ({
+        ...module,
+        capa: optimizeCourseImage(module.capa)
+      }))
+    }));
+  }, [areas]);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.4
+      }
+    }
+  };
 
   // Video player setup
   useEffect(() => {
@@ -402,15 +442,28 @@ export const CursosPreparatoriosElegant = ({
         </div>
 
         {/* Lessons List */}
-        <div className="space-y-4 px-[16px]">
+        <motion.div 
+          className="space-y-4 px-[16px]"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {selectedModule.aulas.map((lesson: any, index: number) => {
           const progress = obterProgresso(lesson.id);
-          return <Card key={lesson.id} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectLesson(lesson)}>
+          const optimizedCapa = optimizeCourseImage(lesson.capa);
+          return <motion.div key={lesson.id} variants={itemVariants}>
+              <Card className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectLesson(lesson)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Lesson Image */}
                     <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
-                      {lesson.capa && <img src={lesson.capa} alt={lesson.nome} className="w-full h-full object-cover rounded-t-lg" />}
+                      {optimizedCapa && <img 
+                        src={optimizedCapa} 
+                        alt={lesson.nome} 
+                        className="w-full h-full object-cover rounded-t-lg"
+                        loading="lazy"
+                        decoding="async"
+                      />}
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <Button variant="ghost" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16">
                           <Play className="h-8 w-8 ml-1" />
@@ -457,9 +510,10 @@ export const CursosPreparatoriosElegant = ({
                     </div>
                   </div>
                 </CardContent>
-              </Card>;
+              </Card>
+            </motion.div>;
         })}
-        </div>
+        </motion.div>
       </div>;
   }
 
@@ -493,19 +547,32 @@ export const CursosPreparatoriosElegant = ({
         </div>
 
         {/* Modules List */}
-        <div className="px-6 space-y-6">
+        <motion.div 
+          className="px-6 space-y-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {selectedArea.modulos.map((module: any, index: number) => {
           const moduleProgress = calcularProgressoModulo(module.aulas);
           const completedLessons = module.aulas.filter((lesson: any) => {
             const progress = obterProgresso(lesson.id);
             return progress?.concluida;
           }).length;
-          return <Card key={index} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectModule(module)}>
+          const optimizedCapa = optimizeCourseImage(module.capa);
+          return <motion.div key={index} variants={itemVariants}>
+              <Card className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectModule(module)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Module Image */}
                     <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
-                      {module.capa && <img src={module.capa} alt={module.nome} className="w-full h-full object-cover rounded-t-lg" />}
+                      {optimizedCapa && <img 
+                        src={optimizedCapa} 
+                        alt={module.nome} 
+                        className="w-full h-full object-cover rounded-t-lg"
+                        loading="lazy"
+                        decoding="async"
+                      />}
                       <div className="absolute top-4 left-4">
                         <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold">
                           {index + 1}
@@ -559,9 +626,10 @@ export const CursosPreparatoriosElegant = ({
                     </div>
                   </div>
                 </CardContent>
-              </Card>;
+              </Card>
+            </motion.div>;
         })}
-        </div>
+        </motion.div>
       </div>;
   }
 
@@ -623,8 +691,13 @@ export const CursosPreparatoriosElegant = ({
       </div>
 
       {/* Areas List */}
-      <div className="px-6 space-y-6">
-        {areas.map((area, index) => {
+      <motion.div 
+        className="px-6 space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {optimizedAreas.map((area, index) => {
         const areaProgress = calcularProgressoArea(area);
         const completedLessons = area.modulos.reduce((total, module) => {
           return total + module.aulas.filter(lesson => {
@@ -632,12 +705,19 @@ export const CursosPreparatoriosElegant = ({
             return progress?.concluida;
           }).length;
         }, 0);
-        return <Card key={index} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectArea(area)}>
+        return <motion.div key={index} variants={itemVariants}>
+            <Card className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectArea(area)}>
               <CardContent className="p-0">
                 <div className="relative">
                   {/* Area Image */}
                   <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
-                    {area.capa && <img src={area.capa} alt={area.nome} className="w-full h-full object-cover rounded-t-lg" />}
+                    {area.capa && <img 
+                      src={area.capa} 
+                      alt={area.nome} 
+                      className="w-full h-full object-cover rounded-t-lg"
+                      loading="lazy"
+                      decoding="async"
+                    />}
                     <div className="absolute top-4 left-4">
                       <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         <BookOpen className="h-4 w-4" />
@@ -671,8 +751,9 @@ export const CursosPreparatoriosElegant = ({
                   </div>
                 </div>
               </CardContent>
-            </Card>;
+            </Card>
+          </motion.div>;
       })}
-      </div>
+      </motion.div>
     </div>;
 };
