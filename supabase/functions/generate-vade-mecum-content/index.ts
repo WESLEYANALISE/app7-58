@@ -34,17 +34,29 @@ serve(async (req) => {
 
     if (type === 'flashcard') {
       prompt = `
-        Baseado no seguinte artigo jurídico, gere 5 flashcards de estudo variados:
+        Baseado no seguinte artigo jurídico, gere EXATAMENTE 10 flashcards de estudo detalhados, desmembrando o artigo parte por parte:
         
         Artigo: ${articleNumber} - ${codeName}
         Conteúdo: ${articleContent}
         
-        Para cada flashcard, crie:
-        1. Uma pergunta clara e objetiva sobre diferentes aspectos do artigo
-        2. Uma resposta completa e educativa
-        3. Um exemplo prático de aplicação do artigo (situação real ou caso hipotético)
+        IMPORTANTE: Desmembre o artigo em 10 flashcards, abordando:
+        - Conceito principal e definição
+        - Elementos essenciais e requisitos
+        - Exceções e ressalvas
+        - Aplicações práticas e casos de uso
+        - Consequências jurídicas
+        - Relações com outros artigos
+        - Aspectos procedimentais
+        - Prazos e condições (se houver)
+        - Jurisprudência relevante
+        - Pontos de atenção e pegadinhas comuns
         
-        Retorne APENAS um JSON válido com um array no formato:
+        Para cada flashcard, crie:
+        1. Uma pergunta clara e específica sobre um aspecto detalhado do artigo
+        2. Uma resposta completa, educativa e precisa
+        3. Um exemplo prático real de aplicação (situação concreta ou caso hipotético)
+        
+        Retorne APENAS um JSON válido com EXATAMENTE 10 flashcards no formato:
         {
           "flashcards": [
             {
@@ -57,7 +69,7 @@ serve(async (req) => {
               "resposta": "resposta 2 aqui", 
               "exemplo": "exemplo prático 2 aqui"
             },
-            ...
+            ... (total de 10 flashcards)
           ]
         }
       `;
