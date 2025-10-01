@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Play, Pause, Search, BarChart3, Download, BookOpen, Clock, CheckCircle, PlayCircle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,16 +12,12 @@ import { LessonActionButtons } from '@/components/Cursos/LessonActionButtons';
 import { toast } from 'sonner';
 import professoraAvatar from '@/assets/professora-avatar.png';
 import { ProfessoraChat } from '@/components/ProfessoraChat';
-import { motion } from 'framer-motion';
-import { optimizeCourseImage, preloadCourseImages } from '@/utils/courseOptimization';
-import { useCursosCoversPreloader } from '@/hooks/useCoverPreloader';
-import { OptimizedImage } from '@/components/OptimizedImage';
 interface CursosPreparatoriosElegantProps {
   onBack: () => void;
 }
-export function CursosPreparatoriosElegant({
+export const CursosPreparatoriosElegant = ({
   onBack
-}: CursosPreparatoriosElegantProps) {
+}: CursosPreparatoriosElegantProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState<'areas' | 'modules' | 'lessons' | 'player'>('areas');
   const [selectedArea, setSelectedArea] = useState<any>(null);
@@ -47,43 +43,6 @@ export function CursosPreparatoriosElegant({
     calcularProgressoModulo,
     calcularProgressoArea
   } = useProgressoUsuario();
-
-  // Preload course covers for ultra-fast loading
-  useCursosCoversPreloader(areas);
-
-  // Memoize optimized image URLs
-  const optimizedAreas = useMemo(() => {
-    return areas.map(area => ({
-      ...area,
-      capa: optimizeCourseImage(area.capa),
-      modulos: area.modulos.map(module => ({
-        ...module,
-        capa: optimizeCourseImage(module.capa)
-      }))
-    }));
-  }, [areas]);
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.4
-      }
-    }
-  };
 
   // Video player setup
   useEffect(() => {
@@ -424,7 +383,11 @@ export function CursosPreparatoriosElegant({
             <BookOpen className="h-5 w-5" />
             <span className="font-medium">Curso Pro</span>
           </div>
+          
+          
+
           <div className="flex items-center gap-2">
+            
             <div>
               <h2 className="text-xl font-bold">{selectedModule.nome}</h2>
               <p className="text-muted-foreground">
@@ -439,29 +402,15 @@ export function CursosPreparatoriosElegant({
         </div>
 
         {/* Lessons List */}
-        <motion.div 
-          className="space-y-4 px-[16px]"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="space-y-4 px-[16px]">
           {selectedModule.aulas.map((lesson: any, index: number) => {
           const progress = obterProgresso(lesson.id);
-          const optimizedCapa = optimizeCourseImage(lesson.capa);
-            return <motion.div key={lesson.id} variants={itemVariants} className="animate-fade-in">
-              <Card className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectLesson(lesson)}>
+          return <Card key={lesson.id} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectLesson(lesson)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Lesson Image */}
                     <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
-                      {optimizedCapa && (
-                        <OptimizedImage 
-                          src={optimizedCapa} 
-                          alt={lesson.nome} 
-                          className="w-full h-full rounded-t-lg"
-                          loading="lazy"
-                        />
-                      )}
+                      {lesson.capa && <img src={lesson.capa} alt={lesson.nome} className="w-full h-full object-cover rounded-t-lg" />}
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <Button variant="ghost" size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16">
                           <Play className="h-8 w-8 ml-1" />
@@ -508,10 +457,9 @@ export function CursosPreparatoriosElegant({
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </motion.div>;
+              </Card>;
         })}
-        </motion.div>
+        </div>
       </div>;
   }
 
@@ -545,33 +493,19 @@ export function CursosPreparatoriosElegant({
         </div>
 
         {/* Modules List */}
-        <motion.div 
-          className="px-6 space-y-6"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="px-6 space-y-6">
           {selectedArea.modulos.map((module: any, index: number) => {
           const moduleProgress = calcularProgressoModulo(module.aulas);
           const completedLessons = module.aulas.filter((lesson: any) => {
             const progress = obterProgresso(lesson.id);
             return progress?.concluida;
           }).length;
-          const optimizedCapa = optimizeCourseImage(module.capa);
-              return <motion.div key={index} variants={itemVariants} className="animate-fade-in">
-                <Card className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectModule(module)}>
+          return <Card key={index} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectModule(module)}>
                 <CardContent className="p-0">
                   <div className="relative">
                     {/* Module Image */}
                     <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
-                      {optimizedCapa && (
-                        <OptimizedImage 
-                          src={optimizedCapa} 
-                          alt={module.nome} 
-                          className="w-full h-full rounded-t-lg"
-                          loading="lazy"
-                        />
-                      )}
+                      {module.capa && <img src={module.capa} alt={module.nome} className="w-full h-full object-cover rounded-t-lg" />}
                       <div className="absolute top-4 left-4">
                         <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold">
                           {index + 1}
@@ -619,18 +553,15 @@ export function CursosPreparatoriosElegant({
                         </div>
                       </div>
 
-                      <Progress value={moduleProgress} />
-                      <div className="text-right text-sm text-muted-foreground mt-2">{moduleProgress}% concluído</div>
                       <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                         Começar
                       </Button>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </motion.div>;
+              </Card>;
         })}
-        </motion.div>
+        </div>
       </div>;
   }
 
@@ -675,7 +606,7 @@ export function CursosPreparatoriosElegant({
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-around text-center animate-fade-in">
+        <div className="flex items-center justify-around text-center">
           <div>
             <div className="text-3xl font-bold text-primary">{totalAreas}</div>
             <div className="text-sm text-muted-foreground">Áreas</div>
@@ -692,13 +623,8 @@ export function CursosPreparatoriosElegant({
       </div>
 
       {/* Areas List */}
-      <motion.div 
-        className="px-6 space-y-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {optimizedAreas.map((area, index) => {
+      <div className="px-6 space-y-6">
+        {areas.map((area, index) => {
         const areaProgress = calcularProgressoArea(area);
         const completedLessons = area.modulos.reduce((total, module) => {
           return total + module.aulas.filter(lesson => {
@@ -706,20 +632,12 @@ export function CursosPreparatoriosElegant({
             return progress?.concluida;
           }).length;
         }, 0);
-        return <motion.div key={index} variants={itemVariants} className="animate-fade-in">
-            <Card className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectArea(area)}>
+        return <Card key={index} className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSelectArea(area)}>
               <CardContent className="p-0">
                 <div className="relative">
                   {/* Area Image */}
                   <div className="relative h-48 bg-gradient-to-br from-primary to-primary/80 rounded-t-lg">
-                    {area.capa && (
-                      <OptimizedImage 
-                        src={area.capa} 
-                        alt={area.nome} 
-                        className="w-full h-full rounded-t-lg"
-                        loading="eager"
-                      />
-                    )}
+                    {area.capa && <img src={area.capa} alt={area.nome} className="w-full h-full object-cover rounded-t-lg" />}
                     <div className="absolute top-4 left-4">
                       <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         <BookOpen className="h-4 w-4" />
@@ -747,19 +665,14 @@ export function CursosPreparatoriosElegant({
                       </div>
                     </div>
 
-                    <Progress value={areaProgress} />
-                    <div className="text-right text-sm text-muted-foreground mt-2">{areaProgress}% concluído</div>
                     <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                       📝 Começar Agora
                     </Button>
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          </motion.div>;
+            </Card>;
       })}
-      </motion.div>
+      </div>
     </div>;
 };
-
-export default CursosPreparatoriosElegant;

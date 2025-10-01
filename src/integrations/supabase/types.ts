@@ -1280,7 +1280,6 @@ export type Database = {
           Área: string | null
           capa: string | null
           id: number
-          narração: string | null
           Tema: string | null
           Texto: string | null
         }
@@ -1288,7 +1287,6 @@ export type Database = {
           Área?: string | null
           capa?: string | null
           id?: number
-          narração?: string | null
           Tema?: string | null
           Texto?: string | null
         }
@@ -1296,7 +1294,6 @@ export type Database = {
           Área?: string | null
           capa?: string | null
           id?: number
-          narração?: string | null
           Tema?: string | null
           Texto?: string | null
         }
@@ -1429,19 +1426,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -1450,19 +1444,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -1471,19 +1462,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -1492,19 +1480,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -1513,19 +1498,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -2004,19 +1986,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -2025,19 +2004,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -2046,19 +2022,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -2094,19 +2067,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -2115,19 +2085,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -2971,107 +2938,20 @@ export type Database = {
         }
         Relationships: []
       }
-      "ESTATUTO - CIDADE": {
-        Row: {
-          Artigo: string | null
-          id: number
-          Narração: string | null
-          "Número do Artigo": string | null
-        }
-        Insert: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Update: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Relationships: []
-      }
-      "ESTATUTO - DESARMAMENTO": {
-        Row: {
-          Artigo: string | null
-          id: number
-          Narração: string | null
-          "Número do Artigo": string | null
-        }
-        Insert: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Update: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Relationships: []
-      }
-      "ESTATUTO - ECA": {
-        Row: {
-          Artigo: string | null
-          id: number
-          Narração: string | null
-          "Número do Artigo": string | null
-        }
-        Insert: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Update: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Relationships: []
-      }
       "ESTATUTO - IDOSO": {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Relationships: []
-      }
-      "ESTATUTO - IGUALDADE RACIAL": {
-        Row: {
-          Artigo: string | null
-          id: number
-          Narração: string | null
-          "Número do Artigo": string | null
-        }
-        Insert: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Update: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -3080,61 +2960,16 @@ export type Database = {
         Row: {
           Artigo: string | null
           id: number
-          Narração: string | null
           "Número do Artigo": string | null
         }
         Insert: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Update: {
           Artigo?: string | null
           id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Relationships: []
-      }
-      "ESTATUTO - PESSOA COM DEFICIENCIA": {
-        Row: {
-          Artigo: string | null
-          id: number
-          Narração: string | null
-          "Número do Artigo": string | null
-        }
-        Insert: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Update: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Relationships: []
-      }
-      "ESTATUTO - TORCEDOR": {
-        Row: {
-          Artigo: string | null
-          id: number
-          Narração: string | null
-          "Número do Artigo": string | null
-        }
-        Insert: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
-          "Número do Artigo"?: string | null
-        }
-        Update: {
-          Artigo?: string | null
-          id?: number
-          Narração?: string | null
           "Número do Artigo"?: string | null
         }
         Relationships: []
@@ -6536,22 +6371,16 @@ export type Database = {
       VIDEOS: {
         Row: {
           area: string | null
-          "capa-categoria": string | null
-          categoria: string | null
           id: number
           link: string | null
         }
         Insert: {
           area?: string | null
-          "capa-categoria"?: string | null
-          categoria?: string | null
           id?: number
           link?: string | null
         }
         Update: {
           area?: string | null
-          "capa-categoria"?: string | null
-          categoria?: string | null
           id?: number
           link?: string | null
         }

@@ -1,7 +1,11 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { Search, ArrowLeft, Scale, BookOpen, ChevronRight, Copy, X, Home, FileText, Scroll, Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2, Zap, Swords, Handshake, Building, Briefcase, Shield, DollarSign, Baby, Users } from 'lucide-react';
+import { 
+  Search, ArrowLeft, Scale, BookOpen, 
+  ChevronRight, Copy, X, Home, FileText, Scroll,
+  Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2,
+  Zap, Swords, Handshake, Building, Briefcase, Shield, DollarSign, Baby, Users
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,12 +13,13 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigation } from '@/context/NavigationContext';
-import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { VadeMecumFlashcardsSession } from '@/components/VadeMecumFlashcardsSession';
+import { ProfessoraIAFloatingButton } from '@/components/ProfessoraIAFloatingButton';
+import { ProfessoraIA } from '@/components/ProfessoraIA';
 import ReactMarkdown from 'react-markdown';
 import { copyToClipboard } from '@/utils/clipboardUtils';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
+
 interface VadeMecumLegalCode {
   id: string;
   name: string;
@@ -24,6 +29,7 @@ interface VadeMecumLegalCode {
   color: string;
   textColor?: string;
 }
+
 interface VadeMecumArticle {
   id: string;
   numero: string;
@@ -38,6 +44,7 @@ interface VadeMecumArticle {
 // Cache em memória global para máxima performance
 const articlesCache = new Map<string, VadeMecumArticle[]>();
 let isPreloading = false;
+
 const VadeMecumUltraFast: React.FC = () => {
   const [view, setView] = useState<'home' | 'codes' | 'articles'>('home');
   const [categoryType, setCategoryType] = useState<'articles' | 'statutes' | null>(null);
@@ -45,34 +52,29 @@ const VadeMecumUltraFast: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [articles, setArticles] = useState<VadeMecumArticle[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [displayedArticles, setDisplayedArticles] = useState<VadeMecumArticle[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const ARTICLES_PER_PAGE = 20;
   const [fontSize, setFontSize] = useState(16);
   const [showScrollTop, setShowScrollTop] = useState(false);
   
-  // Ref para virtualização
-  const parentRef = useRef<HTMLDivElement>(null);
-
   // Estados para indicador de progresso
-  const [loadingProgress, setLoadingProgress] = useState<{
-    [key: string]: number;
-  }>({});
-  const [activeLoading, setActiveLoading] = useState<{
-    [key: string]: boolean;
-  }>({});
-
+  const [loadingProgress, setLoadingProgress] = useState<{ [key: string]: number }>({});
+  const [activeLoading, setActiveLoading] = useState<{ [key: string]: boolean }>({});
+  
   // Estado para loading com blur overlay
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingType, setGeneratingType] = useState<'explicar' | 'exemplo' | null>(null);
-
+  
   // Estados para narração
   const [isNarrating, setIsNarrating] = useState(false);
   const [narrateLoading, setNarrateLoading] = useState(false);
   const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
-
-
-  // Estados para Flashcards
-  const [generatedFlashcards, setGeneratedFlashcards] = useState<any[]>([]);
-  const [showFlashcardsSession, setShowFlashcardsSession] = useState(false);
-
+  
+  // Estado para Professora IA
+  const [showProfessora, setShowProfessora] = useState(false);
+  
   // Estado centralizado para modais de conteúdo gerado
   const [generatedModal, setGeneratedModal] = useState<{
     open: boolean;
@@ -87,16 +89,10 @@ const VadeMecumUltraFast: React.FC = () => {
     articleNumber: '',
     hasValidNumber: false
   });
+  
   const searchRef = useRef<HTMLInputElement>(null);
-  const {
-    toast
-  } = useToast();
-  const {
-    setCurrentFunction
-  } = useNavigation();
-  const {
-    user
-  } = useAuth();
+  const { toast } = useToast();
+  const { setCurrentFunction } = useNavigation();
 
   // Controle de scroll otimizado sem piscar
   useEffect(() => {
@@ -110,16 +106,13 @@ const VadeMecumUltraFast: React.FC = () => {
         ticking = true;
       }
     };
-    window.addEventListener('scroll', handleScroll, {
-      passive: true
-    });
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Sistema de preload agressivo para carregamento instantâneo
@@ -128,47 +121,31 @@ const VadeMecumUltraFast: React.FC = () => {
       isPreloading = true;
       const preloadPopular = async () => {
         // Códigos mais acessados primeiro
-        const popularCodes = [{
-          table: 'CC',
-          id: 'cc'
-        }, {
-          table: 'CF88',
-          id: 'cf88'
-        }, {
-          table: 'CP',
-          id: 'cp'
-        }, {
-          table: 'CPC',
-          id: 'cpc'
-        }, {
-          table: 'CPP',
-          id: 'cpp'
-        }, {
-          table: 'CLT',
-          id: 'clt'
-        }, {
-          table: 'CDC',
-          id: 'cdc'
-        }];
-
+        const popularCodes = [
+          { table: 'CC', id: 'cc' },
+          { table: 'CF88', id: 'cf88' },
+          { table: 'CP', id: 'cp' },
+          { table: 'CPC', id: 'cpc' },
+          { table: 'CPP', id: 'cpp' },
+          { table: 'CLT', id: 'clt' },
+          { table: 'CDC', id: 'cdc' }
+        ];
+        
         // Preload em batches para não sobrecarregar o servidor
         const batchSize = 3;
         for (let i = 0; i < popularCodes.length; i += batchSize) {
           const batch = popularCodes.slice(i, i + batchSize);
-          const batchPromises = batch.map(async ({
-            table,
-            id
-          }) => {
+          
+          const batchPromises = batch.map(async ({ table, id }) => {
             const cacheKey = `articles-${id}`;
+            
             if (!articlesCache.has(cacheKey)) {
               try {
-                const {
-                  data
-                } = await supabase
+                const { data } = await supabase
                   .from(table as any)
                   .select('id, "Número do Artigo", Artigo, Narração')
-                  .order('id', { ascending: true })
-                  .range(0, 5000);
+                  .order('id', { ascending: true });
+                
                 if (data) {
                   const transformed = data.map((item: any) => ({
                     id: String(item.id),
@@ -187,155 +164,122 @@ const VadeMecumUltraFast: React.FC = () => {
               }
             }
           });
-
+          
           // Processa batch e aguarda antes do próximo
           await Promise.allSettled(batchPromises);
-
+          
           // Pequeno delay entre batches para otimizar performance
           if (i + batchSize < popularCodes.length) {
             await new Promise(resolve => setTimeout(resolve, 100));
           }
         }
       };
-
+      
       // Executa preload em background sem bloquear UI
-      requestIdleCallback ? requestIdleCallback(() => preloadPopular()) : setTimeout(preloadPopular, 100);
+      requestIdleCallback ? 
+        requestIdleCallback(() => preloadPopular()) : 
+        setTimeout(preloadPopular, 100);
     }
   }, []);
 
   // Códigos com layout moderno e gradientes
-  const articleCodes = useMemo<VadeMecumLegalCode[]>(() => [{
-    id: 'cc',
-    name: 'CC',
-    fullName: 'Código Civil',
-    description: 'Relações civis e direitos privados',
-    icon: 'Handshake',
-    color: 'bg-gradient-to-br from-blue-500/20 to-blue-700/30 border border-blue-500/20 backdrop-blur-sm',
-    textColor: 'text-blue-100'
-  }, {
-    id: 'cf88',
-    name: 'CF/88',
-    fullName: 'Constituição Federal',
-    description: 'Carta Magna do Brasil',
-    icon: 'Scale',
-    color: 'bg-gradient-to-br from-emerald-500/20 to-emerald-700/30 border border-emerald-500/20 backdrop-blur-sm',
-    textColor: 'text-emerald-100'
-  }, {
-    id: 'cp',
-    name: 'CP',
-    fullName: 'Código Penal',
-    description: 'Crimes e aplicação de penas',
-    icon: 'Zap',
-    color: 'bg-gradient-to-br from-red-500/20 to-red-700/30 border border-red-500/20 backdrop-blur-sm',
-    textColor: 'text-red-100'
-  }, {
-    id: 'cpc',
-    name: 'CPC',
-    fullName: 'Código de Processo Civil',
-    description: 'Procedimentos judiciais cíveis',
-    icon: 'FileText',
-    color: 'bg-gradient-to-br from-purple-500/20 to-purple-700/30 border border-purple-500/20 backdrop-blur-sm',
-    textColor: 'text-purple-100'
-  }, {
-    id: 'cpp',
-    name: 'CPP',
-    fullName: 'Código de Processo Penal',
-    description: 'Procedimentos judiciais penais',
-    icon: 'Swords',
-    color: 'bg-gradient-to-br from-orange-500/20 to-orange-700/30 border border-orange-500/20 backdrop-blur-sm',
-    textColor: 'text-orange-100'
-  }, {
-    id: 'clt',
-    name: 'CLT',
-    fullName: 'Consolidação das Leis do Trabalho',
-    description: 'Direito trabalhista e sindical',
-    icon: 'Briefcase',
-    color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
-    textColor: 'text-amber-100'
-  }, {
-    id: 'cdc',
-    name: 'CDC',
-    fullName: 'Código de Defesa do Consumidor',
-    description: 'Proteção aos direitos do consumidor',
-    icon: 'Shield',
-    color: 'bg-gradient-to-br from-cyan-500/20 to-cyan-700/30 border border-cyan-500/20 backdrop-blur-sm',
-    textColor: 'text-cyan-100'
-  }, {
-    id: 'ctn',
-    name: 'CTN',
-    fullName: 'Código Tributário Nacional',
-    description: 'Sistema tributário e fiscal',
-    icon: 'DollarSign',
-    color: 'bg-gradient-to-br from-yellow-500/20 to-yellow-700/30 border border-yellow-500/20 backdrop-blur-sm',
-    textColor: 'text-yellow-100'
-  }], []);
+  const articleCodes = useMemo<VadeMecumLegalCode[]>(() => [
+    { 
+      id: 'cc', 
+      name: 'CC', 
+      fullName: 'Código Civil', 
+      description: 'Relações civis e direitos privados', 
+      icon: 'Handshake', 
+      color: 'bg-gradient-to-br from-blue-500/20 to-blue-700/30 border border-blue-500/20 backdrop-blur-sm',
+      textColor: 'text-blue-100'
+    },
+    { 
+      id: 'cf88', 
+      name: 'CF/88', 
+      fullName: 'Constituição Federal', 
+      description: 'Carta Magna do Brasil', 
+      icon: 'Scale', 
+      color: 'bg-gradient-to-br from-emerald-500/20 to-emerald-700/30 border border-emerald-500/20 backdrop-blur-sm',
+      textColor: 'text-emerald-100'
+    },
+    { 
+      id: 'cp', 
+      name: 'CP', 
+      fullName: 'Código Penal', 
+      description: 'Crimes e aplicação de penas', 
+      icon: 'Zap', 
+      color: 'bg-gradient-to-br from-red-500/20 to-red-700/30 border border-red-500/20 backdrop-blur-sm',
+      textColor: 'text-red-100'
+    },
+    { 
+      id: 'cpc', 
+      name: 'CPC', 
+      fullName: 'Código de Processo Civil', 
+      description: 'Procedimentos judiciais cíveis', 
+      icon: 'FileText', 
+      color: 'bg-gradient-to-br from-purple-500/20 to-purple-700/30 border border-purple-500/20 backdrop-blur-sm',
+      textColor: 'text-purple-100'
+    },
+    { 
+      id: 'cpp', 
+      name: 'CPP', 
+      fullName: 'Código de Processo Penal', 
+      description: 'Procedimentos judiciais penais', 
+      icon: 'Swords', 
+      color: 'bg-gradient-to-br from-orange-500/20 to-orange-700/30 border border-orange-500/20 backdrop-blur-sm',
+      textColor: 'text-orange-100'
+    },
+    { 
+      id: 'clt', 
+      name: 'CLT', 
+      fullName: 'Consolidação das Leis do Trabalho', 
+      description: 'Direito trabalhista e sindical', 
+      icon: 'Briefcase', 
+      color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
+      textColor: 'text-amber-100'
+    },
+    { 
+      id: 'cdc', 
+      name: 'CDC', 
+      fullName: 'Código de Defesa do Consumidor', 
+      description: 'Proteção aos direitos do consumidor', 
+      icon: 'Shield', 
+      color: 'bg-gradient-to-br from-cyan-500/20 to-cyan-700/30 border border-cyan-500/20 backdrop-blur-sm',
+      textColor: 'text-cyan-100'
+    },
+    { 
+      id: 'ctn', 
+      name: 'CTN', 
+      fullName: 'Código Tributário Nacional', 
+      description: 'Sistema tributário e fiscal', 
+      icon: 'DollarSign', 
+      color: 'bg-gradient-to-br from-yellow-500/20 to-yellow-700/30 border border-yellow-500/20 backdrop-blur-sm',
+      textColor: 'text-yellow-100'
+    }
+  ], []);
 
   // Estatutos com gradientes modernos
-  const statuteCodes = useMemo<VadeMecumLegalCode[]>(() => [{
-    id: 'estatuto-oab',
-    name: 'Estatuto da OAB',
-    fullName: 'Estatuto da Advocacia e da OAB',
-    description: 'Lei nº 8.906/1994',
-    icon: 'Scale',
-    color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
-    textColor: 'text-amber-100'
-  }, {
-    id: 'estatuto-eca',
-    name: 'ECA',
-    fullName: 'Estatuto da Criança e do Adolescente',
-    description: 'Lei nº 8.069/1990',
-    icon: 'Baby',
-    color: 'bg-gradient-to-br from-pink-500/20 to-pink-700/30 border border-pink-500/20 backdrop-blur-sm',
-    textColor: 'text-pink-100'
-  }, {
-    id: 'estatuto-idoso',
-    name: 'Estatuto do Idoso',
-    fullName: 'Estatuto da Pessoa Idosa',
-    description: 'Lei nº 10.741/2003',
-    icon: 'Users',
-    color: 'bg-gradient-to-br from-violet-500/20 to-violet-700/30 border border-violet-500/20 backdrop-blur-sm',
-    textColor: 'text-violet-100'
-  }, {
-    id: 'estatuto-pcd',
-    name: 'Estatuto da Pessoa com Deficiência',
-    fullName: 'Estatuto da Pessoa com Deficiência',
-    description: 'Lei nº 13.146/2015',
-    icon: 'Shield',
-    color: 'bg-gradient-to-br from-indigo-500/20 to-indigo-700/30 border border-indigo-500/20 backdrop-blur-sm',
-    textColor: 'text-indigo-100'
-  }, {
-    id: 'estatuto-igualdade-racial',
-    name: 'Estatuto da Igualdade Racial',
-    fullName: 'Estatuto da Igualdade Racial',
-    description: 'Lei nº 12.288/2010',
-    icon: 'Handshake',
-    color: 'bg-gradient-to-br from-orange-500/20 to-orange-700/30 border border-orange-500/20 backdrop-blur-sm',
-    textColor: 'text-orange-100'
-  }, {
-    id: 'estatuto-cidade',
-    name: 'Estatuto da Cidade',
-    fullName: 'Estatuto da Cidade',
-    description: 'Lei nº 10.257/2001',
-    icon: 'Building',
-    color: 'bg-gradient-to-br from-slate-500/20 to-slate-700/30 border border-slate-500/20 backdrop-blur-sm',
-    textColor: 'text-slate-100'
-  }, {
-    id: 'estatuto-desarmamento',
-    name: 'Estatuto do Desarmamento',
-    fullName: 'Estatuto do Desarmamento',
-    description: 'Lei nº 10.826/2003',
-    icon: 'Shield',
-    color: 'bg-gradient-to-br from-red-500/20 to-red-700/30 border border-red-500/20 backdrop-blur-sm',
-    textColor: 'text-red-100'
-  }, {
-    id: 'estatuto-torcedor',
-    name: 'Estatuto do Torcedor',
-    fullName: 'Estatuto de Defesa do Torcedor',
-    description: 'Lei nº 10.671/2003',
-    icon: 'Users',
-    color: 'bg-gradient-to-br from-green-500/20 to-green-700/30 border border-green-500/20 backdrop-blur-sm',
-    textColor: 'text-green-100'
-  }], []);
+  const statuteCodes = useMemo<VadeMecumLegalCode[]>(() => [
+    { 
+      id: 'eca', 
+      name: 'ECA', 
+      fullName: 'Estatuto da Criança e do Adolescente', 
+      description: 'Proteção de crianças e adolescentes', 
+      icon: 'Baby', 
+      color: 'bg-gradient-to-br from-pink-500/20 to-pink-700/30 border border-pink-500/20 backdrop-blur-sm',
+      textColor: 'text-pink-100'
+    },
+    { 
+      id: 'estatuto-idoso', 
+      name: 'Estatuto do Idoso', 
+      fullName: 'Estatuto da Pessoa Idosa', 
+      description: 'Direitos e proteção dos idosos', 
+      icon: 'Users', 
+      color: 'bg-gradient-to-br from-violet-500/20 to-violet-700/30 border border-violet-500/20 backdrop-blur-sm',
+      textColor: 'text-violet-100'
+    }
+  ], []);
+
   const currentCodes = useMemo(() => {
     return categoryType === 'statutes' ? statuteCodes : articleCodes;
   }, [categoryType, articleCodes, statuteCodes]);
@@ -344,111 +288,99 @@ const VadeMecumUltraFast: React.FC = () => {
   const isValidArticleNumber = useCallback((articleNumber: string, articleContent?: string) => {
     // Verifica se tem número e não é apenas texto de seção/capítulo
     if (!articleNumber) return false;
-
+    
     // Remove caracteres não numéricos e verifica se sobrou algo
     const numbersOnly = articleNumber.replace(/[^\d]/g, '');
-
+    
     // Se não tem números, não é um artigo numerado
     if (numbersOnly.length === 0) return false;
-
+    
     // Verifica se é um texto de seção/capítulo comum
     const lowerText = articleNumber.toLowerCase();
     const sectionWords = ['capítulo', 'capitulo', 'seção', 'secao', 'título', 'titulo', 'livro', 'parte'];
     if (sectionWords.some(word => lowerText.includes(word))) return false;
-
+    
     // Verifica se o conteúdo do artigo contém referência a "Art." em qualquer lugar
     if (articleContent) {
       const contentLower = articleContent.toLowerCase().trim();
-
+      
       // Para o Código Penal e outros códigos, aceita se:
       // 1. Começa diretamente com "art." ou "artigo"
       // 2. Contém "art. X" onde X corresponde ao número do artigo
-      const startsWithArticle = contentLower.startsWith('art.') || contentLower.startsWith('artigo');
-
+      const startsWithArticle = contentLower.startsWith('art.') || 
+                               contentLower.startsWith('artigo');
+                               
       // Ou se contém "Art. [número]" em qualquer lugar do texto
       const articlePattern = new RegExp(`art\\.?\\s*${articleNumber.replace(/[^\w]/g, '')}[^\\w]`, 'i');
       const containsArticleNumber = articlePattern.test(contentLower);
-
+      
       // Aceita se começa com artigo OU se contém a referência ao artigo no meio do texto
       if (startsWithArticle || containsArticleNumber) {
         return true;
       }
-
+      
       // Se não encontrou padrão de artigo, não deve mostrar número
       return false;
     }
+    
     return true;
   }, []);
 
   // Função para simular progresso com porcentagem
   const simulateProgress = useCallback((key: string, duration: number = 3000) => {
-    setActiveLoading(prev => ({
-      ...prev,
-      [key]: true
-    }));
-    setLoadingProgress(prev => ({
-      ...prev,
-      [key]: 0
-    }));
+    setActiveLoading(prev => ({ ...prev, [key]: true }));
+    setLoadingProgress(prev => ({ ...prev, [key]: 0 }));
+    
     const startTime = Date.now();
     const updateProgress = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration * 100, 95);
-      setLoadingProgress(prev => ({
-        ...prev,
-        [key]: progress
-      }));
+      const progress = Math.min((elapsed / duration) * 100, 95);
+      
+      setLoadingProgress(prev => ({ ...prev, [key]: progress }));
+      
       if (progress < 95) {
         requestAnimationFrame(updateProgress);
       }
     };
+    
     requestAnimationFrame(updateProgress);
   }, []);
+
   const stopProgress = useCallback((key: string) => {
-    setLoadingProgress(prev => ({
-      ...prev,
-      [key]: 100
-    }));
+    setLoadingProgress(prev => ({ ...prev, [key]: 100 }));
     setTimeout(() => {
-      setActiveLoading(prev => ({
-        ...prev,
-        [key]: false
-      }));
-      setLoadingProgress(prev => ({
-        ...prev,
-        [key]: 0
-      }));
+      setActiveLoading(prev => ({ ...prev, [key]: false }));
+      setLoadingProgress(prev => ({ ...prev, [key]: 0 }));
     }, 500);
   }, []);
 
-  // Sistema de busca otimizado - SEM paginação, virtualização cuida da performance
+  // Sistema de busca otimizado com paginação
   const filteredArticles = useMemo(() => {
     const allValidArticles = articles.filter(article => {
       const articleContent = article["Artigo"] || article.conteudo || '';
       return articleContent.trim() !== '';
     });
+
     if (!searchTerm.trim()) return allValidArticles;
-    
+
     const searchLower = searchTerm.toLowerCase().trim();
     const searchNumbers = searchTerm.replace(/[^\d]/g, '');
-    
-    // Match exato - retorna imediatamente
-    const exactMatch = allValidArticles.find(article => {
-      const articleNumber = article["Número do Artigo"] || article.numero || '';
-      return articleNumber.toLowerCase() === searchLower;
-    });
-    if (exactMatch) return [exactMatch];
-    
-    // Busca otimizada com early break
+
     const results: { article: VadeMecumArticle; score: number }[] = [];
     
-    for (const article of allValidArticles) {
+    for (let i = 0; i < allValidArticles.length; i++) {
+      const article = allValidArticles[i];
       const articleNumber = article["Número do Artigo"] || article.numero || '';
       const articleContent = article["Artigo"] || article.conteudo || '';
+      
       let score = 0;
-
+      
+      // Match exato - prioridade máxima
+      if (articleNumber.toLowerCase() === searchLower) {
+        return [article];
+      }
       // Número puro
-      if (searchNumbers && articleNumber.replace(/[^\d]/g, '') === searchNumbers) {
+      else if (searchNumbers && articleNumber.replace(/[^\d]/g, '') === searchNumbers) {
         score = 900;
       }
       // Número contém
@@ -464,73 +396,62 @@ const VadeMecumUltraFast: React.FC = () => {
         results.push({ article, score });
       }
     }
-    
-    return results.sort((a, b) => b.score - a.score).map(item => item.article);
-  }, [articles, searchTerm]);
-  
-  // Configuração do virtualizador
-  const virtualizer = useVirtualizer({
-    count: filteredArticles.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 200, // Altura estimada de cada card
-    overscan: 5, // Renderiza 5 itens extras acima/abaixo
-  });
 
-  // Ao alterar a busca, garanta que o primeiro resultado fique visível
+    return results
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.article);
+  }, [articles, searchTerm]);
+
+  // Infinite scroll setup
   useEffect(() => {
-    if (!parentRef.current) return;
-    parentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    try {
-      virtualizer.scrollToIndex(0, { align: 'start' });
-    } catch {/* ignore */}
-  }, [searchTerm]);
+    if (searchTerm.trim()) {
+      // When searching, show all results
+      setDisplayedArticles(filteredArticles);
+      setHasMore(false);
+    } else {
+      // When not searching, show paginated results
+      const startIndex = 0;
+      const endIndex = page * ARTICLES_PER_PAGE;
+      const newDisplayed = filteredArticles.slice(startIndex, endIndex);
+      setDisplayedArticles(newDisplayed);
+      setHasMore(endIndex < filteredArticles.length);
+    }
+  }, [filteredArticles, page, searchTerm]);
+
+  // Reset pagination when articles change
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+  }, [articles]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    if (searchTerm.trim()) return; // Don't use infinite scroll during search
+
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop 
+          >= document.documentElement.offsetHeight - 1000) {
+        if (hasMore && !isLoading) {
+          setPage(prev => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, isLoading, searchTerm]);
 
   // Carregar artigos com cache instantâneo e otimização extrema
   const loadArticles = useCallback(async (code: VadeMecumLegalCode) => {
     const cacheKey = `articles-${code.id}`;
-
+    
+    // Verifica cache primeiro - carregamento instantâneo
     if (articlesCache.has(cacheKey)) {
       const cachedData = articlesCache.get(cacheKey)!;
       setArticles(cachedData);
       setSelectedCode(code);
       setView('articles');
       setSearchTerm('');
-
-      // Atualização em segundo plano para garantir dataset completo (evita caches antigos com 1000 linhas)
-      if (cachedData.length < 2000) {
-        const tableMap: Record<string, string> = {
-          'cc': 'CC', 'cdc': 'CDC', 'cf88': 'CF88', 'clt': 'CLT', 'cp': 'CP', 'cpc': 'CPC', 'cpp': 'CPP', 'ctn': 'CTN', 'ctb': 'CTB', 'ce': 'CE',
-          'estatuto-oab': 'ESTATUTO - OAB', 'estatuto-eca': 'ESTATUTO - ECA', 'estatuto-idoso': 'ESTATUTO - IDOSO', 'estatuto-pcd': 'ESTATUTO - PESSOA COM DEFICIENCIA',
-          'estatuto-igualdade-racial': 'ESTATUTO - IGUALDADE RACIAL', 'estatuto-cidade': 'ESTATUTO - CIDADE', 'estatuto-desarmamento': 'ESTATUTO - DESARMAMENTO', 'estatuto-torcedor': 'ESTATUTO - TORCEDOR'
-        };
-        const tableName = tableMap[code.id];
-        if (tableName) {
-          (async () => {
-            try {
-              const { data } = await supabase
-                .from(tableName as any)
-                .select('id, "Número do Artigo", Artigo, Narração')
-                .order('id', { ascending: true })
-                .range(0, 5000);
-              if (data && data.length > cachedData.length) {
-                const transformed = data.map((item: any) => ({
-                  id: String(item.id),
-                  numero: item["Número do Artigo"] || String(item.id),
-                  conteudo: item.Artigo || '',
-                  codigo_id: code.id,
-                  naracao_url: item["Narração"] || null,
-                  "Número do Artigo": item["Número do Artigo"],
-                  "Narração": item["Narração"],
-                  "Artigo": item.Artigo
-                }));
-                articlesCache.set(cacheKey, transformed);
-                // Atualiza somente se o usuário ainda estiver no mesmo código
-                setArticles(prev => (selectedCode?.id === code.id ? transformed : prev));
-              }
-            } catch {/* ignore background refresh errors */}
-          })();
-        }
-      }
       return;
     }
 
@@ -539,11 +460,12 @@ const VadeMecumUltraFast: React.FC = () => {
     setSelectedCode(code);
     setView('articles');
     setSearchTerm('');
+    
     try {
       // Mapping otimizado de tabelas
       const tableMap: Record<string, string> = {
         'cc': 'CC',
-        'cdc': 'CDC',
+        'cdc': 'CDC', 
         'cf88': 'CF88',
         'clt': 'CLT',
         'cp': 'CP',
@@ -552,15 +474,10 @@ const VadeMecumUltraFast: React.FC = () => {
         'ctn': 'CTN',
         'ctb': 'CTB',
         'ce': 'CE',
-        'estatuto-oab': 'ESTATUTO - OAB',
-        'estatuto-eca': 'ESTATUTO - ECA',
-        'estatuto-idoso': 'ESTATUTO - IDOSO',
-        'estatuto-pcd': 'ESTATUTO - PESSOA COM DEFICIENCIA',
-        'estatuto-igualdade-racial': 'ESTATUTO - IGUALDADE RACIAL',
-        'estatuto-cidade': 'ESTATUTO - CIDADE',
-        'estatuto-desarmamento': 'ESTATUTO - DESARMAMENTO',
-        'estatuto-torcedor': 'ESTATUTO - TORCEDOR'
+        'eca': 'ECA',
+        'estatuto_idoso': 'ESTATUTO - IDOSO'
       };
+      
       const tableName = tableMap[code.id];
       if (!tableName) {
         setIsLoading(false);
@@ -568,14 +485,11 @@ const VadeMecumUltraFast: React.FC = () => {
       }
 
       // Query otimizada para máxima velocidade
-      const {
-        data,
-        error
-      } = await supabase
+      const { data, error } = await supabase
         .from(tableName as any)
         .select('id, "Número do Artigo", Artigo, Narração')
-        .order('id', { ascending: true })
-        .range(0, 5000);
+        .order('id', { ascending: true });
+
       if (error) throw error;
 
       // Transformação otimizada de dados
@@ -593,6 +507,7 @@ const VadeMecumUltraFast: React.FC = () => {
       // Cache triplo para máxima performance
       articlesCache.set(cacheKey, transformedArticles);
       setArticles(transformedArticles);
+      
     } catch (error: any) {
       toast({
         title: "❌ Erro ao carregar artigos",
@@ -618,16 +533,18 @@ const VadeMecumUltraFast: React.FC = () => {
       setCurrentFunction(null);
     }
   }, [view, setCurrentFunction]);
+
   const selectCategory = useCallback((type: 'articles' | 'statutes') => {
     setCategoryType(type);
     setView('codes');
   }, []);
+
   const copyArticle = useCallback(async (content: string) => {
     const success = await copyToClipboard(content);
     if (success) {
       toast({
         title: "✅ Artigo copiado!",
-        description: "O conteúdo foi copiado para a área de transferência."
+        description: "O conteúdo foi copiado para a área de transferência.",
       });
     } else {
       toast({
@@ -637,15 +554,17 @@ const VadeMecumUltraFast: React.FC = () => {
       });
     }
   }, [toast]);
+
   const narrateArticle = useCallback(async (article: VadeMecumArticle, codeName: string) => {
     // Check if audio URL is not available
     if (!article.naracao_url) {
       toast({
         title: "Em breve",
-        description: "A narração deste artigo estará disponível em breve."
+        description: "A narração deste artigo estará disponível em breve.",
       });
       return;
     }
+
     if (isNarrating && audioInstance) {
       // Parar narração
       audioInstance.pause();
@@ -653,36 +572,42 @@ const VadeMecumUltraFast: React.FC = () => {
       setAudioInstance(null);
       return;
     }
+
     setNarrateLoading(true);
+    
     try {
       // Use the audio URL directly from the database
       const audio = new Audio(article.naracao_url);
+      
       audio.onended = () => {
         setIsNarrating(false);
         setAudioInstance(null);
       };
+      
       audio.onerror = () => {
         setIsNarrating(false);
         setAudioInstance(null);
         toast({
           title: "❌ Erro",
           description: "Erro ao reproduzir áudio.",
-          variant: "destructive"
+          variant: "destructive",
         });
       };
+
       setAudioInstance(audio);
       setIsNarrating(true);
       audio.play();
+      
       toast({
         title: "🔊 Narração iniciada",
-        description: "O artigo está sendo narrado."
+        description: "O artigo está sendo narrado.",
       });
     } catch (error: any) {
       console.error('Erro ao narrar artigo:', error);
       toast({
         title: "❌ Erro ao narrar",
         description: "Erro ao reproduzir áudio. Tente novamente.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setNarrateLoading(false);
@@ -697,9 +622,10 @@ const VadeMecumUltraFast: React.FC = () => {
       utterance.lang = 'pt-BR';
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
+      
       toast({
         title: "🔊 Reproduzindo áudio",
-        description: "O texto está sendo reproduzido em voz alta."
+        description: "O texto está sendo reproduzido em voz alta.",
       });
     } else {
       toast({
@@ -710,80 +636,39 @@ const VadeMecumUltraFast: React.FC = () => {
     }
   }, [toast]);
 
-  // Função para gerar flashcards
-  const generateFlashcards = useCallback(async (articleContent: string, articleNumber: string) => {
-    if (!user) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para gerar flashcards.",
-        variant: "destructive"
-      });
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-vade-mecum-content', {
-        body: {
-          articleContent,
-          articleNumber,
-          codeName: selectedCode?.name || 'Código Legal',
-          userId: user.id,
-          type: 'flashcard'
-        }
-      });
-      if (error) throw error;
-      if (data?.flashcards) {
-        setGeneratedFlashcards(data.flashcards);
-        setShowFlashcardsSession(true);
-        toast({
-          title: "Sucesso!",
-          description: `${data.flashcards.length} flashcards gerados com IA`
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao gerar flashcards:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível gerar os flashcards. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [user, selectedCode, toast]);
-
   // Função para formatar texto com estilos específicos
   const formatVademecumText = useCallback((text: string) => {
     if (!text) return text;
-
+    
     // Aplica formatação para títulos do Código Penal e "Parágrafo único"
     let formattedText = text;
-
+    
     // Identifica e formata títulos antes de "Art." - Código Penal com cor branca e negrito
-    formattedText = formattedText.replace(/^([^A][^r][^t].*?)(?=\n\nArt\.)/gm, '<strong style="font-weight: bold; color: #ffffff;">$1</strong>');
-
+    formattedText = formattedText.replace(
+      /^([^A][^r][^t].*?)(?=\n\nArt\.)/gm, 
+      '<strong style="font-weight: bold; color: #ffffff;">$1</strong>'
+    );
+    
     // Formata títulos que aparecem no início de linhas (sem Art.) com cor branca e negrito
-    formattedText = formattedText.replace(/^([A-Z][a-záêôõçã\s]+)(?=\n\nArt\.)/gm, '<strong style="font-weight: bold; color: #ffffff;">$1</strong>');
-
+    formattedText = formattedText.replace(
+      /^([A-Z][a-záêôõçã\s]+)(?=\n\nArt\.)/gm,
+      '<strong style="font-weight: bold; color: #ffffff;">$1</strong>'
+    );
+    
     // Formata "Parágrafo único" em todos os códigos com cor branca
-    formattedText = formattedText.replace(/(Parágrafo único|PARÁGRAFO ÚNICO)/gi, '<strong style="font-weight: bold; color: #ffffff;">$1</strong>');
-
+    formattedText = formattedText.replace(
+      /(Parágrafo único|PARÁGRAFO ÚNICO)/gi,
+      '<strong style="font-weight: bold; color: #ffffff;">$1</strong>'
+    );
+    
     // Quebras de linha para HTML
     formattedText = formattedText.replace(/\n/g, '<br>');
+    
     return formattedText;
   }, []);
 
   // Componente de Card do Artigo
-  const VadeMecumArticleCard = ({
-    article,
-    index
-  }: {
-    article: VadeMecumArticle;
-    index: number;
-  }) => {
+  const VadeMecumArticleCard = ({ article, index }: { article: VadeMecumArticle; index: number }) => {
     const [loadingState, setLoadingState] = useState<{
       explanation: boolean;
       practicalExample: boolean;
@@ -791,15 +676,19 @@ const VadeMecumUltraFast: React.FC = () => {
       explanation: false,
       practicalExample: false
     });
+
     const articleNumber = article["Número do Artigo"] || article.numero || '';
     const articleContent = article["Artigo"] || article.conteudo || '';
-
+    
     // Verifica se tem número válido (contém dígitos após remover caracteres não numéricos)
     const hasValidNumber = isValidArticleNumber(articleNumber, articleContent);
 
     // Layout compacto para cards sem número válido (seções, capítulos, etc.)
     if (!hasValidNumber) {
-      return <div className="mb-2">
+      return (
+        <div
+          className="mb-2"
+        >
           <Card className="bg-muted/20 border-muted/40">
             <CardContent className="p-2">
               <div className="text-center">
@@ -809,23 +698,24 @@ const VadeMecumUltraFast: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>;
+        </div>
+      );
     }
 
     // Define keys for loading states
     const explainKey = `explain-${articleNumber}`;
     const exampleKey = `example-${articleNumber}`;
+
     const handleExplain = async () => {
       const key = explainKey;
       setIsGenerating(true);
       setGeneratingType('explicar');
       simulateProgress(key);
+      
       try {
         console.log('Chamando Gemini API para: explicar');
-        const {
-          data,
-          error
-        } = await supabase.functions.invoke('gemini-vademecum', {
+        
+        const { data, error } = await supabase.functions.invoke('gemini-vademecum', {
           body: {
             action: 'explicar',
             articleNumber: articleNumber,
@@ -833,10 +723,12 @@ const VadeMecumUltraFast: React.FC = () => {
             hasArticle: !!articleContent
           }
         });
+
         if (error) {
           console.error('Erro na API Gemini:', error);
           throw new Error('Erro ao gerar explicação');
         }
+
         if (data?.content) {
           console.log('Explicação gerada:', data.content);
           setGeneratedModal({
@@ -848,7 +740,7 @@ const VadeMecumUltraFast: React.FC = () => {
           });
           toast({
             title: "✅ Explicação gerada!",
-            description: "A explicação foi gerada com sucesso."
+            description: "A explicação foi gerada com sucesso.",
           });
         }
       } catch (error: any) {
@@ -863,16 +755,15 @@ const VadeMecumUltraFast: React.FC = () => {
         stopProgress(key);
       }
     };
+
     const handleExample = async () => {
       const key = exampleKey;
       setIsGenerating(true);
       setGeneratingType('exemplo');
       simulateProgress(key);
+      
       try {
-        const {
-          data,
-          error
-        } = await supabase.functions.invoke('gemini-vademecum', {
+        const { data, error } = await supabase.functions.invoke('gemini-vademecum', {
           body: {
             action: 'exemplo',
             articleNumber: articleNumber,
@@ -880,10 +771,12 @@ const VadeMecumUltraFast: React.FC = () => {
             hasArticle: !!articleContent
           }
         });
+
         if (error) {
           console.error('Erro na API Gemini:', error);
           throw new Error('Erro ao gerar exemplo');
         }
+
         if (data?.content) {
           console.log('Exemplo gerado:', data.content);
           setGeneratedModal({
@@ -895,7 +788,7 @@ const VadeMecumUltraFast: React.FC = () => {
           });
           toast({
             title: "✅ Exemplo gerado!",
-            description: "O exemplo prático foi gerado com sucesso."
+            description: "O exemplo prático foi gerado com sucesso.",
           });
         }
       } catch (error: any) {
@@ -913,36 +806,65 @@ const VadeMecumUltraFast: React.FC = () => {
 
     // Layout diferente para cards sem número válido
     if (!hasValidNumber) {
-      return <div className="mb-3">
+      return (
+        <div
+          className="mb-3"
+        >
           <Card className="bg-card/50 border-muted">
             <CardContent className="p-3">{/* Removida animação motion */}
                 <div className="text-center">
-                  <div className="vademecum-text text-foreground/80 text-sm leading-relaxed" style={{
-                fontSize: `${fontSize}px`,
-                lineHeight: 1.6
-              }} dangerouslySetInnerHTML={{
-                __html: formatVademecumText(articleContent)
-              }} />
+                  <div 
+                    className="vademecum-text text-foreground/80 text-sm leading-relaxed"
+                    style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatVademecumText(articleContent)
+                    }}
+                  />
                 
                 {/* Apenas botões de IA para cards sem número */}
                 <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-muted">
-                  <Button onClick={handleExplain} disabled={loadingState.explanation} variant="outline" size="sm" className="text-xs">
-                    {loadingState.explanation ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" /> : <Brain className="h-3 w-3" />}
+                  <Button
+                    onClick={handleExplain}
+                    disabled={loadingState.explanation}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    {loadingState.explanation ? (
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
+                    ) : (
+                      <Brain className="h-3 w-3" />
+                    )}
                     <span className="ml-1">Explicar</span>
                   </Button>
-                  <Button onClick={handleExample} disabled={loadingState.practicalExample} variant="outline" size="sm" className="text-xs">
-                    {loadingState.practicalExample ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" /> : <Lightbulb className="h-3 w-3" />}
+                  <Button
+                    onClick={handleExample}
+                    disabled={loadingState.practicalExample}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    {loadingState.practicalExample ? (
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
+                    ) : (
+                      <Lightbulb className="h-3 w-3" />
+                    )}
                     <span className="ml-1">Exemplo</span>
                   </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>;
+        </div>
+      );
     }
 
     // Layout para cards com número válido
-    return <div key={`${article.id}-${index}`} className="mb-4">
+    return (
+      <div
+        key={`${article.id}-${index}`}
+        className="mb-4"
+      >
         <Card className="bg-card border">
           <CardContent className="p-4">{/* Removidas animações de hover que causavam piscar */}
             <div className="space-y-3">
@@ -952,59 +874,99 @@ const VadeMecumUltraFast: React.FC = () => {
                   <h3 className="font-bold text-lg text-yellow-400 mb-2">
                     Art. {articleNumber}
                   </h3>
-                  <div className="vademecum-text text-foreground" style={{
-                  fontSize: `${fontSize}px`,
-                  lineHeight: 1.6
-                }} dangerouslySetInnerHTML={{
-                  __html: formatVademecumText(articleContent)
-                }} />
+                  <div 
+                    className="vademecum-text text-foreground" 
+                    style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatVademecumText(articleContent)
+                    }}
+                  />
                 </div>
               </div>
 
               {/* Ações do Artigo */}
               <div className="flex flex-wrap gap-2 pt-3 border-t border-muted">
-                <Button onClick={() => copyArticle(articleContent)} variant="outline" size="sm" className="text-xs">
+                <Button
+                  onClick={() => copyArticle(articleContent)}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
                   <Copy className="h-3 w-3 mr-1" />
                   Copiar
                 </Button>
 
-                <Button onClick={() => narrateArticle(article, selectedCode?.name || '')} disabled={narrateLoading || !article.naracao_url} variant="outline" size="sm" className={`text-xs ${!article.naracao_url ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                  {narrateLoading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : isNarrating ? <Square className="h-3 w-3 mr-1" /> : <Volume2 className="h-3 w-3 mr-1" />}
+                <Button
+                  onClick={() => narrateArticle(article, selectedCode?.name || '')}
+                  disabled={narrateLoading || !article.naracao_url}
+                  variant="outline"
+                  size="sm"
+                  className={`text-xs ${
+                    !article.naracao_url 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : ''
+                  }`}
+                >
+                  {narrateLoading ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : isNarrating ? (
+                    <Square className="h-3 w-3 mr-1" />
+                  ) : (
+                    <Volume2 className="h-3 w-3 mr-1" />
+                  )}
                   {narrateLoading ? 'Carregando...' : isNarrating ? 'Parar' : 'Narrar'}
                 </Button>
                 
-                <Button onClick={handleExplain} disabled={activeLoading[explainKey] || isGenerating} variant="outline" size="sm" className="text-xs">
-                  {activeLoading[explainKey] ? <>
+                <Button
+                  onClick={handleExplain}
+                  disabled={activeLoading[explainKey] || isGenerating}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  {activeLoading[explainKey] ? (
+                    <>
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary mr-1" />
                       {loadingProgress[explainKey]?.toFixed(0)}%
-                    </> : <>
+                    </>
+                  ) : (
+                    <>
                       <Brain className="h-3 w-3 mr-1" />
                       Explicar
-                    </>}
+                    </>
+                  )}
                 </Button>
-                <Button onClick={handleExample} disabled={activeLoading[exampleKey] || isGenerating} variant="outline" size="sm" className="text-xs">
-                  {activeLoading[exampleKey] ? <>
+                <Button
+                  onClick={handleExample}
+                  disabled={activeLoading[exampleKey] || isGenerating}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  {activeLoading[exampleKey] ? (
+                    <>
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary mr-1" />
                       {loadingProgress[exampleKey]?.toFixed(0)}%
-                    </> : <>
+                    </>
+                  ) : (
+                    <>
                       <Lightbulb className="h-3 w-3 mr-1" />
                       Exemplo
-                    </>}
-                </Button>
-                <Button onClick={() => generateFlashcards(articleContent, articleNumber)} disabled={isGenerating} variant="outline" size="sm" className="text-xs">
-                  {isGenerating ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Bookmark className="h-3 w-3 mr-1" />}
-                  Flashcards
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>;
+      </div>
+    );
   };
 
   // Tela inicial
   if (view === 'home') {
-    return <div className="min-h-screen bg-background">
+    return (
+      <div className="min-h-screen bg-background">
         <div className="flex items-center justify-between p-4 border-b">
           <Button variant="ghost" size="sm" onClick={() => setCurrentFunction(null)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -1026,7 +988,8 @@ const VadeMecumUltraFast: React.FC = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 max-w-2xl w-full">
-            <Card className="cursor-pointer group bg-gradient-to-br from-primary/20 to-primary/10 border-primary/30 hover:border-primary/50" onClick={() => selectCategory('articles')}>
+            <Card className="cursor-pointer group bg-gradient-to-br from-primary/20 to-primary/10 border-primary/30 hover:border-primary/50" 
+                  onClick={() => selectCategory('articles')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 mx-auto bg-primary/20 rounded-xl flex items-center justify-center mb-4">
                   <BookOpen className="h-6 w-6 text-primary" />
@@ -1042,7 +1005,8 @@ const VadeMecumUltraFast: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer group bg-gradient-to-br from-accent-legal/20 to-accent-legal/10 border-accent-legal/30 hover:border-accent-legal/50 hover:shadow-lg transition-all duration-300" onClick={() => selectCategory('statutes')}>
+            <Card className="cursor-pointer group bg-gradient-to-br from-accent-legal/20 to-accent-legal/10 border-accent-legal/30 hover:border-accent-legal/50 hover:shadow-lg transition-all duration-300" 
+                  onClick={() => selectCategory('statutes')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 mx-auto bg-accent-legal/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                   <Scroll className="h-6 w-6 text-accent-legal" />
@@ -1059,12 +1023,14 @@ const VadeMecumUltraFast: React.FC = () => {
             </Card>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Lista de códigos
   if (view === 'codes') {
-    return <div className="min-h-screen bg-background">
+    return (
+      <div className="min-h-screen bg-background">
         <div className="flex items-center justify-between p-4 border-b">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -1080,51 +1046,54 @@ const VadeMecumUltraFast: React.FC = () => {
           {/* Grid responsivo */}
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {currentCodes.map(code => <motion.div key={code.id} onClick={() => loadArticles(code)} className="cursor-pointer group" whileHover={{
-              scale: 1.02
-            }} whileTap={{
-              scale: 0.98
-            }} transition={{
-              duration: 0.2
-            }}>
-                  <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[160px] sm:h-[180px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
-                    <div className="mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+              {currentCodes.map((code) => (
+                <motion.div
+                  key={code.id}
+                  onClick={() => loadArticles(code)}
+                  className="cursor-pointer group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[140px] sm:h-[160px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
+                    <div className="mb-3 group-hover:scale-110 transition-transform duration-300">
                       {(() => {
-                    const iconMap: Record<string, React.ComponentType<any>> = {
-                      'Handshake': Handshake,
-                      'Building': Building,
-                      'Zap': Zap,
-                      'FileText': FileText,
-                      'Swords': Swords,
-                      'Briefcase': Briefcase,
-                      'Shield': Shield,
-                      'DollarSign': DollarSign,
-                      'Baby': Baby,
-                      'Users': Users,
-                      'Scale': Scale
-                    };
-                    const IconComponent = iconMap[code.icon];
-                    return IconComponent ? <IconComponent className="h-8 w-8 sm:h-10 sm:w-10" /> : null;
-                  })()}
+                        const iconMap: Record<string, React.ComponentType<any>> = {
+                          'Handshake': Handshake,
+                          'Building': Building,
+                          'Zap': Zap,
+                          'FileText': FileText,
+                          'Swords': Swords,
+                          'Briefcase': Briefcase,
+                          'Shield': Shield,
+                          'DollarSign': DollarSign,
+                          'Baby': Baby,
+                          'Users': Users,
+                          'Scale': Scale
+                        };
+                        const IconComponent = iconMap[code.icon];
+                        return IconComponent ? <IconComponent className="h-8 w-8 sm:h-10 sm:w-10" /> : null;
+                      })()}
                     </div>
-                    <div className="flex-1 flex flex-col justify-center min-h-0">
-                      <h3 className={`font-bold text-base sm:text-lg mb-1 ${code.textColor} line-clamp-2`}>
-                        {code.name}
-                      </h3>
-                      <p className={`text-xs sm:text-sm ${code.textColor} opacity-80 leading-tight line-clamp-2`}>
-                        {code.fullName}
-                      </p>
-                    </div>
+                    <h3 className={`font-bold text-lg sm:text-xl mb-1 ${code.textColor}`}>
+                      {code.name}
+                    </h3>
+                    <p className={`text-xs sm:text-sm ${code.textColor} opacity-80 leading-tight`}>
+                      {code.fullName}
+                    </p>
                   </div>
-                </motion.div>)}
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
-  // Lista de artigos com virtualização
-  return <div className="min-h-screen bg-background">
+  // Lista de artigos
+  return (
+    <div className="min-h-screen bg-background">
       <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b z-10">
         <div className="flex items-center justify-between p-4">
           <Button variant="ghost" size="sm" onClick={handleBack}>
@@ -1140,64 +1109,72 @@ const VadeMecumUltraFast: React.FC = () => {
         <div className="px-4 pb-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input ref={searchRef} placeholder="Buscar por artigo ou conteúdo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+            <Input
+              ref={searchRef}
+              placeholder="Buscar por artigo ou conteúdo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="ml-3 text-muted-foreground">Carregando artigos...</span>
-        </div>
-      ) : filteredArticles.length === 0 ? (
-        <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            {searchTerm ? 'Nenhum artigo encontrado.' : 'Nenhum artigo disponível.'}
-          </p>
-        </div>
-      ) : (
-        <div ref={parentRef} className="h-[calc(100vh-180px)] overflow-auto p-4">
-          <div
-            className="max-w-4xl mx-auto"
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              position: 'relative',
-            }}
-          >
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const article = filteredArticles[virtualItem.index];
-              return (
-                <div
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  <VadeMecumArticleCard article={article} index={virtualItem.index} />
-                </div>
-              );
-            })}
+      <div className="p-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-muted-foreground">Carregando artigos...</span>
           </div>
-        </div>
-      )}
+        ) : filteredArticles.length === 0 ? (
+          <div className="text-center py-12">
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              {searchTerm ? 'Nenhum artigo encontrado.' : 'Nenhum artigo disponível.'}
+            </p>
+          </div>
+        ) : (
+          <motion.div
+            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {displayedArticles.map((article, index) => (
+              <motion.div
+                key={`${article.id}-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.4,
+                  delay: index * 0.05,
+                  ease: "easeOut"
+                }}
+              >
+                <VadeMecumArticleCard article={article} index={index} />
+              </motion.div>
+            ))}
+            
+            {hasMore && !searchTerm && (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span className="ml-3 text-muted-foreground">Carregando mais artigos...</span>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
 
       {/* Modal Centralizado para Conteúdo Gerado */}
-      <Dialog open={generatedModal.open} onOpenChange={open => setGeneratedModal(prev => ({
-      ...prev,
-      open
-    }))}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto px-0">
+      <Dialog open={generatedModal.open} onOpenChange={(open) => setGeneratedModal(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              {generatedModal.type === 'explicar' ? <Brain className="h-6 w-6 text-primary" /> : <Lightbulb className="h-6 w-6 text-warning" />}
+              {generatedModal.type === 'explicar' ? (
+                <Brain className="h-6 w-6 text-primary" />
+              ) : (
+                <Lightbulb className="h-6 w-6 text-warning" />
+              )}
               {generatedModal.type === 'explicar' ? 'Explicação' : 'Exemplo Prático'}
               {generatedModal.hasValidNumber && ` - Art. ${generatedModal.articleNumber}`}
             </DialogTitle>
@@ -1205,96 +1182,130 @@ const VadeMecumUltraFast: React.FC = () => {
           
           <div className="space-y-6">
             <div className="prose prose-slate dark:prose-invert max-w-none p-6 bg-muted/30 rounded-lg border">
-              {generatedModal.content ? <div className="vademecum-text">
-                  <ReactMarkdown components={{
-                h1: ({
-                  ...props
-                }) => <h1 className="text-2xl font-bold mb-4 text-primary" {...props} />,
-                h2: ({
-                  ...props
-                }) => <h2 className="text-xl font-semibold mb-3 text-primary" {...props} />,
-                h3: ({
-                  ...props
-                }) => <h3 className="text-lg font-medium mb-2 text-primary" {...props} />,
-                p: ({
-                  ...props
-                }) => <p className="mb-3 last:mb-0 text-base leading-relaxed" {...props} />,
-                ul: ({
-                  ...props
-                }) => <ul className="list-disc pl-6 mb-3 space-y-1" {...props} />,
-                ol: ({
-                  ...props
-                }) => <ol className="list-decimal pl-6 mb-3 space-y-1" {...props} />,
-                li: ({
-                  ...props
-                }) => <li className="text-base leading-relaxed" {...props} />,
-                blockquote: ({
-                  ...props
-                }) => <blockquote className="border-l-4 border-primary/30 pl-4 italic text-muted-foreground my-4" {...props} />,
-                code: ({
-                  ...props
-                }) => <code className="bg-muted px-2 py-1 rounded text-sm font-mono" {...props} />,
-                strong: ({
-                  ...props
-                }) => <strong className="font-semibold text-primary" {...props} />,
-                em: ({
-                  ...props
-                }) => <em className="italic text-accent-legal" {...props} />
-              }}>
+              {generatedModal.content ? (
+                <div className="vademecum-text">
+                  <ReactMarkdown 
+                    components={{
+                      h1: ({...props}) => <h1 className="text-2xl font-bold mb-4 text-primary" {...props} />,
+                      h2: ({...props}) => <h2 className="text-xl font-semibold mb-3 text-primary" {...props} />,
+                      h3: ({...props}) => <h3 className="text-lg font-medium mb-2 text-primary" {...props} />,
+                      p: ({...props}) => <p className="mb-3 last:mb-0 text-base leading-relaxed" {...props} />,
+                      ul: ({...props}) => <ul className="list-disc pl-6 mb-3 space-y-1" {...props} />,
+                      ol: ({...props}) => <ol className="list-decimal pl-6 mb-3 space-y-1" {...props} />,
+                      li: ({...props}) => <li className="text-base leading-relaxed" {...props} />,
+                      blockquote: ({...props}) => <blockquote className="border-l-4 border-primary/30 pl-4 italic text-muted-foreground my-4" {...props} />,
+                      code: ({...props}) => <code className="bg-muted px-2 py-1 rounded text-sm font-mono" {...props} />,
+                      strong: ({...props}) => <strong className="font-semibold text-primary" {...props} />,
+                      em: ({...props}) => <em className="italic text-accent-legal" {...props} />
+                    }}
+                  >
                     {generatedModal.content}
                   </ReactMarkdown>
-                </div> : <p className="text-muted-foreground">Carregando conteúdo...</p>}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Carregando conteúdo...</p>
+              )}
             </div>
             
             <div className="flex flex-wrap gap-3">
-              <Button onClick={() => {
-              copyToClipboard(generatedModal.content);
-              toast({
-                title: "✅ Conteúdo copiado!",
-                description: "O conteúdo foi copiado para a área de transferência."
-              });
-            }} variant="outline" size="sm">
+              <Button
+                onClick={() => {
+                  copyToClipboard(generatedModal.content);
+                  toast({
+                    title: "✅ Conteúdo copiado!",
+                    description: "O conteúdo foi copiado para a área de transferência.",
+                  });
+                }}
+                variant="outline"
+                size="sm"
+              >
                 <Copy className="h-4 w-4 mr-2" />
                 Copiar {generatedModal.type === 'explicar' ? 'Explicação' : 'Exemplo'}
               </Button>
-              <Button onClick={() => setGeneratedModal(prev => ({
-              ...prev,
-              open: false
-            }))} size="sm">
+              <Button 
+                onClick={() => setGeneratedModal(prev => ({ ...prev, open: false }))} 
+                size="sm"
+              >
                 Fechar
               </Button>
             </div>
             
+            {/* Professora IA */}
+            <div className="pt-6 border-t border-muted bg-gradient-to-r from-primary/5 to-accent-legal/5 rounded-lg p-6">
+              <div className="text-center">
+                <h4 className="text-lg font-semibold mb-3 text-primary flex items-center justify-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  Precisa de mais esclarecimentos?
+                </h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  A Professora IA está disponível para tirar todas as suas dúvidas sobre este artigo
+                </p>
+                <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+                <p className="text-xs text-muted-foreground mt-3">
+                  💡 Clique para abrir uma conversa personalizada sobre este tema
+                </p>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Professora IA Modal */}
+      <ProfessoraIA 
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        video={{
+          title: generatedModal.articleNumber ? `Art. ${generatedModal.articleNumber}` : "Consulta Jurídica",
+          area: selectedCode?.fullName || "Vade Mecum",
+          assunto: generatedModal.content ? 
+            (generatedModal.type === 'explicar' ? 'Explicação do Artigo' : 'Exemplo Prático') : 
+            'Consulta Geral',
+          conteudo: generatedModal.content || 'Consulta sobre artigos do Vade Mecum'
+        }} 
+      />
       
       {/* Botões Flutuantes */}
-      {view === 'articles' && <>
+      {view === 'articles' && (
+        <>
           {/* Controles de Fonte - Canto Inferior Esquerdo */}
           <div className="fixed bottom-6 left-6 flex flex-col gap-2 z-50">
-            <Button onClick={() => setFontSize(prev => Math.min(prev + 2, 24))} size="sm" className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 shadow-lg">
+            <Button
+              onClick={() => setFontSize(prev => Math.min(prev + 2, 24))}
+              size="sm"
+              className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+            >
               <Plus className="h-4 w-4" />
             </Button>
             <div className="text-xs text-center text-primary font-medium bg-background/90 rounded px-2 py-1 shadow">
               {fontSize}px
             </div>
-            <Button onClick={() => setFontSize(prev => Math.max(prev - 2, 12))} size="sm" className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 shadow-lg">
+            <Button
+              onClick={() => setFontSize(prev => Math.max(prev - 2, 12))}
+              size="sm"
+              className="w-10 h-10 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+            >
               <Minus className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Botão Scroll to Top - Canto Inferior Direito */}
-          {showScrollTop && <div className="fixed bottom-6 right-6 z-50">
-              <Button onClick={scrollToTop} size="sm" className="w-12 h-12 rounded-full bg-accent hover:bg-accent/90 shadow-lg">
+          {showScrollTop && (
+            <div className="fixed bottom-6 right-6 z-50">
+              <Button
+                onClick={scrollToTop}
+                size="sm"
+                className="w-12 h-12 rounded-full bg-accent hover:bg-accent/90 shadow-lg"
+              >
                 <ArrowUp className="h-5 w-5" />
               </Button>
-            </div>}
-        </>}
+            </div>
+          )}
+        </>
+      )}
 
       {/* Overlay com blur quando está gerando conteúdo */}
-      {isGenerating && <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      {isGenerating && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-8 flex flex-col items-center space-y-4 shadow-2xl">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
             <div className="text-center">
@@ -1306,19 +1317,42 @@ const VadeMecumUltraFast: React.FC = () => {
               </p>
             </div>
           </div>
-        </div>}
+        </div>
+      )}
       
       {/* Indicadores de progresso globais */}
       <div className="fixed top-20 right-4 space-y-2 z-50">
-        {Object.entries(activeLoading).map(([key, active]) => active ? <ProgressIndicator key={key} progress={loadingProgress[key] || 0} label={key.includes('explain') ? 'Gerando explicação...' : 'Gerando exemplo...'} /> : null)}
+        {Object.entries(activeLoading).map(([key, active]) => 
+          active ? (
+            <ProgressIndicator 
+              key={key}
+              progress={loadingProgress[key] || 0}
+              label={key.includes('explain') ? 'Gerando explicação...' : 'Gerando exemplo...'}
+            />
+          ) : null
+        )}
       </div>
 
+      {/* Professora IA Button - aparece por cima de tudo */}
+      <div className="fixed bottom-20 right-6 z-50">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      </div>
 
-      {/* Flashcards Session */}
-      {showFlashcardsSession && generatedFlashcards.length > 0 && <VadeMecumFlashcardsSession flashcards={generatedFlashcards} articleNumber="" codeName={selectedCode?.name || 'Código Legal'} onClose={() => {
-      setShowFlashcardsSession(false);
-      setGeneratedFlashcards([]);
-    }} />}
-    </div>;
+      {/* Modal Professora IA */}
+      <ProfessoraIA 
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        video={{
+          title: generatedModal.articleNumber ? `Art. ${generatedModal.articleNumber}` : "Consulta Jurídica",
+          area: selectedCode?.fullName || "Vade Mecum",
+          assunto: generatedModal.content ? 
+            (generatedModal.type === 'explicar' ? 'Explicação do Artigo' : 'Exemplo Prático') : 
+            'Consulta Geral',
+          conteudo: generatedModal.content || 'Consulta sobre artigos do Vade Mecum'
+        }} 
+      />
+    </div>
+  );
 };
+
 export default VadeMecumUltraFast;

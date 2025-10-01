@@ -9,16 +9,14 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Search, Volume2, Share2, Heart, 
   Lightbulb, BookOpen, Presentation,
-  Play, Pause, Loader2, X, Square, Brain
+  Play, Pause, Loader2, X, Square
 } from 'lucide-react';
 import { VadeMecumSlideShow } from './VadeMecumSlideShow';
-import { VadeMecumFlashcardsSession } from './VadeMecumFlashcardsSession';
 import { useGeminiAI } from '@/hooks/useGeminiAI';
 import { useDebounce } from 'use-debounce';
 import { ErrorBoundary } from 'react-error-boundary';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
 
 interface VadeMecumArticleProps {
   article: {
@@ -58,12 +56,9 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
   const [isNarrating, setIsNarrating] = useState(false);
   const [narrateLoading, setNarrateLoading] = useState(false);
   const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);
-  const [generatedFlashcards, setGeneratedFlashcards] = useState<any[]>([]);
-  const [showFlashcardsSession, setShowFlashcardsSession] = useState(false);
   
   const { loading, responses, callGeminiAPI, clearResponse } = useGeminiAI();
   const { toast } = useToast();
-  const { user } = useAuth();
 
   // Animation springs
   const fadeSpring = useSpring({
@@ -190,47 +185,6 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
     }
   }, [isNarrating, audioInstance, article, toast]);
 
-  const generateFlashcards = useCallback(async () => {
-    if (!user) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para gerar flashcards.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-vade-mecum-content', {
-        body: {
-          articleContent: article.conteudo,
-          articleNumber: article.numero,
-          codeName: codeInfo.name,
-          userId: user.id,
-          type: 'flashcard'
-        }
-      });
-
-      if (error) throw error;
-      
-      if (data?.flashcards) {
-        setGeneratedFlashcards(data.flashcards);
-        setShowFlashcardsSession(true);
-        toast({
-          title: "Sucesso!",
-          description: `${data.flashcards.length} flashcards gerados com IA`,
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao gerar flashcards:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível gerar os flashcards. Tente novamente.",
-        variant: "destructive"
-      });
-    }
-  }, [user, article, codeInfo.name, toast]);
-
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <animated.div style={fadeSpring} className="space-y-6">
@@ -339,7 +293,7 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Main AI Functions - First Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 <Button
                   onClick={() => handleAIAction('explicar')}
                   disabled={loading[`explicar-${article.numero}`]}
@@ -364,19 +318,6 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
                     <Lightbulb className="h-4 w-4" />
                   )}
                   Exemplo
-                </Button>
-
-                <Button
-                  onClick={generateFlashcards}
-                  disabled={loading[`flashcards-${article.numero}`]}
-                  className="h-12 justify-start gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold"
-                >
-                  {loading[`flashcards-${article.numero}`] ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Brain className="h-4 w-4" />
-                  )}
-                  Flashcards
                 </Button>
               </div>
 
@@ -521,19 +462,6 @@ export const VadeMecumArticleOptimized: React.FC<VadeMecumArticleProps> = ({ art
                   />
           )}
         </AnimatePresence>
-
-        {/* Flashcards Session */}
-        {showFlashcardsSession && generatedFlashcards.length > 0 && (
-          <VadeMecumFlashcardsSession
-            flashcards={generatedFlashcards}
-            articleNumber={article.numero}
-            codeName={codeInfo.name}
-            onClose={() => {
-              setShowFlashcardsSession(false);
-              setGeneratedFlashcards([]);
-            }}
-          />
-        )}
       </animated.div>
     </ErrorBoundary>
   );

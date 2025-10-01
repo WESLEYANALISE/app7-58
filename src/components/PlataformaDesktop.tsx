@@ -12,7 +12,6 @@ import { Loader2, User, Mail, CheckCircle, Crown, Download, Zap, Shield, Lock, S
 import { DesktopPlatformCarousel } from '@/components/DesktopPlatformCarousel';
 import { PremiumRequired } from '@/components/PremiumRequired';
 import { useNavigation } from '@/context/NavigationContext';
-import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Digite um email válido')
@@ -38,50 +37,37 @@ export const PlataformaDesktop = () => {
   });
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
-    
+    const scriptURL = 'https://sheetdb.io/api/v1/29eaz3rsm73qu';
     try {
-      const { detectPlatform, getUserIP } = await import('@/utils/platformDetection');
-      const platform = detectPlatform();
-      const ip = await getUserIP();
-
-      const { data: result, error } = await supabase.functions.invoke('send-desktop-link', {
-        body: { 
-          name: data.nome,
-          email: data.email,
-          platform,
-          ip
+      console.log('Dados originais do formulário:', data);
+      const sheetData = {
+        Nome: data.nome,
+        email: data.email
+      };
+      console.log('Dados formatados para SheetDB:', sheetData);
+      const response = await fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify([sheetData]),
+        headers: {
+          'Content-Type': 'application/json'
         }
       });
-
-      if (error) {
-        console.error('Erro ao enviar:', error);
-        
-        if (error.message?.includes('domínio') || error.message?.includes('domain')) {
-          toast({
-            variant: "destructive",
-            title: "Configuração pendente",
-            description: "Estamos configurando o sistema de envio. Tente novamente em breve."
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Erro ao enviar",
-            description: "Tente novamente em alguns instantes."
-          });
-        }
-        return;
+      console.log('Resposta da API:', response.status, response.statusText);
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Dados enviados com sucesso:', result);
+        setIsSuccess(true);
+        setIsDialogOpen(false);
+        form.reset();
+        toast({
+          title: "Cadastro realizado com sucesso!",
+          description: "Você receberá o link de acesso da plataforma desktop no seu email em instantes."
+        });
+      } else {
+        const errorText = await response.text();
+        console.error('Erro na resposta:', response.status, errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
       }
-
-      console.log('Email enviado com sucesso:', result);
-      setIsSuccess(true);
-      setIsDialogOpen(false);
-      form.reset();
-      
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Você receberá o link de acesso no seu email em instantes."
-      });
-      
     } catch (error) {
       console.error('Erro ao enviar:', error);
       toast({

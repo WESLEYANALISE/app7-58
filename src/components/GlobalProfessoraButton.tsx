@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
-import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
+import { ProfessoraIA } from './ProfessoraIA';
 import { useDeviceDetection } from '@/hooks/useDeviceDetection';
 import { useNavigation } from '@/context/NavigationContext';
 import { useLocation } from 'react-router-dom';
@@ -71,7 +71,7 @@ export const GlobalProfessoraButton = () => {
     <>
       <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
       
-      <ProfessoraIAEnhanced 
+      <ProfessoraIA 
         isOpen={showProfessora}
         onClose={() => setShowProfessora(false)}
         area={contextData.area}

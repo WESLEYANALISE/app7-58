@@ -135,7 +135,7 @@ export const GlobalSearch = ({ onClose }: GlobalSearchProps) => {
     let filtered = searchResults;
     
     if (activeFilter === 'videos') {
-      filtered = searchResults.filter(result => result.type === 'videoaulas');
+      filtered = searchResults.filter(result => result.type === 'videoaulas' || result.type === 'cursos');
     } else if (activeFilter === 'resumos') {
       filtered = searchResults.filter(result => result.type === 'resumo');
     } else if (activeFilter === 'leis') {

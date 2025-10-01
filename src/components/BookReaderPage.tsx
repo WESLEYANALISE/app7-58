@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, X } from 'lucide-react';
 import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
 import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
-import { AmbientSoundPlayer } from './AmbientSoundPlayer';
 import { useState } from 'react';
 
 interface BookData {
@@ -35,18 +34,14 @@ export const BookReaderPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border/50 pointer-events-auto">
-        <div className="flex items-center justify-between p-4 pointer-events-auto">
+      <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border/50">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigate(-1);
-              }}
-              className="shrink-0 relative z-50"
+              onClick={() => navigate(-1)}
+              className="shrink-0"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -65,32 +60,28 @@ export const BookReaderPage = () => {
       </div>
 
       {/* Reader Content */}
-      <div className="h-[calc(100vh-80px)] relative">
+      <div className="h-[calc(100vh-80px)]">
         <iframe 
           src={url} 
-          className="w-full h-full border-0 pointer-events-auto" 
+          className="w-full h-full border-0" 
           title={book.livro}
           loading="lazy"
         />
       </div>
 
-      {/* Botão de Som Ambiente - canto inferior esquerdo */}
-      <AmbientSoundPlayer />
-
-      {/* Floating Professor Button - canto inferior direito */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
-      </div>
+      {/* Floating Professor Button */}
+      <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
       
       {/* Professor AI Chat */}
       <ProfessoraIAEnhanced
         isOpen={showProfessora}
         onClose={() => setShowProfessora(false)}
         bookContext={{
-          livro: book.livro,
-          autor: book.autor
+          titulo: book.livro,
+          autor: book.autor,
+          area: book.area,
+          sobre: book.sobre
         }}
-        area={book.area}
       />
     </div>
   );

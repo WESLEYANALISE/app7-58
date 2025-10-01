@@ -1,4 +1,1 @@
 project_id = "phzcazcyjhlmdchcjagy"
-
-[functions.send-desktop-link]
-verify_jwt = false
