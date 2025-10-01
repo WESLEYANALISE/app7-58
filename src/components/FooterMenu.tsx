@@ -85,7 +85,12 @@ export const FooterMenu = ({
   const handleItemClick = (item: typeof menuItems[0]) => {
     setActiveItem(item.id);
     if (item.id === 'assistenteia') {
-      setCurrentFunction('Professora IA');
+      // Não mudar currentFunction aqui para evitar abrir o chat legado automaticamente
+      // Abrir apenas o chat global via evento
+      const event = new CustomEvent('openProfessoraChat', {
+        detail: { area: 'Direito' }
+      });
+      window.dispatchEvent(event);
     } else {
       setCurrentFunction(item.function);
     }
@@ -114,9 +119,9 @@ export const FooterMenu = ({
                    {/* Icon container */}
                   <div className={`${getIconStyles(item, isActive)} ${isProfessoraIA ? 'rounded-full' : ''}`}>
                     {isProfessoraIA ? (
-                      <div className="w-8 h-8 overflow-hidden rounded-full">
+                      <div className="w-10 h-10 overflow-hidden rounded-full">
                         <iframe
-                          src="https://lottie.host/embed/462be1de-7e6c-4d35-bd11-bf0c61cd91c8/u08MMvLcmY.lottie"
+                          src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie"
                           style={{ 
                             width: '100%', 
                             height: '100%', 
@@ -166,7 +171,7 @@ export const FooterMenu = ({
               return <div key={item.id} className="flex justify-center">
                     <button onClick={() => handleItemClick(item)} className={`
                         relative flex flex-col items-center justify-center
-                        ${isProfessoraIA ? 'w-14 h-14 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white shadow-2xl shadow-red-500/50 hover:shadow-red-500/70 scale-110 border-2 border-red-400/50' : 'w-16 h-16 rounded-2xl'}
+                        ${isProfessoraIA ? 'w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white shadow-2xl shadow-red-500/50 hover:shadow-red-500/70 scale-105 border-2 border-red-400/50' : 'w-16 h-16 rounded-2xl'}
                         transition-all duration-300 transform
                         ${!isProfessoraIA && (isActive ? 'bg-gradient-to-br from-white/20 to-white/10 text-white shadow-lg scale-105 border border-white/20' : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:scale-105')}
                         active:scale-95
@@ -174,11 +179,11 @@ export const FooterMenu = ({
                       `} style={{
                   animationDelay: `${index * 100}ms`
                 }}>
-                      {/* Icon with consistent sizing - smaller for circular button */}
+                      {/* Icon with consistent sizing - compact for circular button */}
                       {isProfessoraIA ? (
-                        <div className="w-7 h-7 overflow-hidden rounded-full">
+                        <div className="w-10 h-10 overflow-hidden rounded-full">
                           <iframe
-                            src="https://lottie.host/embed/462be1de-7e6c-4d35-bd11-bf0c61cd91c8/u08MMvLcmY.lottie"
+                            src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie"
                             style={{ 
                               width: '100%', 
                               height: '100%', 

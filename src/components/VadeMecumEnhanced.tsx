@@ -18,6 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import { useVadeMecumInstant } from '@/hooks/useVadeMecumInstant';
 import { useArtigoPDFExport } from '@/hooks/useArtigoPDFExport';
+import { ProfessoraIAFloatingButton } from './ProfessoraIAFloatingButton';
+import { ProfessoraIAEnhanced } from './ProfessoraIAEnhanced';
 
 export interface VadeMecumLegalCode {
   id: string;
@@ -71,6 +73,7 @@ export const VadeMecumEnhanced: React.FC = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [showExplanation, setShowExplanation] = useState(false);
+  const [showProfessora, setShowProfessora] = useState(false);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -332,7 +335,6 @@ export const VadeMecumEnhanced: React.FC = () => {
               />
             </div>
 
-            {/* Botões de ação compactos */}
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => handleAIActionWrapper('explicar')}
@@ -364,48 +366,6 @@ export const VadeMecumEnhanced: React.FC = () => {
                     Exemplo
                   </>
                 )}
-              </Button>
-
-              <Button
-                onClick={() => generateFlashcard(article)}
-                disabled={isLoading || generatingAI}
-                size="sm"
-                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0 h-8 text-xs"
-              >
-                {(isLoading || generatingAI) ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <>
-                    <Brain className="h-3 w-3 mr-1" />
-                    Flashcard
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={() => generateQuestao(article)}
-                disabled={isLoading || generatingAI}
-                size="sm"
-                className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white border-0 h-8 text-xs"
-              >
-                {(isLoading || generatingAI) ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <>
-                    <HelpCircle className="h-3 w-3 mr-1" />
-                    Questão
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={() => copyToClipboard(article.Artigo || article.conteudo)}
-                size="sm"
-                variant="outline"
-                className="border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground h-8 text-xs col-span-2"
-              >
-                <Copy className="h-3 w-3 mr-1" />
-                Copiar
               </Button>
             </div>
           </CardContent>
@@ -699,25 +659,38 @@ export const VadeMecumEnhanced: React.FC = () => {
         </div>
       </div>
 
-      {/* Botão de scroll to top */}
+      {/* Botões flutuantes - Scroll to top e Professora IA */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-6 right-24 z-40"
           >
             <Button
               onClick={scrollToTop}
-              size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-10 h-10 p-0 shadow-lg"
+              size="icon"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-14 h-14 p-0 shadow-lg"
             >
-              <ArrowUp className="h-5 w-5" />
+              <ArrowUp className="h-6 w-6" />
             </Button>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Professora IA Floating Button - alinhado com scroll top */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      </div>
+      
+      {/* Professora IA Chat */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        area={selectedCode?.fullName}
+        initialMessage={aiContent ? `Olá! Vi que você gerou uma ${aiType === 'explicar' ? 'explicação' : 'exemplo prático'} sobre este artigo:\n\n${aiContent}\n\nEm qual ponto você ficou com dúvida?` : undefined}
+      />
 
       {/* Modal de explicação IA */}
       <Dialog open={showAIResponse} onOpenChange={setShowAIResponse}>
@@ -745,68 +718,31 @@ export const VadeMecumEnhanced: React.FC = () => {
               </div>
             </div>
             
-            {/* SEÇÃO DOS BOTÕES - SEMPRE VISÍVEL */}
-            <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-700 bg-gray-800/30 p-4 rounded-lg">
-              <Button 
-                onClick={() => copyToClipboard(aiContent)}
-                variant="outline"
-                size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 flex-1 sm:flex-none"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                {aiType === 'explicar' ? 'Copiar Explicação' : 'Copiar Exemplo'}
-              </Button>
-              
-              {/* BOTÃO DE EXPORTAR PDF - SEMPRE DEVE APARECER */}
-              <Button 
-                onClick={() => {
-                  console.log("🚀 Botão Exportar PDF clicado");
-                  console.log("📄 currentArticle:", currentArticle);
-                  console.log("🔤 aiType:", aiType);
-                  console.log("📝 aiContent length:", aiContent?.length);
-                  
-                  if (currentArticle && aiContent) {
-                    exportarArtigo({
-                      tipo: aiType,
-                      conteudo: aiContent,
-                      numeroArtigo: currentArticle["Número do Artigo"] || currentArticle.numero || "Sem número",
-                      nomecodigo: selectedCode?.name || 'Código Legal',
-                      textoOriginal: currentArticle.Artigo || currentArticle.conteudo || "Sem texto original"
-                    });
-                  } else {
-                    console.error("❌ Dados insuficientes para exportar");
-                    toast({
-                      title: "Erro",
-                      description: "Dados insuficientes para exportar o PDF.",
-                      variant: "destructive"
-                    });
-                  }
-                }}
-                disabled={exporting || !currentArticle || !aiContent}
-                size="sm" 
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 flex-1 sm:flex-none min-w-[140px]"
-              >
-                {exporting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Exportando...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Exportar PDF
-                  </>
-                )}
-              </Button>
-              
-              <Button
-                onClick={() => setShowAIResponse(false)}
-                variant="outline"
-                size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-              >
-                Fechar
-              </Button>
+            {/* Card da Professora IA */}
+            <div className="mt-6 bg-gradient-to-br from-red-900/90 to-red-800/90 rounded-xl p-6 border border-red-700/50">
+              <div className="flex items-start gap-4">
+                <div className="bg-red-800/50 rounded-full p-3">
+                  <Lightbulb className="h-6 w-6 text-red-100" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-red-50 mb-2">
+                    Precisa de mais esclarecimentos?
+                  </h3>
+                  <p className="text-red-100/90 text-sm mb-4">
+                    A Professora IA está disponível para tirar todas as suas dúvidas sobre este artigo
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setShowProfessora(true);
+                      setShowAIResponse(false);
+                    }}
+                    className="bg-red-800 hover:bg-red-700 text-white border-0 w-full"
+                  >
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Clique para abrir uma conversa personalizada sobre este tema
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -983,6 +919,16 @@ export const VadeMecumEnhanced: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Professora IA Floating Button */}
+      <ProfessoraIAFloatingButton onOpen={() => setShowProfessora(true)} />
+      
+      {/* Professora IA Chat */}
+      <ProfessoraIAEnhanced
+        isOpen={showProfessora}
+        onClose={() => setShowProfessora(false)}
+        area={selectedCode?.fullName}
+      />
     </div>
   );
 };

@@ -1,12 +1,13 @@
 import { GraduationCap, Library, Wrench, Target, ChevronRight, Newspaper, Play, Radar } from 'lucide-react';
 import { useNavigation } from '@/context/NavigationContext';
 import { useDeviceDetection } from '@/hooks/useDeviceDetection';
-import { useState, memo, useMemo, useCallback } from 'react';
+import { useState, memo, useMemo, useCallback, useEffect } from 'react';
 import { CategoryDialog } from './CategoryDialog';
 import { useAuth } from '@/context/AuthContext';
 import { SearchBar } from '@/components/SearchBar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import categoriaJustica from '@/assets/categoria-justica.png';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CategoryAccessSection = memo(() => {
   const {
@@ -20,6 +21,48 @@ const CategoryAccessSection = memo(() => {
     profile
   } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<typeof categories[0] | null>(null);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  const motivationalMessages = useMemo(() => [
+    "Vai estudar, seu preguiçoso! 📚",
+    "Revisão é a chave do sucesso! 🔑",
+    "Menos procrastinação, mais dedicação! ⏰",
+    "Tchau Netflix, olá livros! 👋",
+    "Foco nos estudos, não no celular! 📵",
+    "Seu futuro agradece seu esforço! 🎓",
+    "OAB não vai passar sozinha! 💼",
+    "Concurso é para quem estuda, não sonha! 💪",
+    "Cada página lida é um passo a mais! 👣",
+    "Resumo feito? Flashcard criado? 🃏",
+    "Desligue o TikTok e abra o Código! 📖",
+    "A aprovação não vai cair do céu! ☁️",
+    "Questões de ontem resolvidas? 🤔",
+    "Domingo de estudo vale ouro! 💎",
+    "Café + Livro = Aprovação! ☕",
+    "Parou de estudar? Tá errado! 🚫",
+    "Seu concorrente está estudando agora! 🏃",
+    "Instagram pode esperar, estude! 📱",
+    "Doutrina não se lê sozinha! 📕",
+    "Meta de hoje cumprida? 🎯",
+    "Menos desculpas, mais disciplina! 💪",
+    "Jurisprudência não vai se decorar! ⚖️",
+    "Acordou? Então estude! ☀️",
+    "Sono? Toma café e vai estudar! ☕",
+    "Feriado é dia de estudar também! 🗓️",
+    "Sua nomeação depende de hoje! 📜",
+    "Posse no cargo ou na preguiça? 🤔",
+    "Edital saiu, e você aí parado! 📢",
+    "Vade Mecum não vai se ler sozinho! ⚖️",
+    "Simulado feito hoje é aprovação amanhã! ✅"
+  ], []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % motivationalMessages.length);
+    }, 10000); // Troca a cada 10 segundos
+
+    return () => clearInterval(interval);
+  }, [motivationalMessages.length]);
   const categories = useMemo(() => [{
     id: 1,
     title: 'Estudar Agora',
@@ -87,6 +130,24 @@ const CategoryAccessSection = memo(() => {
 
         {/* Header Section - Animação Lottie Centralizada com Botões */}
         <div className="text-center mb-2">
+          {/* Mensagens Motivacionais Flutuantes */}
+          <div className="relative mb-3">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentMessageIndex}
+                initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                transition={{ duration: 0.5 }}
+                className="inline-block bg-white/95 backdrop-blur-sm text-red-800 px-3 py-1.5 rounded-xl shadow-md border border-red-200 font-medium text-xs relative"
+              >
+                {motivationalMessages[currentMessageIndex]}
+                {/* Balão de fala - seta apontando para baixo */}
+                <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white/95"></div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
           <div className="w-full max-w-md mx-auto relative flex items-center justify-center">
             {/* Botão Curso - Lado Esquerdo */}
             <button 
@@ -99,7 +160,7 @@ const CategoryAccessSection = memo(() => {
             
             {/* Animação Lottie Central */}
             <iframe 
-              src="https://lottie.host/embed/4cf4ee37-a511-4357-a3ff-fa2115251444/oXRRrHCU8q.lottie" 
+              src="https://lottie.host/embed/4801f3f0-7d55-4e49-b808-02032f215495/yAzqvAcH2m.lottie" 
               className="w-full h-32 border-0" 
               title="Animação de Justiça" 
             />

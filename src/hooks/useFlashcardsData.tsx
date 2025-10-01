@@ -48,41 +48,83 @@ export const useFlashcardsData = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Carregar flashcards do Supabase
+  // Carregar flashcards do Supabase com cache local (stale-while-revalidate)
   useEffect(() => {
+    const cacheKey = 'flashcards-cache-v1';
+    let hadCache = false;
+
+    // Tentar servir imediatamente do cache local
+    try {
+      const cachedRaw = localStorage.getItem(cacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (Array.isArray(cached?.data)) {
+          setFlashcards(cached.data);
+          setLoading(false); // entrada instantânea
+          hadCache = true;
+          console.log(`⚡ Flashcards carregados do cache: ${cached.data.length}`);
+        }
+      }
+    } catch (e) {
+      console.warn('Falha ao ler cache de flashcards', e);
+    }
+
     const loadFlashcards = async () => {
       try {
-        const { data, error } = await (supabase as any)
-          .from('FLASH-CARDS-FINAL')
-          .select('id, area, tema, pergunta, resposta, exemplo')
-          .range(0, 99999)
-          .order('area', { ascending: true })
-          .order('tema', { ascending: true });
+        console.log('Iniciando carregamento de flashcards...');
 
-        if (error) throw error;
-        console.log('Flashcards carregados:', data?.length || 0);
-        console.log('Áreas encontradas:', [...new Set(data?.map(f => f.area) || [])]);
-        
-        // Mapear os dados para o formato esperado
-        const mappedData = data?.map(item => ({
+        // Carregar todos os flashcards em lotes (evita limite do Supabase)
+        let allFlashcards: any[] = [];
+        let from = 0;
+        const batchSize = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          const { data: batchData, error: batchError } = await (supabase as any)
+            .from('FLASH-CARDS-FINAL')
+            .select('id, area, tema, pergunta, resposta, exemplo')
+            .order('area', { ascending: true })
+            .order('tema', { ascending: true })
+            .range(from, from + batchSize - 1);
+
+          if (batchError) throw batchError;
+
+          if (batchData && batchData.length > 0) {
+            allFlashcards = [...allFlashcards, ...batchData];
+            from += batchSize;
+            hasMore = batchData.length === batchSize;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        const mappedData = (allFlashcards || []).map(item => ({
           id: item.id,
           area: item.area || '',
           tema: item.tema || '',
           pergunta: item.pergunta || '',
           resposta: item.resposta || '',
           exemplo: item.exemplo || ''
-        })) || [];
-        
+        }));
+
         setFlashcards(mappedData);
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ data: mappedData, updatedAt: Date.now() }));
+        } catch {}
+
+        const uniqueAreas = [...new Set(mappedData.map(f => f.area))].filter(Boolean);
+        console.log(`📚 ${uniqueAreas.length} áreas únicas encontradas`);
       } catch (error) {
-        console.error('Erro ao carregar flashcards:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os flashcards",
-          variant: "destructive"
-        });
+        console.error('❌ Erro ao carregar flashcards:', error);
+        if (!hadCache) {
+          toast({
+            title: "Erro ao Carregar",
+            description: "Não foi possível carregar os flashcards. Tente novamente.",
+            variant: "destructive"
+          });
+        }
       } finally {
-        setLoading(false);
+        if (!hadCache) setLoading(false);
       }
     };
 

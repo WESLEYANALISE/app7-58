@@ -3,6 +3,7 @@ import { cacheManager } from './cacheManager';
 
 // Cache para imagens de curso
 const imageCache = new Map<string, string>();
+const preloadedImages = new Set<string>();
 
 export const optimizeCourseImage = (url: string): string => {
   if (!url) return '/placeholder.svg';
@@ -14,7 +15,7 @@ export const optimizeCourseImage = (url: string): string => {
 
   // Para imagens do Supabase, adiciona parâmetros de otimização
   if (url.includes('supabase')) {
-    const optimizedUrl = `${url}?width=400&quality=80`;
+    const optimizedUrl = `${url}?width=600&quality=85&format=webp`;
     imageCache.set(url, optimizedUrl);
     return optimizedUrl;
   }
@@ -23,17 +24,45 @@ export const optimizeCourseImage = (url: string): string => {
   return url;
 };
 
-// Preload de imagens críticas
-export const preloadCourseImages = (urls: string[]) => {
-  urls.forEach(url => {
-    if (url && !imageCache.has(url)) {
+// Preload de imagens críticas com prioridade ultra-alta
+export const preloadCourseImages = (urls: string[], priority: 'high' | 'low' = 'high') => {
+  // Usar requestIdleCallback para não bloquear thread principal
+  const preloadBatch = () => {
+    urls.forEach(url => {
+      if (!url || preloadedImages.has(url)) return;
+      
+      const optimizedUrl = optimizeCourseImage(url);
+      
+      // Preload agressivo para melhor performance
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = optimizedUrl;
+      if (priority === 'high') {
+        link.fetchPriority = 'high';
+      }
+      document.head.appendChild(link);
+      
+      // Também criar objeto Image para cache do navegador
       const img = new Image();
-      img.src = optimizeCourseImage(url);
-      img.onload = () => {
-        imageCache.set(url, url);
-      };
+      img.src = optimizedUrl;
+      img.loading = 'eager';
+      
+      preloadedImages.add(url);
+    });
+  };
+
+  // Se prioridade alta, executar imediatamente
+  if (priority === 'high') {
+    preloadBatch();
+  } else {
+    // Se prioridade baixa, usar requestIdleCallback
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(preloadBatch);
+    } else {
+      setTimeout(preloadBatch, 1);
     }
-  });
+  }
 };
 
 // Cache para dados de progresso

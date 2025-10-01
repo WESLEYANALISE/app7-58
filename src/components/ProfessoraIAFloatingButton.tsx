@@ -41,10 +41,10 @@ export const ProfessoraIAFloatingButton = ({
             onClick={onOpen}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-400/50"
+            className="w-14 h-14 rounded-full bg-gradient-to-r from-red-900 to-red-700 hover:from-red-800 hover:to-red-600 shadow-lg hover:shadow-xl border-2 border-red-700/50"
             size="lg"
           >
-            <Brain className="h-8 w-8 text-white" />
+            <Brain className="h-7 w-7 text-red-50" />
           </Button>
         </motion.div>
         
