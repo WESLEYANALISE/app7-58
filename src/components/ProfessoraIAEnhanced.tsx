@@ -129,7 +129,6 @@ ${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
 📝 Gerar flashcards personalizados para estudos
 ❓ Criar questões objetivas e discursivas
 📋 Resumir artigos e documentos complexos
-⚖️ Sugerir casos práticos e jurisprudências relevantes
 📤 Exportar conversas em PDF
 
 Como posso te ajudar hoje? 🚀`,
@@ -180,15 +179,7 @@ Como posso te ajudar hoje? 🚀`,
       let fileData = null;
       
       if (currentFile) {
-        if (/heic|heif/i.test(currentFile.type)) {
-          toast({
-            title: 'Formato não suportado',
-            description: 'Por favor, tire a foto em JPG/PNG ou converta a imagem.',
-            variant: 'destructive'
-          });
-          setIsLoading(false);
-          return;
-        } else if (currentFile.type.startsWith('image/')) {
+        if (currentFile.type.startsWith('image/')) {
           try {
             const compressed = await compressImage(currentFile);
             fileData = compressed;
@@ -433,11 +424,11 @@ Como posso te ajudar hoje? 🚀`,
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (file.size > maxSize) {
       toast({
         title: "Arquivo muito grande",
-        description: "Tamanho máximo: 10MB",
+        description: "Tamanho máximo: 20MB",
         variant: "destructive"
       });
       return;
@@ -450,18 +441,55 @@ Como posso te ajudar hoje? 🚀`,
     });
   };
 
-  // Upload de imagem
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload de imagem (com suporte a HEIC)
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (file.size > maxSize) {
       toast({
         title: "Imagem muito grande",
-        description: "Tamanho máximo: 10MB",
+        description: "Tamanho máximo: 20MB",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Converter HEIC para JPG
+    if (/heic|heif/i.test(file.type) || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+      toast({
+        title: "Convertendo HEIC...",
+        description: "Aguarde, convertendo imagem para JPG",
+      });
+
+      try {
+        const heic2any = (await import('heic2any')).default;
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.8
+        }) as Blob;
+
+        const convertedFile = new File(
+          [convertedBlob], 
+          file.name.replace(/\.heic$/i, '.jpg'),
+          { type: 'image/jpeg' }
+        );
+
+        setUploadedFile(convertedFile);
+        toast({
+          title: "Imagem convertida",
+          description: `${convertedFile.name} pronta para envio`,
+        });
+      } catch (error) {
+        console.error('Erro ao converter HEIC:', error);
+        toast({
+          title: "Erro na conversão",
+          description: "Não foi possível converter a imagem. Tire outra foto em JPG/PNG.",
+          variant: "destructive"
+        });
+      }
       return;
     }
 
@@ -486,7 +514,6 @@ ${areaLabel ? `📖 Especializada em **${areaLabel}**` : ''}
 📝 Gerar flashcards personalizados para estudos
 ❓ Criar questões objetivas e discursivas
 📋 Resumir artigos e documentos complexos
-⚖️ Sugerir casos práticos e jurisprudências relevantes
 📤 Exportar conversas em PDF
 
 Como posso te ajudar hoje? 🚀`,
@@ -619,7 +646,7 @@ Responda APENAS com JSON válido:
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mt-4 p-4 bg-red-900/20 rounded-xl border border-red-800/30"
+      className="mt-4 p-3 md:p-4 bg-red-900/20 rounded-xl border border-red-800/30"
     >
       <p className="text-xs text-red-300 mb-3 font-medium">⚡ Ações Rápidas:</p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -642,26 +669,6 @@ Responda APENAS com JSON válido:
         >
           <BookOpen className="w-4 h-4" />
           Explicar
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => sendMessage('Sugira casos práticos relacionados ao tema')}
-          disabled={isLoading}
-          className="text-xs text-red-100 hover:text-white hover:bg-red-800/40 h-auto py-2 flex-col gap-1"
-        >
-          <Scale className="w-4 h-4" />
-          Casos
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => sendMessage('Indique jurisprudências relevantes (se existirem)')}
-          disabled={isLoading}
-          className="text-xs text-red-100 hover:text-white hover:bg-red-800/40 h-auto py-2 flex-col gap-1"
-        >
-          <FileText className="w-4 h-4" />
-          Jurisprudências
         </Button>
         <Button
           variant="ghost"
@@ -910,37 +917,37 @@ Responda APENAS com JSON válido:
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 bg-gradient-to-br from-red-950 via-red-900 to-black flex flex-col"
         >
-          {/* Header */}
-          <div className="p-4 border-b border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
+          {/* Header - mais compacto no mobile */}
+          <div className="p-3 md:p-4 border-b border-red-800 shrink-0 bg-red-950/50 backdrop-blur-sm">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={onClose}
-                  className="text-red-200 hover:text-white hover:bg-red-800/50"
+                  className="text-red-200 hover:text-white hover:bg-red-800/50 h-8 w-8 md:h-10 md:w-10"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5 md:h-6 md:w-6" />
                 </Button>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Professora Evelyn</h2>
-                  <p className="text-sm text-red-200">Assistente IA de Direito{areaLabel ? ` • ${areaLabel}` : ''}</p>
+                  <h2 className="text-base md:text-xl font-bold text-white">Professora Evelyn</h2>
+                  <p className="text-xs md:text-sm text-red-200">Assistente IA de Direito{areaLabel ? ` • ${areaLabel}` : ''}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearConversation}
-                className="text-red-200 hover:text-white hover:bg-red-800/50 gap-2"
+                className="text-red-200 hover:text-white hover:bg-red-800/50 gap-1 md:gap-2 text-xs md:text-sm"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-3 w-3 md:h-4 md:w-4" />
                 Limpar
               </Button>
             </div>
           </div>
 
-          {/* Messages */}
-          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+          {/* Messages - WhatsApp style */}
+          <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 md:p-4">
             <div className="max-w-5xl mx-auto">
               <AnimatePresence mode="popLayout">
                 {messages.map((message, index) => (
@@ -949,14 +956,18 @@ Responda APENAS com JSON válido:
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`mb-3 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[90%] md:max-w-[85%] rounded-2xl p-4 ${
+                      className={`max-w-[85%] md:max-w-[85%] rounded-lg px-3 py-2 md:px-4 md:py-3 ${
                         message.role === 'user'
                           ? 'bg-red-600 text-white'
                           : 'bg-red-950/80 text-red-50 border border-red-800/50'
                       }`}
+                      style={{ 
+                        fontSize: '15px', 
+                        lineHeight: '1.4'
+                      }}
                     >
                       {message.file && (
                         <div className="mb-2 flex items-center gap-2 text-sm opacity-70">
