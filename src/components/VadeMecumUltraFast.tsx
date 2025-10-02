@@ -12,6 +12,7 @@ import { useNavigation } from '@/context/NavigationContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { VadeMecumFlashcardsSession } from '@/components/VadeMecumFlashcardsSession';
+import { VadeMecumSumulasList } from '@/components/VadeMecumSumulasList';
 import ReactMarkdown from 'react-markdown';
 import { copyToClipboard } from '@/utils/clipboardUtils';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
@@ -483,12 +484,30 @@ const VadeMecumUltraFast: React.FC = () => {
   const filteredArticles = useMemo(() => {
     const allValidArticles = articles.filter(article => {
       const articleContent = article["Artigo"] || article.conteudo || '';
-      return articleContent.trim() !== '';
+      const articleNumber = article["Número do Artigo"] || article.numero || '';
+      
+      // Validar que tem conteúdo
+      if (articleContent.trim() === '') return false;
+      
+      // Se for um artigo válido com número, incluir
+      return isValidArticleNumber(articleNumber, articleContent);
     });
+    
     if (!searchTerm.trim()) return allValidArticles;
     
     const searchLower = searchTerm.toLowerCase().trim();
     const searchNumbers = searchTerm.replace(/[^\d]/g, '');
+    
+    // Se buscar por número puro, filtrar apenas artigos com aquele número exato
+    if (searchNumbers && searchNumbers === searchTerm) {
+      const numberResults = allValidArticles.filter(article => {
+        const articleNumber = article["Número do Artigo"] || article.numero || '';
+        const numbersInArticle = articleNumber.replace(/[^\d]/g, '');
+        return numbersInArticle === searchNumbers;
+      });
+      
+      if (numberResults.length > 0) return numberResults;
+    }
     
     // Match exato - retorna imediatamente
     const exactMatch = allValidArticles.find(article => {
@@ -524,7 +543,7 @@ const VadeMecumUltraFast: React.FC = () => {
     }
     
     return results.sort((a, b) => b.score - a.score).map(item => item.article);
-  }, [articles, searchTerm]);
+  }, [articles, searchTerm, isValidArticleNumber]);
   
   // Configuração do virtualizador
   const virtualizer = useVirtualizer({
@@ -694,6 +713,9 @@ const VadeMecumUltraFast: React.FC = () => {
       if (cfCode) {
         loadArticles(cfCode);
       }
+    } else if (type === 'sumulas') {
+      // Súmulas também vai direto para visualização
+      setView('codes');
     } else {
       setView('codes');
     }
@@ -1101,7 +1123,7 @@ const VadeMecumUltraFast: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 max-w-2xl w-full">
+          <div className="grid gap-4 grid-cols-2 max-w-3xl w-full">
             {/* Constituição Federal */}
             <Card className="cursor-pointer group bg-gradient-to-br from-yellow-500/20 to-amber-600/20 border-yellow-500/30 hover:border-yellow-500/50 hover:shadow-lg transition-all duration-300" onClick={() => selectCategory('cf')}>
               <CardContent className="p-6 text-center">
@@ -1174,8 +1196,13 @@ const VadeMecumUltraFast: React.FC = () => {
       </div>;
   }
 
-  // Lista de códigos
+  // Lista de códigos ou súmulas
   if (view === 'codes') {
+    // Se for categoria de súmulas, mostrar componente específico
+    if (categoryType === 'sumulas') {
+      return <VadeMecumSumulasList onBack={handleBack} />;
+    }
+
     return <div className="min-h-screen bg-background">
         <div className="flex items-center justify-between p-4 border-b">
           <Button variant="ghost" size="sm" onClick={handleBack}>
@@ -1183,7 +1210,7 @@ const VadeMecumUltraFast: React.FC = () => {
             Voltar
           </Button>
           <h2 className="text-lg font-bold">
-            {categoryType === 'articles' ? 'Códigos & Leis' : categoryType === 'sumulas' ? 'Súmulas' : 'Estatutos'}
+            {categoryType === 'articles' ? 'Códigos & Leis' : 'Estatutos'}
           </h2>
           <div className="w-16" />
         </div>
@@ -1202,7 +1229,7 @@ const VadeMecumUltraFast: React.FC = () => {
                   <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[160px] sm:h-[180px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
                     <div className="mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                       {(() => {
-                     const iconMap: Record<string, React.ComponentType<any>> = {
+                    const iconMap: Record<string, React.ComponentType<any>> = {
                       'Handshake': Handshake,
                       'Building': Building,
                       'Zap': Zap,
