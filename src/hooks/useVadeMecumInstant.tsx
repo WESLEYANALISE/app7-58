@@ -109,6 +109,13 @@ export const useVadeMecumInstant = () => {
   // Códigos jurídicos com design consistente
   const articleCodes: VadeMecumLegalCode[] = useMemo(() => [
     { 
+      id: 'cf88', name: 'CF88', fullName: 'Constituição Federal de 1988', 
+      description: 'Lei fundamental do Brasil', 
+      icon: '🏛️', 
+      color: 'gradient-legal border border-yellow-500/30',
+      textColor: 'text-background'
+    },
+    { 
       id: 'cc', name: 'CC', fullName: 'Código Civil', 
       description: 'Relações civis entre particulares', 
       icon: '🤝', 
@@ -121,13 +128,6 @@ export const useVadeMecumInstant = () => {
       icon: '🛡️', 
       color: 'bg-gradient-to-br from-green-600/90 to-green-700/80 border border-green-500/30',
       textColor: 'text-white'
-    },
-    { 
-      id: 'cf88', name: 'CF88', fullName: 'Constituição Federal de 1988', 
-      description: 'Lei fundamental do Brasil', 
-      icon: '🏛️', 
-      color: 'gradient-legal border border-yellow-500/30',
-      textColor: 'text-background'
     },
     { 
       id: 'clt', name: 'CLT', fullName: 'Consolidação das Leis do Trabalho', 
@@ -176,6 +176,55 @@ export const useVadeMecumInstant = () => {
       description: 'Normas eleitorais', 
       icon: '🗳️', 
       color: 'bg-gradient-to-br from-pink-600/90 to-pink-700/80 border border-pink-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'ca', name: 'CA', fullName: 'Código de Águas', 
+      description: 'Legislação sobre recursos hídricos', 
+      icon: '💧', 
+      color: 'bg-gradient-to-br from-blue-500/90 to-blue-600/80 border border-blue-400/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'cba', name: 'CBA', fullName: 'Código Brasileiro de Aeronáutica', 
+      description: 'Legislação aeronáutica', 
+      icon: '✈️', 
+      color: 'bg-gradient-to-br from-sky-600/90 to-sky-700/80 border border-sky-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'cbt', name: 'CBT', fullName: 'Código Brasileiro de Telecomunicações', 
+      description: 'Legislação de telecomunicações', 
+      icon: '📡', 
+      color: 'bg-gradient-to-br from-violet-600/90 to-violet-700/80 border border-violet-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'ccom', name: 'CCOM', fullName: 'Código Comercial', 
+      description: 'Direito comercial', 
+      icon: '💼', 
+      color: 'bg-gradient-to-br from-green-600/90 to-green-700/80 border border-green-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'cdm', name: 'CDM', fullName: 'Código de Minas', 
+      description: 'Legislação minerária', 
+      icon: '⛏️', 
+      color: 'bg-gradient-to-br from-stone-600/90 to-stone-700/80 border border-stone-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'ced', name: 'CED', fullName: 'Código de Ética - OAB', 
+      description: 'Ética profissional da advocacia', 
+      icon: '⚖️', 
+      color: 'bg-gradient-to-br from-amber-600/90 to-amber-700/80 border border-amber-500/30',
+      textColor: 'text-white'
+    },
+    { 
+      id: 'cppm', name: 'CPPM', fullName: 'Código de Processo Penal Militar', 
+      description: 'Procedimentos penais militares', 
+      icon: '🪖', 
+      color: 'bg-gradient-to-br from-red-700/90 to-red-800/80 border border-red-600/30',
       textColor: 'text-white'
     },
   ], []);
@@ -321,6 +370,13 @@ export const useVadeMecumInstant = () => {
         'ctn': 'CTN',
         'ctb': 'CTB',
         'ce': 'CE',
+        'ca': 'CA- Código de aguas',
+        'cba': 'CBA - Código Brasileiro de Aeronáutica',
+        'cbt': 'CBT - Código Brasileiro de Telecomunicações.',
+        'ccom': 'CCOM',
+        'cdm': 'CDM - Código de Minas',
+        'ced': 'CED CÓDIGO DE ETICA - OAB',
+        'cppm': 'CPPM - PROCESSO MILITAR',
         'estatuto-oab': 'ESTATUTO - OAB',
         'estatuto-eca': 'ESTATUTO - ECA',
         'estatuto-idoso': 'ESTATUTO - IDOSO',

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Search, ArrowLeft, Scale, BookOpen, ChevronRight, Copy, X, Home, FileText, Scroll, Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2, Zap, Swords, Handshake, Building, Briefcase, Shield, DollarSign, Baby, Users } from 'lucide-react';
+import { Search, ArrowLeft, Scale, BookOpen, ChevronRight, Copy, X, Home, FileText, Scroll, Volume2, Lightbulb, Bookmark, Brain, Plus, Minus, ArrowUp, Square, Loader2, Zap, Swords, Handshake, Building, Briefcase, Shield, DollarSign, Baby, Users, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,7 +40,7 @@ const articlesCache = new Map<string, VadeMecumArticle[]>();
 let isPreloading = false;
 const VadeMecumUltraFast: React.FC = () => {
   const [view, setView] = useState<'home' | 'codes' | 'articles'>('home');
-  const [categoryType, setCategoryType] = useState<'articles' | 'statutes' | null>(null);
+  const [categoryType, setCategoryType] = useState<'cf' | 'articles' | 'statutes' | 'sumulas' | null>(null);
   const [selectedCode, setSelectedCode] = useState<VadeMecumLegalCode | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [articles, setArticles] = useState<VadeMecumArticle[]>([]);
@@ -205,6 +205,14 @@ const VadeMecumUltraFast: React.FC = () => {
 
   // Códigos com layout moderno e gradientes
   const articleCodes = useMemo<VadeMecumLegalCode[]>(() => [{
+    id: 'cf88',
+    name: 'CF/88',
+    fullName: 'Constituição Federal',
+    description: 'Carta Magna do Brasil',
+    icon: 'Crown',
+    color: 'bg-gradient-to-br from-yellow-500/20 to-amber-600/30 border border-yellow-500/20 backdrop-blur-sm',
+    textColor: 'text-yellow-100'
+  }, {
     id: 'cc',
     name: 'CC',
     fullName: 'Código Civil',
@@ -212,14 +220,6 @@ const VadeMecumUltraFast: React.FC = () => {
     icon: 'Handshake',
     color: 'bg-gradient-to-br from-blue-500/20 to-blue-700/30 border border-blue-500/20 backdrop-blur-sm',
     textColor: 'text-blue-100'
-  }, {
-    id: 'cf88',
-    name: 'CF/88',
-    fullName: 'Constituição Federal',
-    description: 'Carta Magna do Brasil',
-    icon: 'Scale',
-    color: 'bg-gradient-to-br from-emerald-500/20 to-emerald-700/30 border border-emerald-500/20 backdrop-blur-sm',
-    textColor: 'text-emerald-100'
   }, {
     id: 'cp',
     name: 'CP',
@@ -268,6 +268,62 @@ const VadeMecumUltraFast: React.FC = () => {
     icon: 'DollarSign',
     color: 'bg-gradient-to-br from-yellow-500/20 to-yellow-700/30 border border-yellow-500/20 backdrop-blur-sm',
     textColor: 'text-yellow-100'
+  }, {
+    id: 'ca',
+    name: 'CA',
+    fullName: 'Código de Águas',
+    description: 'Legislação sobre recursos hídricos',
+    icon: 'Briefcase',
+    color: 'bg-gradient-to-br from-blue-400/20 to-blue-600/30 border border-blue-400/20 backdrop-blur-sm',
+    textColor: 'text-blue-100'
+  }, {
+    id: 'cba',
+    name: 'CBA',
+    fullName: 'Código Brasileiro de Aeronáutica',
+    description: 'Legislação aeronáutica',
+    icon: 'Briefcase',
+    color: 'bg-gradient-to-br from-sky-500/20 to-sky-700/30 border border-sky-500/20 backdrop-blur-sm',
+    textColor: 'text-sky-100'
+  }, {
+    id: 'cbt',
+    name: 'CBT',
+    fullName: 'Código Brasileiro de Telecomunicações',
+    description: 'Legislação de telecomunicações',
+    icon: 'Briefcase',
+    color: 'bg-gradient-to-br from-violet-500/20 to-violet-700/30 border border-violet-500/20 backdrop-blur-sm',
+    textColor: 'text-violet-100'
+  }, {
+    id: 'ccom',
+    name: 'CCOM',
+    fullName: 'Código Comercial',
+    description: 'Direito comercial',
+    icon: 'Briefcase',
+    color: 'bg-gradient-to-br from-green-500/20 to-green-700/30 border border-green-500/20 backdrop-blur-sm',
+    textColor: 'text-green-100'
+  }, {
+    id: 'cdm',
+    name: 'CDM',
+    fullName: 'Código de Minas',
+    description: 'Legislação minerária',
+    icon: 'Briefcase',
+    color: 'bg-gradient-to-br from-stone-500/20 to-stone-700/30 border border-stone-500/20 backdrop-blur-sm',
+    textColor: 'text-stone-100'
+  }, {
+    id: 'ced',
+    name: 'CED',
+    fullName: 'Código de Ética - OAB',
+    description: 'Ética profissional da advocacia',
+    icon: 'Scale',
+    color: 'bg-gradient-to-br from-amber-500/20 to-amber-700/30 border border-amber-500/20 backdrop-blur-sm',
+    textColor: 'text-amber-100'
+  }, {
+    id: 'cppm',
+    name: 'CPPM',
+    fullName: 'Código de Processo Penal Militar',
+    description: 'Procedimentos penais militares',
+    icon: 'Shield',
+    color: 'bg-gradient-to-br from-red-600/20 to-red-800/30 border border-red-600/20 backdrop-blur-sm',
+    textColor: 'text-red-100'
   }], []);
 
   // Estatutos com gradientes modernos
@@ -337,7 +393,9 @@ const VadeMecumUltraFast: React.FC = () => {
     textColor: 'text-green-100'
   }], []);
   const currentCodes = useMemo(() => {
-    return categoryType === 'statutes' ? statuteCodes : articleCodes;
+    if (categoryType === 'statutes') return statuteCodes;
+    if (categoryType === 'sumulas') return []; // Súmulas terão tratamento especial
+    return articleCodes;
   }, [categoryType, articleCodes, statuteCodes]);
 
   // Função para validar se tem número de artigo válido
@@ -500,6 +558,8 @@ const VadeMecumUltraFast: React.FC = () => {
       if (cachedData.length < 2000) {
         const tableMap: Record<string, string> = {
           'cc': 'CC', 'cdc': 'CDC', 'cf88': 'CF88', 'clt': 'CLT', 'cp': 'CP', 'cpc': 'CPC', 'cpp': 'CPP', 'ctn': 'CTN', 'ctb': 'CTB', 'ce': 'CE',
+          'ca': 'CA- Código de aguas', 'cba': 'CBA - Código Brasileiro de Aeronáutica', 'cbt': 'CBT - Código Brasileiro de Telecomunicações.', 
+          'ccom': 'CCOM', 'cdm': 'CDM - Código de Minas', 'ced': 'CED CÓDIGO DE ETICA - OAB', 'cppm': 'CPPM - PROCESSO MILITAR',
           'estatuto-oab': 'ESTATUTO - OAB', 'estatuto-eca': 'ESTATUTO - ECA', 'estatuto-idoso': 'ESTATUTO - IDOSO', 'estatuto-pcd': 'ESTATUTO - PESSOA COM DEFICIENCIA',
           'estatuto-igualdade-racial': 'ESTATUTO - IGUALDADE RACIAL', 'estatuto-cidade': 'ESTATUTO - CIDADE', 'estatuto-desarmamento': 'ESTATUTO - DESARMAMENTO', 'estatuto-torcedor': 'ESTATUTO - TORCEDOR'
         };
@@ -552,6 +612,13 @@ const VadeMecumUltraFast: React.FC = () => {
         'ctn': 'CTN',
         'ctb': 'CTB',
         'ce': 'CE',
+        'ca': 'CA- Código de aguas',
+        'cba': 'CBA - Código Brasileiro de Aeronáutica',
+        'cbt': 'CBT - Código Brasileiro de Telecomunicações.',
+        'ccom': 'CCOM',
+        'cdm': 'CDM - Código de Minas',
+        'ced': 'CED CÓDIGO DE ETICA - OAB',
+        'cppm': 'CPPM - PROCESSO MILITAR',
         'estatuto-oab': 'ESTATUTO - OAB',
         'estatuto-eca': 'ESTATUTO - ECA',
         'estatuto-idoso': 'ESTATUTO - IDOSO',
@@ -618,10 +685,19 @@ const VadeMecumUltraFast: React.FC = () => {
       setCurrentFunction(null);
     }
   }, [view, setCurrentFunction]);
-  const selectCategory = useCallback((type: 'articles' | 'statutes') => {
+  const selectCategory = useCallback((type: 'cf' | 'articles' | 'statutes' | 'sumulas') => {
     setCategoryType(type);
-    setView('codes');
-  }, []);
+    
+    // CF vai direto para artigos
+    if (type === 'cf') {
+      const cfCode = articleCodes.find(c => c.id === 'cf88');
+      if (cfCode) {
+        loadArticles(cfCode);
+      }
+    } else {
+      setView('codes');
+    }
+  }, [articleCodes, loadArticles]);
   const copyArticle = useCallback(async (content: string) => {
     const success = await copyToClipboard(content);
     if (success) {
@@ -1026,6 +1102,24 @@ const VadeMecumUltraFast: React.FC = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 max-w-2xl w-full">
+            {/* Constituição Federal */}
+            <Card className="cursor-pointer group bg-gradient-to-br from-yellow-500/20 to-amber-600/20 border-yellow-500/30 hover:border-yellow-500/50 hover:shadow-lg transition-all duration-300" onClick={() => selectCategory('cf')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 mx-auto bg-yellow-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <span className="text-3xl">👑</span>
+                </div>
+                <h3 className="text-xl font-bold text-yellow-600 dark:text-yellow-500 mb-3">Constituição Federal</h3>
+                <p className="text-muted-foreground mb-4 text-sm">
+                  Carta Magna do Brasil - Lei fundamental
+                </p>
+                <div className="flex items-center justify-center text-yellow-600/70 dark:text-yellow-500/70 group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors">
+                  <span className="text-sm">Explore agora</span>
+                  <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Códigos & Leis */}
             <Card className="cursor-pointer group bg-gradient-to-br from-primary/20 to-primary/10 border-primary/30 hover:border-primary/50" onClick={() => selectCategory('articles')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 mx-auto bg-primary/20 rounded-xl flex items-center justify-center mb-4">
@@ -1042,6 +1136,7 @@ const VadeMecumUltraFast: React.FC = () => {
               </CardContent>
             </Card>
 
+            {/* Estatutos */}
             <Card className="cursor-pointer group bg-gradient-to-br from-accent-legal/20 to-accent-legal/10 border-accent-legal/30 hover:border-accent-legal/50 hover:shadow-lg transition-all duration-300" onClick={() => selectCategory('statutes')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 mx-auto bg-accent-legal/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
@@ -1052,6 +1147,23 @@ const VadeMecumUltraFast: React.FC = () => {
                   Consulte estatutos e leis especiais importantes
                 </p>
                 <div className="flex items-center justify-center text-accent-legal/70 group-hover:text-accent-legal transition-colors">
+                  <span className="text-sm">Explore agora</span>
+                  <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Súmulas */}
+            <Card className="cursor-pointer group bg-gradient-to-br from-purple-500/20 to-purple-700/20 border-purple-500/30 hover:border-purple-500/50 hover:shadow-lg transition-all duration-300" onClick={() => selectCategory('sumulas')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 mx-auto bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <Scale className="h-6 w-6 text-purple-500" />
+                </div>
+                <h3 className="text-xl font-bold text-purple-500 mb-3">Súmulas</h3>
+                <p className="text-muted-foreground mb-4 text-sm">
+                  Súmulas do STF e STJ
+                </p>
+                <div className="flex items-center justify-center text-purple-500/70 group-hover:text-purple-500 transition-colors">
                   <span className="text-sm">Explore agora</span>
                   <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -1071,7 +1183,7 @@ const VadeMecumUltraFast: React.FC = () => {
             Voltar
           </Button>
           <h2 className="text-lg font-bold">
-            {categoryType === 'articles' ? 'Códigos & Leis' : 'Estatutos'}
+            {categoryType === 'articles' ? 'Códigos & Leis' : categoryType === 'sumulas' ? 'Súmulas' : 'Estatutos'}
           </h2>
           <div className="w-16" />
         </div>
@@ -1090,7 +1202,7 @@ const VadeMecumUltraFast: React.FC = () => {
                   <div className={`rounded-xl ${code.color} p-4 sm:p-6 h-[160px] sm:h-[180px] flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all duration-300`}>
                     <div className="mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                       {(() => {
-                    const iconMap: Record<string, React.ComponentType<any>> = {
+                     const iconMap: Record<string, React.ComponentType<any>> = {
                       'Handshake': Handshake,
                       'Building': Building,
                       'Zap': Zap,
@@ -1101,7 +1213,8 @@ const VadeMecumUltraFast: React.FC = () => {
                       'DollarSign': DollarSign,
                       'Baby': Baby,
                       'Users': Users,
-                      'Scale': Scale
+                      'Scale': Scale,
+                      'Crown': Crown
                     };
                     const IconComponent = iconMap[code.icon];
                     return IconComponent ? <IconComponent className="h-8 w-8 sm:h-10 sm:w-10" /> : null;

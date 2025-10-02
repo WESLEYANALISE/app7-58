@@ -37,14 +37,19 @@ export const vademecumConfig: FunctionSidebarConfig = {
       ]
     },
     {
-      title: 'Códigos Fundamentais',
+      title: 'Constituição Federal',
       items: [
         {
           id: 'cf88',
           label: 'Constituição Federal',
           icon: Scale,
           badge: '250'
-        },
+        }
+      ]
+    },
+    {
+      title: 'Códigos Fundamentais',
+      items: [
         {
           id: 'cc',
           label: 'Código Civil',
@@ -99,10 +104,46 @@ export const vademecumConfig: FunctionSidebarConfig = {
           badge: '78'
         },
         {
-          id: 'lf',
-          label: 'Lei de Falências',
-          icon: Building,
-          badge: '201'
+          id: 'ca',
+          label: 'Código de Águas',
+          icon: FileText,
+          badge: '150'
+        },
+        {
+          id: 'cba',
+          label: 'Código Brasileiro de Aeronáutica',
+          icon: FileText,
+          badge: '180'
+        },
+        {
+          id: 'cbt',
+          label: 'Código Brasileiro de Telecomunicações',
+          icon: FileText,
+          badge: '90'
+        },
+        {
+          id: 'ccom',
+          label: 'Código Comercial',
+          icon: Briefcase,
+          badge: '456'
+        },
+        {
+          id: 'cdm',
+          label: 'Código de Minas',
+          icon: FileText,
+          badge: '100'
+        },
+        {
+          id: 'ced',
+          label: 'Código de Ética - OAB',
+          icon: Scale,
+          badge: '54'
+        },
+        {
+          id: 'cppm',
+          label: 'Código de Processo Penal Militar',
+          icon: Shield,
+          badge: '700'
         }
       ]
     },
@@ -196,6 +237,29 @@ export const vademecumConfig: FunctionSidebarConfig = {
           label: 'Estatuto do Torcedor',
           icon: Users,
           badge: '47'
+        }
+      ]
+    },
+    {
+      title: 'Súmulas',
+      items: [
+        {
+          id: 'sumulas-stf',
+          label: 'Súmulas STF',
+          icon: Scale,
+          badge: '736'
+        },
+        {
+          id: 'sumulas-stj',
+          label: 'Súmulas STJ',
+          icon: Scale,
+          badge: '639'
+        },
+        {
+          id: 'sumulas-vinculantes',
+          label: 'Súmulas Vinculantes STF',
+          icon: Star,
+          badge: '58'
         }
       ]
     }
