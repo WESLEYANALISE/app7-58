@@ -1407,6 +1407,27 @@ export type Database = {
         }
         Relationships: []
       }
+      "CA- Código de aguas": {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
       "CAPAS-FUNÇÃO": {
         Row: {
           capa: string | null
@@ -1425,7 +1446,70 @@ export type Database = {
         }
         Relationships: []
       }
+      "CBA - Código Brasileiro de Aeronáutica": {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
+      "CBT - Código Brasileiro de Telecomunicações.": {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
       CC: {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
+      CCOM: {
         Row: {
           Artigo: string | null
           id: number
@@ -1467,7 +1551,49 @@ export type Database = {
         }
         Relationships: []
       }
+      "CDM - Código de Minas": {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
       CE: {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
+      "CED CÓDIGO DE ETICA - OAB": {
         Row: {
           Artigo: string | null
           id: number
@@ -1510,6 +1636,27 @@ export type Database = {
         Relationships: []
       }
       CLT: {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
+      "CÓDIGO FLORESTAL": {
         Row: {
           Artigo: string | null
           id: number
@@ -2043,6 +2190,27 @@ export type Database = {
         Relationships: []
       }
       CPP: {
+        Row: {
+          Artigo: string | null
+          id: number
+          Narração: string | null
+          "Número do Artigo": string | null
+        }
+        Insert: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Update: {
+          Artigo?: string | null
+          id?: number
+          Narração?: string | null
+          "Número do Artigo"?: string | null
+        }
+        Relationships: []
+      }
+      "CPPM - PROCESSO MILITAR": {
         Row: {
           Artigo: string | null
           id: number
@@ -5585,6 +5753,54 @@ export type Database = {
           price?: number
           stripe_price_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      SUMULAS: {
+        Row: {
+          "Data de Aprovação": string | null
+          id: number
+          Narração: string | null
+          "Texto da Súmula": string | null
+          "Título da Súmula": string | null
+        }
+        Insert: {
+          "Data de Aprovação"?: string | null
+          id?: number
+          Narração?: string | null
+          "Texto da Súmula"?: string | null
+          "Título da Súmula"?: string | null
+        }
+        Update: {
+          "Data de Aprovação"?: string | null
+          id?: number
+          Narração?: string | null
+          "Texto da Súmula"?: string | null
+          "Título da Súmula"?: string | null
+        }
+        Relationships: []
+      }
+      "SUMULAS VINCULANTES": {
+        Row: {
+          "Data de Aprovação": string | null
+          id: number
+          Narração: string | null
+          "Texto da Súmula": string | null
+          "Título da Súmula": string | null
+        }
+        Insert: {
+          "Data de Aprovação"?: string | null
+          id?: number
+          Narração?: string | null
+          "Texto da Súmula"?: string | null
+          "Título da Súmula"?: string | null
+        }
+        Update: {
+          "Data de Aprovação"?: string | null
+          id?: number
+          Narração?: string | null
+          "Texto da Súmula"?: string | null
+          "Título da Súmula"?: string | null
         }
         Relationships: []
       }
